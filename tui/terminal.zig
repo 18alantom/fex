@@ -28,12 +28,12 @@ pub fn enableRawMode() !void {
 }
 
 /// Reverts `enableRawMode` to restore initial functionality.
-pub fn disableRawMode() void {
-    var termios = os.tcgetattr(os.STDIN_FILENO) catch return;
+pub fn disableRawMode() !void {
+    var termios = try os.tcgetattr(os.STDIN_FILENO);
     termios.lflag &= (os.system.ECHO | os.system.ICANON);
-    os.tcsetattr(
+    try os.tcsetattr(
         os.STDIN_FILENO,
         os.TCSA.FLUSH,
         termios,
-    ) catch return;
+    );
 }

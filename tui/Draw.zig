@@ -26,7 +26,7 @@ const HLineConfig = struct {
 const StringConfig = struct {
     col: usize = 0,
     row: usize = 0,
-    style: []const u8,
+    style: []const u8 = "",
 };
 
 const BoxChars = struct {

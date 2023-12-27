@@ -1,41 +1,119 @@
 const std = @import("std");
 const utils = @import("utils.zig");
-const Tui = @import("Tui.zig");
+
+const tui = @import("tui.zig");
+const Draw = tui.Draw;
+const terminal = tui.terminal;
 
 const fs = std.fs;
+const io = std.io;
 const os = std.os;
 const fmt = std.fmt;
 const time = std.time;
 const mem = std.mem;
 
-var sel: u8 = 0;
-const options: [3][]const u8 = .{
-    "One",
-    "Two",
-    "Three",
+const print = std.debug.print;
+const bufStyle = tui.style.bufStyle;
+
+allocator: mem.Allocator,
+
+rbuf: []u8, // buffer for reading input
+sbuf: []u8, // buffer for styling output
+rlen: usize = 0, // num bytes read into rbuf
+
+reader: fs.File.Reader,
+writer: fs.File.Writer,
+
+draw: Draw,
+
+counter: usize = 0,
+
+flags: Flags = .{},
+size: terminal.Size = .{ .cols = 0, .rows = 0 },
+
+const Self = @This();
+const Flags = struct {
+    should_quit: bool = false,
+    render_chrome: bool = true,
 };
 
-pub fn render(tui: *Tui) !void {
-    try tui.clearScreen();
-    _ = try tui.write("\x1b[1;34mSelect An Option (quit: q)\n\x1b[0m");
+pub fn init(allocator: mem.Allocator) !Self {
+    var rbuf = try allocator.alloc(u8, 2048);
+    var sbuf = try allocator.alloc(u8, 2048);
 
-    for (options, 0..) |op, i| {
-        if (sel == i) {
-            try tui.writer.print("\x1b[1;35m▶ \x1b[1;33m{s}\x1b[0m\n", .{op});
-        } else {
-            try tui.writer.print("  {s}\n", .{op});
+    var reader = io.getStdIn().reader();
+    var writer = io.getStdIn().writer();
+
+    const draw = Draw{ .writer = writer };
+    return .{
+        .allocator = allocator,
+        .rbuf = rbuf,
+        .sbuf = sbuf,
+        .reader = reader,
+        .writer = writer,
+        .draw = draw,
+    };
+}
+
+pub fn deinit(self: *Self) void {
+    self.allocator.free(self.rbuf);
+    self.allocator.free(self.sbuf);
+}
+
+pub fn run(self: *Self) !void {
+    try terminal.enableRawMode();
+    defer terminal.disableRawMode() catch {};
+
+    try self.draw.hideCursor();
+    defer self.draw.showCursor() catch {};
+
+    while (true) {
+        defer self.counter += 1;
+        if (self.flags.should_quit) {
+            break;
+        }
+
+        self.render() catch break;
+        self.process() catch break;
+    }
+}
+
+fn render(self: *Self) !void {
+    self.size = terminal.getTerminalSize();
+
+    if (self.flags.render_chrome) {
+        try self.renderChrome();
+    }
+
+    var wbuf: [1024]u8 = undefined;
+    const slc = try fmt.bufPrint(&wbuf, "counter: {d:5}", .{self.counter});
+
+    try self.draw.string(slc, .{
+        .col = 0,
+        .row = 0,
+        .style = try bufStyle(self.sbuf, .{ .inverse = true, .fg = .magenta }),
+    });
+}
+
+fn renderChrome(self: *Self) !void {
+    defer self.flags.render_chrome = false;
+    for (0..self.size.rows) |r| {
+        for (0..self.size.cols) |c| {
+            var style = try bufStyle(self.sbuf, .{
+                .fg = .blue,
+            });
+            try self.draw.string("\u{2588}", .{ .col = c, .row = r, .style = style });
         }
     }
 }
 
-pub fn process(tui: *Tui) !void {
-    try tui.read();
-    switch (tui.r_buf[0]) {
-        'k' => sel = @max(sel -| 1, 0),
-        'j' => sel = @min(sel + 1, 2),
-        'q' => tui.flags.should_quit = true,
-        else => return,
+fn process(self: *Self) !void {
+    try self.read();
+    if (self.rlen == 1 and self.rbuf[0] == 'q') {
+        self.flags.should_quit = true;
     }
 }
 
-// const help_bar = "j,k: up,down · /:search · q: quit · ?:help";
+fn read(self: *Self) !void {
+    self.rlen = try self.reader.read(self.rbuf);
+}
