@@ -7,7 +7,7 @@ const heap = std.heap;
 const mem = std.mem;
 const print = std.debug.print;
 
-const ItemList = std.ArrayList(Item);
+const ItemList = std.ArrayList(*Item);
 
 /// Item is a view into a file system item
 const Item = struct {
@@ -20,39 +20,48 @@ const Item = struct {
 
     const Self = @This();
 
-    /// init_path can be absolute or relative paths
-    /// if init_path is "." then cwd is opened.
+    /// init_path can be absolute or relative paths if init_path is "." then cwd
+    /// is opened.
     ///
     /// Note: init_path should always point to a dir.
-    pub fn init(self: *Self, allocator: mem.Allocator, init_path: []const u8) !void {
+    pub fn init(allocator: mem.Allocator, init_path: []const u8) !*Self {
         var dir = fs.cwd();
         if (init_path.len > 1 or init_path[0] != '.') {
             dir = try dir.openDir(init_path, .{});
         }
 
-        var abs_path = try dir.realpath(".", &self.abs_path_buf);
-        self.allocator = allocator;
-        self.abs_path_buf[abs_path.len] = 0; // sentinel termination
-        self.abs_path_len = abs_path.len; // set len
-        self._stat = null;
-        self._parent = null;
-        self._children = null;
+        var item = try allocator.create(Self);
+        var abs_path = try dir.realpath(".", &item.abs_path_buf);
+        item.allocator = allocator;
+        item.abs_path_buf[abs_path.len] = 0; // sentinel termination
+        item.abs_path_len = abs_path.len; // set len
+        item._stat = null;
+        item._parent = null;
+        item._children = null;
+        return item;
     }
 
-    /// When deinit is called all returned parent and children are
-    /// invalidated.
+    /// Frees all children and invalidates self. Should be called from parent if
+    /// present. If
     pub fn deinit(self: *Self) void {
-        self.freeParent();
-        self.freeChildren();
+        self.freeChildren(null);
+        self.allocator.destroy(self);
     }
 
+    /// Returns absolute path.
     pub fn abspath(self: *const Self) []const u8 {
         return self.abs_path_buf[0..self.abs_path_len];
     }
 
+    /// Returns name of the Item.
     pub fn name(self: *const Self) []const u8 {
         const abs_path = self.abs_path_buf[0..self.abs_path_len];
         return path.basename(abs_path);
+    }
+
+    /// Returns path to the containing directory.
+    pub fn dirpath(self: *const Self) ?[]const u8 {
+        return path.dirname(self.abspath());
     }
 
     pub fn stat(self: *Self) !os.Stat {
@@ -79,30 +88,49 @@ const Item = struct {
         return os.S.ISDIR(s.mode);
     }
 
+    /// Returns Item that references the parent directory of the calling Item.
+    /// Initializes parents children and sets self in the list of children.
+    ///
+    /// Once parent has been created, deinit should be called on parent which
+    /// recursively frees all children. If instead a child is to be skipped while
+    /// deinit-ing the parent call `deinitSkipChild`.
     pub fn parent(self: *Self) !*Self {
         if (self._parent) |p| {
             return p;
         }
 
-        if (fs.path.dirname(self.abspath())) |parent_path| {
-            self._parent = try self.allocator.create(Self);
-            try self._parent.?.init(self.allocator, parent_path);
+        if (self.dirpath()) |parent_path| {
+            self._parent = try Item.init(self.allocator, parent_path);
+            try self.setParentsChildren();
             return self._parent.?;
         }
 
         return error.NoParent;
     }
 
-    pub fn freeParent(self: *Self) void {
+    fn setParentsChildren(self: *Self) !void {
         if (self._parent == null) {
             return;
         }
 
-        self._parent.?.deinit();
-        self.allocator.destroy(self._parent.?);
-        self._parent = null;
+        var p = self._parent.?;
+        var pc: ItemList = try p.children();
+        for (0..pc.items.len) |i| {
+            var ch = pc.items[i];
+            if (self.abs_path_len == ch.abs_path_len or
+                mem.eql(
+                u8,
+                &self.abs_path_buf,
+                &ch.abs_path_buf,
+            )) {
+                pc.items[i] = self;
+                self.allocator.destroy(ch);
+            }
+        }
     }
 
+    /// Initializes children if not present and returns it. If `deinit` or
+    /// `freeChildren` is called, the returned ItemList of children are invalidated.
     pub fn children(self: *Self) !ItemList {
         if (!try self.isDir()) {
             return error.IsNotDirectory;
@@ -130,27 +158,38 @@ const Item = struct {
             );
             defer self.allocator.free(item_ap);
 
-            var item_ptr: *Self = try contents.addOne();
-            @memcpy(item_ptr.abs_path_buf[0..item_ap.len], item_ap);
-            item_ptr.abs_path_buf[item_ap.len] = 0;
-            item_ptr.abs_path_len = item_ap.len;
-            item_ptr._stat = null;
-            item_ptr._parent = self;
-            item_ptr._children = null;
+            var item = try self.allocator.create(Self);
+            @memcpy(item.abs_path_buf[0..item_ap.len], item_ap);
+            item.abs_path_buf[item_ap.len] = 0;
+            item.abs_path_len = item_ap.len;
+            item._stat = null;
+            item._parent = self;
+            item._children = null;
+            try contents.append(item);
         }
 
         self._children = contents;
         return contents;
     }
 
-    pub fn freeChildren(self: *Self) void {
+    pub fn deinitSkipChild(self: *Self, child: *Item) void {
+        self.freeChildren(child);
+        self.allocator.destroy(self);
+    }
+
+    pub fn freeChildren(self: *Self, child_to_skip: ?*Item) void {
         if (self._children == null) {
             return;
         }
 
         for (self._children.?.items) |i| {
+            if (child_to_skip != null and child_to_skip.? == i) {
+                continue;
+            }
+
             var itm = i;
-            itm.freeChildren();
+            itm.freeChildren(null);
+            self.allocator.destroy(itm);
         }
         self._children.?.deinit();
         self._children = null;
@@ -159,19 +198,18 @@ const Item = struct {
 
 const testing = std.testing;
 test "stuff" {
-    var item: Item = undefined;
-    try item.init(testing.allocator, ".");
-    defer item.deinit();
+    var item = try Item.init(testing.allocator, ".");
+
     var parent = try item.parent();
     var children = try item.children();
+    defer {
+        parent.deinitSkipChild(item);
+        item.deinit();
+    }
 
     print("\n{s}\n", .{parent.abspath()});
     print("{s}\n", .{item.abspath()});
     for (children.items) |itm| {
         print("{s}\n", .{itm.abspath()});
     }
-}
-
-pub fn printStat(s: os.Stat) void {
-    print("stat :: uid={d}, gid={d}, mode={d}, size={d}\n", .{ s.uid, s.gid, s.mode, s.size });
 }
