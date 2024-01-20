@@ -1,16 +1,21 @@
 const std = @import("std");
 
-const os = std.os;
 const fs = std.fs;
-const path = std.fs.path;
-const heap = std.heap;
 const mem = std.mem;
+const os = std.os;
+
 const print = std.debug.print;
 
-const ItemList = std.ArrayList(*Item);
+pub const ItemList = std.ArrayList(*Item);
+pub const ItemError = error{
+    StatError,
+    NoParent,
+    IsNotDirectory,
+};
 
-/// Item is a view into a file system item
-const Item = struct {
+/// Item is a view into a file system item it can be a directory or a file
+/// or something else. It should be initialized to a directory.
+pub const Item = struct {
     allocator: mem.Allocator,
     abs_path_buf: [fs.MAX_PATH_BYTES]u8,
     abs_path_len: usize,
@@ -56,12 +61,12 @@ const Item = struct {
     /// Returns name of the Item.
     pub fn name(self: *const Self) []const u8 {
         const abs_path = self.abs_path_buf[0..self.abs_path_len];
-        return path.basename(abs_path);
+        return fs.path.basename(abs_path);
     }
 
     /// Returns path to the containing directory.
     pub fn dirpath(self: *const Self) ?[]const u8 {
-        return path.dirname(self.abspath());
+        return fs.path.dirname(self.abspath());
     }
 
     pub fn stat(self: *Self) !os.Stat {
@@ -76,7 +81,7 @@ const Item = struct {
 
         var s: os.Stat = undefined;
         if (os.system.stat(abs_path_w, &s) != 0) {
-            return error.StatError;
+            return ItemError.StatError;
         }
 
         self._stat = s;
@@ -105,7 +110,7 @@ const Item = struct {
             return self._parent.?;
         }
 
-        return error.NoParent;
+        return ItemError.NoParent;
     }
 
     fn setParentsChildren(self: *Self) !void {
@@ -129,11 +134,18 @@ const Item = struct {
         }
     }
 
+    pub fn isOpen(self: *Self) bool {
+        if (self._children != null) {
+            return true;
+        }
+        return false;
+    }
+
     /// Initializes children if not present and returns it. If `deinit` or
     /// `freeChildren` is called, the returned ItemList of children are invalidated.
     pub fn children(self: *Self) !ItemList {
         if (!try self.isDir()) {
-            return error.IsNotDirectory;
+            return ItemError.IsNotDirectory;
         }
 
         if (self._children) |contents| {
@@ -197,7 +209,7 @@ const Item = struct {
 };
 
 const testing = std.testing;
-test "stuff" {
+test "leaks in Item" {
     var item = try Item.init(testing.allocator, ".");
 
     var parent = try item.parent();
@@ -207,9 +219,9 @@ test "stuff" {
         item.deinit();
     }
 
-    print("\n{s}\n", .{parent.abspath()});
-    print("{s}\n", .{item.abspath()});
+    _ = parent.abspath();
+    _ = item.abspath();
     for (children.items) |itm| {
-        print("{s}\n", .{itm.abspath()});
+        _ = itm.abspath();
     }
 }
