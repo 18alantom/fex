@@ -2,6 +2,7 @@ const std = @import("std");
 
 const _item = @import("./item.zig");
 const Item = _item.Item;
+const ItemList = _item.ItemList;
 const ItemError = _item.ItemError;
 
 const fs = std.fs;
@@ -66,8 +67,9 @@ pub fn down(self: *Self, child: *Item) !?*Item {
 pub fn findParent(self: *Self, child: *Item) !?*Item {
     return try _findParent(self.root, child);
 }
+
 fn _findParent(parent: *Item, child: *Item) !?*Item {
-    if (!parent.isOpen()) {
+    if (!parent.hasChildren()) {
         return null;
     }
 
@@ -85,7 +87,52 @@ fn _findParent(parent: *Item, child: *Item) !?*Item {
     return null;
 }
 
-pub fn walk() void {}
+const Entry = struct {
+    item: *Item,
+};
+
+pub fn iterate(self: *Self, expand: bool) !Iterator {
+    return try Iterator.init(
+        self.allocator,
+        self.root,
+        expand,
+    );
+}
+
+// DFS
+const Iterator = struct {
+    stack: ItemList,
+    expand: bool = false,
+
+    pub fn init(allocator: mem.Allocator, first: *Item, expand: bool) !Iterator {
+        var stack = ItemList.init(allocator);
+        try stack.append(first);
+        return .{ .stack = stack, .expand = expand };
+    }
+
+    pub fn next(self: *Iterator) !?*Item {
+        if (self.stack.items.len == 0) {
+            self.stack.deinit();
+            return null;
+        }
+
+        const last: *Item = self.stack.pop();
+        try self.growStack(last);
+        return last;
+    }
+
+    fn growStack(self: *Iterator, item: *Item) !void {
+        if ((!self.expand and !item.hasChildren()) or !try item.isDir()) {
+            return;
+        }
+
+        var lc = try item.children();
+        for (0..lc.items.len) |i| {
+            var idx = lc.items.len - 1 - i;
+            try self.stack.append(lc.items[idx]);
+        }
+    }
+};
 
 const testing = std.testing;
 test "leaks in Manager" {
@@ -94,6 +141,17 @@ test "leaks in Manager" {
     _ = try m.up();
     try testing.expect(m.root != r);
     try testing.expectEqual(try m.findParent(r), m.root);
+
+    var iter = try m.iterate(true);
+    while (true) {
+        if (try iter.next()) |itm| {
+            _ = itm;
+            // std.debug.print("{s}\n", .{itm.abspath()});
+        } else {
+            break;
+        }
+    }
+
     _ = try m.down(r);
     try testing.expectEqual(m.root, r);
     m.deinit();

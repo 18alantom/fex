@@ -134,11 +134,12 @@ pub const Item = struct {
         }
     }
 
-    pub fn isOpen(self: *Self) bool {
-        if (self._children != null) {
-            return true;
-        }
-        return false;
+    pub fn hasChildren(self: *Self) bool {
+        return self._children != null;
+    }
+
+    pub fn hasParent(self: *Self) bool {
+        return self._parent != null;
     }
 
     /// Initializes children if not present and returns it. If `deinit` or
@@ -164,24 +165,38 @@ pub const Item = struct {
                 break;
             }
 
-            var item_ap = try fs.path.join(
-                self.allocator,
-                &[_][]const u8{ ap, entry.?.name },
-            );
-            defer self.allocator.free(item_ap);
+            var item = try self.allocator.create(Item);
+            var len = ap.len + 1 + entry.?.name.len;
 
-            var item = try self.allocator.create(Self);
-            @memcpy(item.abs_path_buf[0..item_ap.len], item_ap);
-            item.abs_path_buf[item_ap.len] = 0;
-            item.abs_path_len = item_ap.len;
+            @memcpy(item.abs_path_buf[0..ap.len], ap);
+            item.abs_path_buf[ap.len] = fs.path.sep;
+
+            @memcpy(item.abs_path_buf[(ap.len + 1)..len], entry.?.name);
+            item.abs_path_buf[len] = 0;
+            item.abs_path_len = len;
+
             item._stat = null;
             item._parent = self;
             item._children = null;
+            item.allocator = self.allocator;
             try contents.append(item);
         }
 
         self._children = contents;
         return contents;
+    }
+
+    pub fn indexOfChild(self: *Self, child: *Item) !?usize {
+        if (self._children == null) {
+            return null;
+        }
+
+        for (self._children.?.items, 0..) |c, i| {
+            if (c == child) {
+                return i;
+            }
+        }
+        return null;
     }
 
     pub fn deinitSkipChild(self: *Self, child: *Item) void {
