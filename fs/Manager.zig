@@ -87,10 +87,6 @@ fn _findParent(parent: *Item, child: *Item) !?*Item {
     return null;
 }
 
-const Entry = struct {
-    item: *Item,
-};
-
 pub fn iterate(self: *Self, expand: bool) !Iterator {
     return try Iterator.init(
         self.allocator,
@@ -99,40 +95,72 @@ pub fn iterate(self: *Self, expand: bool) !Iterator {
     );
 }
 
-// DFS
 const Iterator = struct {
-    stack: ItemList,
+    const Entry = struct {
+        item: *Item,
+        level: usize,
+        index: usize, // child index
+        first: bool, // first child
+        last: bool, // last child
+    };
+    const EntryList = std.ArrayList(Entry);
+
+    stack: EntryList,
     expand: bool = false,
 
     pub fn init(allocator: mem.Allocator, first: *Item, expand: bool) !Iterator {
-        var stack = ItemList.init(allocator);
-        try stack.append(first);
-        return .{ .stack = stack, .expand = expand };
+        var stack = EntryList.init(allocator);
+        try stack.append(.{
+            .item = first,
+            .level = 0,
+            .index = 0,
+            .first = true,
+            .last = true,
+        });
+        return .{
+            .stack = stack,
+            .expand = expand,
+        };
     }
 
-    pub fn next(self: *Iterator) !?*Item {
+    pub fn next(self: *Iterator) ?Entry {
         if (self.stack.items.len == 0) {
             self.stack.deinit();
             return null;
         }
 
-        const last: *Item = self.stack.pop();
-        try self.growStack(last);
+        const last: Entry = self.stack.pop();
+        self.growStack(last) catch return null;
         return last;
     }
 
-    fn growStack(self: *Iterator, item: *Item) !void {
-        if ((!self.expand and !item.hasChildren()) or !try item.isDir()) {
+    fn growStack(self: *Iterator, entry: Entry) !void {
+        if ((!self.expand and !entry.item.hasChildren()) or !try entry.item.isDir()) {
             return;
         }
 
-        var lc = try item.children();
-        for (0..lc.items.len) |i| {
-            var idx = lc.items.len - 1 - i;
-            try self.stack.append(lc.items[idx]);
+        var children = try entry.item.children();
+        for (0..children.items.len) |index| {
+            // TODO: Add ignore patterns
+
+            // Required because Items are popped off the stack.
+            var reverse_index = children.items.len - 1 - index;
+            var child_entry = getEntry(reverse_index, entry.level, children);
+            try self.stack.append(child_entry);
         }
     }
 };
+
+pub fn getEntry(index: usize, parent_level: usize, children: ItemList) Iterator.Entry {
+    const item = children.items[index];
+    return .{
+        .item = item,
+        .index = index,
+        .level = parent_level + 1,
+        .first = index == 0,
+        .last = index == children.items.len - 1,
+    };
+}
 
 const testing = std.testing;
 test "leaks in Manager" {
