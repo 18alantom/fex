@@ -87,18 +87,18 @@ fn _findParent(parent: *Item, child: *Item) !?*Item {
     return null;
 }
 
-pub fn iterate(self: *Self, expand: bool) !Iterator {
+pub fn iterate(self: *Self, depth: i32) !Iterator {
     return try Iterator.init(
         self.allocator,
         self.root,
-        expand,
+        depth,
     );
 }
 
-const Iterator = struct {
-    const Entry = struct {
+pub const Iterator = struct {
+    pub const Entry = struct {
         item: *Item,
-        level: usize,
+        depth: usize,
         index: usize, // child index
         first: bool, // first child
         last: bool, // last child
@@ -106,20 +106,20 @@ const Iterator = struct {
     const EntryList = std.ArrayList(Entry);
 
     stack: EntryList,
-    expand: bool = false,
+    depth: i32 = -1, // max depth, -1 == as deep as possible
 
-    pub fn init(allocator: mem.Allocator, first: *Item, expand: bool) !Iterator {
+    pub fn init(allocator: mem.Allocator, first: *Item, depth: i32) !Iterator {
         var stack = EntryList.init(allocator);
         try stack.append(.{
             .item = first,
-            .level = 0,
+            .depth = 0,
             .index = 0,
             .first = true,
             .last = true,
         });
         return .{
             .stack = stack,
-            .expand = expand,
+            .depth = depth,
         };
     }
 
@@ -135,7 +135,11 @@ const Iterator = struct {
     }
 
     fn growStack(self: *Iterator, entry: Entry) !void {
-        if ((!self.expand and !entry.item.hasChildren()) or !try entry.item.isDir()) {
+        if (self.depth != -1 and entry.depth > self.depth) {
+            return;
+        }
+
+        if (!try entry.item.isDir()) {
             return;
         }
 
@@ -145,18 +149,18 @@ const Iterator = struct {
 
             // Required because Items are popped off the stack.
             var reverse_index = children.items.len - 1 - index;
-            var child_entry = getEntry(reverse_index, entry.level, children);
+            var child_entry = getEntry(reverse_index, entry.depth, children);
             try self.stack.append(child_entry);
         }
     }
 };
 
-pub fn getEntry(index: usize, parent_level: usize, children: ItemList) Iterator.Entry {
+pub fn getEntry(index: usize, parent_depth: usize, children: ItemList) Iterator.Entry {
     const item = children.items[index];
     return .{
         .item = item,
         .index = index,
-        .level = parent_level + 1,
+        .depth = parent_depth + 1,
         .first = index == 0,
         .last = index == children.items.len - 1,
     };
@@ -170,14 +174,9 @@ test "leaks in Manager" {
     try testing.expect(m.root != r);
     try testing.expectEqual(try m.findParent(r), m.root);
 
-    var iter = try m.iterate(true);
-    while (true) {
-        if (try iter.next()) |itm| {
-            _ = itm;
-            // std.debug.print("{s}\n", .{itm.abspath()});
-        } else {
-            break;
-        }
+    var iter = try m.iterate(-1);
+    while (iter.next()) |itm| {
+        _ = itm;
     }
 
     _ = try m.down(r);
