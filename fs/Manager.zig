@@ -105,8 +105,13 @@ pub const Iterator = struct {
     };
     const EntryList = std.ArrayList(Entry);
 
+    //// Depth values:
+    /// -1 : as deep as possible
+    /// -2 : only if children are present
+    ///  0 : do not expand
+    ///  n : expand until depth `n`
+    depth: i32 = -1,
     stack: EntryList,
-    depth: i32 = -1, // max depth, -1 == as deep as possible
 
     pub fn init(allocator: mem.Allocator, first: *Item, depth: i32) !Iterator {
         var stack = EntryList.init(allocator);
@@ -135,7 +140,15 @@ pub const Iterator = struct {
     }
 
     fn growStack(self: *Iterator, entry: Entry) !void {
-        if (self.depth != -1 and entry.depth > self.depth) {
+        if (self.depth < -2) {
+            return;
+        }
+
+        if (self.depth == -2 and !entry.item.hasChildren()) {
+            return;
+        }
+
+        if (self.depth >= 0 and entry.depth > self.depth) {
             return;
         }
 

@@ -169,14 +169,22 @@ fn getBoxStyle(config: BoxConfig) BoxStyles {
 
 pub fn string(
     self: *Self,
-    val: []const u8,
+    str: []const u8,
     config: StringConfig,
 ) !void {
     if (config.style.len > 0) {
-        _ = try self.writer.print("\x1b[{d};{d}H{s}{s}\x1b[m", .{ config.row, config.col, config.style, val });
+        _ = try self.writer.print("\x1b[{d};{d}H{s}{s}\x1b[m", .{ config.row, config.col, config.style, str });
     } else {
-        _ = try self.writer.print("\x1b[{d};{d}H{s}", .{ config.row, config.col, val });
+        _ = try self.writer.print("\x1b[{d};{d}H{s}", .{ config.row, config.col, str });
     }
+}
+
+pub fn print(self: *Self, str: []const u8, style: []const u8) !void {
+    _ = try self.writer.print("\x1b[{s}{s}\x1b[m", .{ style, str });
+}
+
+pub fn println(self: *Self, str: []const u8, style: []const u8) !void {
+    _ = try self.writer.print("\x1b[{s}{s}\x1b[m\n", .{ style, str });
 }
 
 pub fn moveCursor(self: *Self, row: usize, col: usize) !void {

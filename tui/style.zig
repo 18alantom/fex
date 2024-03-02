@@ -3,7 +3,7 @@ const std = @import("std");
 const fmt = std.fmt;
 const testing = std.testing;
 
-const Color = enum(u8) {
+pub const Color = enum(u8) {
     black = 0,
     red = 1,
     green = 2,
@@ -20,7 +20,7 @@ const Color = enum(u8) {
     none, // color string not applied
 };
 
-const StyleConfig = struct {
+pub const StyleConfig = struct {
     bold: bool = false,
     faint: bool = false,
     italic: bool = false,
