@@ -30,8 +30,14 @@ pub fn deinit(self: *Self) void {
     self.manager.deinit();
 }
 
+fn setRowCount(self: *Self) void {
+    const term_rows = tui.terminal.getTerminalSize().rows;
+    self.rows = term_rows / 2;
+}
+
 const Entry = Manager.Iterator.Entry;
 pub fn run(self: *Self) !void {
+    self.setRowCount();
     _ = try self.manager.root.children();
 
     // Buffer iterated elements to allow backtracking
@@ -46,21 +52,24 @@ pub fn run(self: *Self) !void {
     const writer = io.getStdOut().writer();
     var obuf: [2048]u8 = undefined; // content buffer
     var sbuf: [2048]u8 = undefined; // style buffer
-    var out = tui.Draw{ .writer = writer };
+    var draw = tui.Draw{ .writer = writer };
 
     // Stdin reader and buffer
     const reader = io.getStdIn().reader();
     var rbuf: [2048]u8 = undefined;
-    var inp = tui.Input{ .reader = reader };
+    var input = tui.Input{ .reader = reader };
 
     // Cursor and view boundaries
     var cursor: usize = 0;
     var vb_first: usize = 0; // First Index
     var vb_last: usize = 0; // Last Index
 
-    var reiterate = false;
+    // Iterates over fs tree
     var iter = try self.manager.iterate(-2);
     defer iter.deinit();
+
+    // Reiterates
+    var reiterate = false;
 
     // Pre-fill iter buffer
     for (0..self.rows) |i| {
@@ -118,18 +127,18 @@ pub fn run(self: *Self) !void {
 
             var cursor_style: []u8 = undefined;
             if (cursor == i) {
-                cursor_style = try bS(&sbuf, .{ .fg = tui.style.Color.magenta });
+                cursor_style = try bS(&sbuf, .{ .fg = tui.style.Color.cyan });
             } else {
                 cursor_style = try bS(&sbuf, .{ .fg = tui.style.Color.default });
             }
 
             var line = try tv.line(e, &obuf);
-            try out.println(line, cursor_style);
+            try draw.println(line, cursor_style);
         }
 
         // Wait for input
         while (true) {
-            const action = try inp.readAction(&rbuf);
+            const action = try input.readAction(&rbuf);
             switch (action) {
                 .quit => return,
                 .down => cursor += 1,
@@ -141,6 +150,8 @@ pub fn run(self: *Self) !void {
 
             break;
         }
+
+        try draw.clearNLines(@intCast(self.rows));
     }
 }
 

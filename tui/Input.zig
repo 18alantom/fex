@@ -13,6 +13,7 @@ pub const Action = enum {
     right,
     select,
     help,
+    find,
     quit,
     unknown,
 };
@@ -64,9 +65,10 @@ pub fn getAction(value: []u8) Action {
 
 fn getSingleCharMappedAction(char: u8) Action {
     return switch (char) {
-        // Help chars
+        // Help and other chars
         '?' => Action.help,
         'H' => Action.help,
+        '/' => Action.find,
         // Directional chars
         'h' => Action.left,
         'j' => Action.down,
