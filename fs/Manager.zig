@@ -128,9 +128,12 @@ pub const Iterator = struct {
         };
     }
 
+    pub fn deinit(self: *Iterator) void {
+        self.stack.deinit();
+    }
+
     pub fn next(self: *Iterator) ?Entry {
         if (self.stack.items.len == 0) {
-            self.stack.deinit();
             return null;
         }
 
@@ -188,6 +191,8 @@ test "leaks in Manager" {
     try testing.expectEqual(try m.findParent(r), m.root);
 
     var iter = try m.iterate(-1);
+    defer iter.deinit();
+
     while (iter.next()) |itm| {
         _ = itm;
     }

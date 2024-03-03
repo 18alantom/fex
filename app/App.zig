@@ -9,6 +9,7 @@ const os = std.os;
 const io = std.io;
 
 const print = std.debug.print;
+const bS = tui.style.bufStyle;
 
 rows: usize = 10,
 allocator: mem.Allocator,
@@ -41,19 +42,25 @@ pub fn run(self: *Self) !void {
     var tv = tree.TreeView.init(self.allocator);
     defer tv.deinit();
 
-    // Stdout writer, and buffer
+    // Stdout writer and buffer
     const writer = io.getStdOut().writer();
     var obuf: [2048]u8 = undefined; // content buffer
-    var sbuf: [2045]u8 = undefined; // style buffer
-    var d = tui.Draw{ .writer = writer };
+    var sbuf: [2048]u8 = undefined; // style buffer
+    var out = tui.Draw{ .writer = writer };
 
+    // Stdin reader and buffer
+    const reader = io.getStdIn().reader();
+    var rbuf: [2048]u8 = undefined;
+    var inp = tui.Input{ .reader = reader };
+
+    // Cursor and view boundaries
     var cursor: usize = 0;
     var vb_first: usize = 0; // First Index
     var vb_last: usize = 0; // Last Index
-    var li: usize = 0; // Failsafe
 
     var reiterate = false;
     var iter = try self.manager.iterate(-2);
+    defer iter.deinit();
 
     // Pre-fill iter buffer
     for (0..self.rows) |i| {
@@ -67,17 +74,15 @@ pub fn run(self: *Self) !void {
         vb_last = i;
     }
 
+    try tui.terminal.enableRawMode();
+    defer tui.terminal.disableRawMode() catch {};
+
     while (true) {
         // If manager tree changes in any way
         if (reiterate) {
             view_buffer.clearAndFree();
-            iter.stack.deinit();
+            iter.deinit();
             iter = try self.manager.iterate(-2);
-        }
-
-        // Reset cursor
-        if (cursor < 0) {
-            cursor = 0;
         }
 
         // Cursor exceeds bottom boundary
@@ -113,18 +118,29 @@ pub fn run(self: *Self) !void {
 
             var cursor_style: []u8 = undefined;
             if (cursor == i) {
-                cursor_style = try tui.style.bufStyle(&sbuf, .{ .fg = tui.style.Color.magenta });
+                cursor_style = try bS(&sbuf, .{ .fg = tui.style.Color.magenta });
             } else {
-                cursor_style = try tui.style.bufStyle(&sbuf, .{ .fg = tui.style.Color.default });
+                cursor_style = try bS(&sbuf, .{ .fg = tui.style.Color.default });
             }
 
             var line = try tv.line(e, &obuf);
-            try d.println(line, cursor_style);
+            try out.println(line, cursor_style);
         }
 
-        // Fail safe
-        li += 1;
-        if (li == 10) break;
+        // Wait for input
+        while (true) {
+            const action = try inp.readAction(&rbuf);
+            switch (action) {
+                .quit => return,
+                .down => cursor += 1,
+                .up => cursor -|= 1,
+                // Implement others
+                .unknown => continue,
+                else => continue,
+            }
+
+            break;
+        }
     }
 }
 
