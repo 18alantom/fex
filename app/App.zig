@@ -89,9 +89,23 @@ pub fn run(self: *Self) !void {
     while (true) {
         // If manager tree changes in any way
         if (reiterate) {
+            defer reiterate = false;
+
             view_buffer.clearAndFree();
             iter.deinit();
+
             iter = try self.manager.iterate(-2);
+
+            for (0..self.rows) |i| {
+                const _e = iter.next();
+                if (_e == null) {
+                    break;
+                }
+
+                const e = _e.?;
+                try view_buffer.append(e);
+                vb_last = i;
+            }
         }
 
         // Cursor exceeds bottom boundary
@@ -125,12 +139,8 @@ pub fn run(self: *Self) !void {
         for (vb_first..(vb_last + 1)) |i| {
             const e = view_buffer.items[i];
 
-            var cursor_style: []u8 = undefined;
-            if (cursor == i) {
-                cursor_style = try bS(&sbuf, .{ .fg = tui.style.Color.cyan });
-            } else {
-                cursor_style = try bS(&sbuf, .{ .fg = tui.style.Color.default });
-            }
+            const fg = if (cursor == i) tui.style.Color.cyan else tui.style.Color.default;
+            const cursor_style = try bS(&sbuf, .{ .fg = fg });
 
             var line = try tv.line(e, &obuf);
             try draw.println(line, cursor_style);
@@ -143,6 +153,15 @@ pub fn run(self: *Self) !void {
                 .quit => return,
                 .down => cursor += 1,
                 .up => cursor -|= 1,
+                .select => {
+                    const item = view_buffer.items[cursor].item;
+                    if (item.hasChildren()) {
+                        item.freeChildren(null);
+                    } else {
+                        _ = try item.children();
+                    }
+                    reiterate = true;
+                },
                 // Implement others
                 .unknown => continue,
                 else => continue,
