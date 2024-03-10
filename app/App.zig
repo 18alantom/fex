@@ -190,22 +190,10 @@ pub fn run(self: *Self) !void {
     var input = tui.Input{ .reader = reader };
 
     // Iterates over fs tree
-    var iter = try self.manager.iterate(-2);
-    defer iter.deinit();
-
-    // Reiterates
-    var reiterate = false;
-
-    // Pre-fill iter buffer
-    for (0..vp.rows) |i| {
-        const _e = iter.next();
-        if (_e == null) {
-            break;
-        }
-
-        const e = _e.?;
-        try view.buffer.append(e);
-        view.last = i;
+    var reiterate = true;
+    var iter_or_null: ?Manager.Iterator = null;
+    defer {
+        if (iter_or_null != null) iter_or_null.?.deinit();
     }
 
     try draw.hideCursor();
@@ -215,14 +203,12 @@ pub fn run(self: *Self) !void {
         // If manager tree changes in any way
         if (reiterate) {
             defer reiterate = false;
-
             view.buffer.clearAndFree();
-            iter.deinit();
+            if (iter_or_null != null) iter_or_null.?.deinit();
 
-            iter = try self.manager.iterate(-2);
-
+            iter_or_null = try self.manager.iterate(-2);
             for (0..vp.rows) |i| {
-                const _e = iter.next();
+                const _e = iter_or_null.?.next();
                 if (_e == null) {
                     break;
                 }
@@ -233,7 +219,7 @@ pub fn run(self: *Self) !void {
             }
         }
 
-        try view.update(iter);
+        try view.update(iter_or_null.?);
 
         // Print contents of view buffer in range
         try draw.moveCursor(vp.start_row, 0);
@@ -246,7 +232,7 @@ pub fn run(self: *Self) !void {
             var line = try tv.line(e, &obuf);
             try draw.println(line, cursor_style);
         }
-        std.debug.print("post print {any}\n", .{try terminal.getCursorPosition()});
+        std.debug.print("app.run post print position={any}\n", .{try terminal.getCursorPosition()});
 
         // Wait for input
         while (true) {
@@ -272,8 +258,6 @@ pub fn run(self: *Self) !void {
             break;
         }
 
-        // try draw.clearNLines(@intCast(self.rows));
-        // try draw.clearLinesBelow(pos.row);
         try draw.clearLinesBelow(vp.start_row);
     }
 }
