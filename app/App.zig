@@ -2,6 +2,7 @@ const std = @import("std");
 const tree = @import("./tree.zig");
 const Manager = @import("../fs/Manager.zig");
 const tui = @import("../tui.zig");
+const utils = @import("../utils.zig");
 
 const fs = std.fs;
 const mem = std.mem;
@@ -10,8 +11,8 @@ const io = std.io;
 
 const print = std.debug.print;
 const bS = tui.style.bufStyle;
+const terminal = tui.terminal;
 
-rows: usize = 10,
 allocator: mem.Allocator,
 manager: *Manager,
 
@@ -30,14 +31,81 @@ pub fn deinit(self: *Self) void {
     self.manager.deinit();
 }
 
-fn setRowCount(self: *Self) void {
-    const term_rows = tui.terminal.getTerminalSize().rows;
-    self.rows = term_rows / 2;
-}
+pub const Viewport = struct {
+    // Terminal related fields
+    size: terminal.Size, // terminal dims
+    position: terminal.Position, // cursor position
+
+    // Display related fields
+    rows: u16 = 1, // max rows
+    start_row: u16 = 0,
+
+    pub fn init() !Viewport {
+        try terminal.enableRawMode();
+        return .{
+            .rows = 0,
+            .start_row = 0,
+            .size = terminal.Size{ .cols = 0, .rows = 0 },
+            .position = terminal.Position{ .col = 0, .row = 0 },
+        };
+    }
+
+    pub fn deinit(_: *Viewport) void {
+        terminal.disableRawMode() catch {};
+    }
+
+    pub fn setBounds(self: *Viewport) !void {
+        self.size = terminal.getTerminalSize();
+        self.position = try Viewport.getAdjustedPosition(self.size);
+        self.rows = self.size.rows - self.position.row;
+        self.start_row = Viewport.getStartRow(
+            self.rows,
+            self.position,
+        );
+        std.debug.print(
+            "vp.setBounds size={any}, position={any}, rows={any}, start_row={any}\n",
+            .{ self.size, self.position, self.rows, self.start_row },
+        );
+    }
+
+    fn getAdjustedPosition(size: terminal.Size) !terminal.Position {
+        var position = try terminal.getCursorPosition();
+        const min_rows = size.rows / 2;
+
+        const rows_below = size.rows - position.row;
+        if (rows_below > min_rows) {
+            return position;
+        }
+
+        // Adjust Position: shift prompt (and cursor) up with newlines
+        var obuf: [1024]u8 = undefined;
+        var shift = min_rows - rows_below + 1;
+        var newlines = utils.repeat(&obuf, "\n", shift);
+        _ = try os.write(os.STDOUT_FILENO, newlines);
+
+        return terminal.Position{
+            .row = size.rows - shift,
+            .col = position.col,
+        };
+    }
+
+    fn getStartRow(rows: u16, pos: terminal.Position) u16 {
+        if (pos.row > rows) {
+            // unreachable after adjusted position
+            return pos.row - rows;
+        }
+
+        return pos.row;
+    }
+};
 
 const Entry = Manager.Iterator.Entry;
 pub fn run(self: *Self) !void {
-    self.setRowCount();
+    var vp = try Viewport.init();
+    defer vp.deinit();
+
+    try vp.setBounds();
+
     _ = try self.manager.root.children();
 
     // Buffer iterated elements to allow backtracking
@@ -72,7 +140,7 @@ pub fn run(self: *Self) !void {
     var reiterate = false;
 
     // Pre-fill iter buffer
-    for (0..self.rows) |i| {
+    for (0..vp.rows) |i| {
         const _e = iter.next();
         if (_e == null) {
             break;
@@ -83,8 +151,8 @@ pub fn run(self: *Self) !void {
         vb_last = i;
     }
 
-    try tui.terminal.enableRawMode();
-    defer tui.terminal.disableRawMode() catch {};
+    try draw.hideCursor();
+    defer draw.showCursor() catch {};
 
     while (true) {
         // If manager tree changes in any way
@@ -96,7 +164,7 @@ pub fn run(self: *Self) !void {
 
             iter = try self.manager.iterate(-2);
 
-            for (0..self.rows) |i| {
+            for (0..vp.rows) |i| {
                 const _e = iter.next();
                 if (_e == null) {
                     break;
@@ -136,6 +204,7 @@ pub fn run(self: *Self) !void {
         }
 
         // Print contents of view buffer in range
+        try draw.moveCursor(vp.start_row, 0);
         for (vb_first..(vb_last + 1)) |i| {
             const e = view_buffer.items[i];
 
@@ -145,6 +214,7 @@ pub fn run(self: *Self) !void {
             var line = try tv.line(e, &obuf);
             try draw.println(line, cursor_style);
         }
+        std.debug.print("post print {any}\n", .{try terminal.getCursorPosition()});
 
         // Wait for input
         while (true) {
@@ -170,7 +240,9 @@ pub fn run(self: *Self) !void {
             break;
         }
 
-        try draw.clearNLines(@intCast(self.rows));
+        // try draw.clearNLines(@intCast(self.rows));
+        // try draw.clearLinesBelow(pos.row);
+        try draw.clearLinesBelow(vp.start_row);
     }
 }
 

@@ -219,3 +219,10 @@ pub fn clearNLines(self: *Self, n: u16) !void {
     var slc = try fmt.bufPrint(&buf, "\x1b[{d}H\x1b[{d}A\x1b[0J", .{ size.rows, n });
     _ = try self.writer.write(slc);
 }
+
+pub fn clearLinesBelow(self: *Self, row: u16) !void {
+    std.debug.print("clearing lines arg.row={d}, pos={any}\n", .{ row, try terminal.getCursorPosition() });
+    var buf: [128]u8 = undefined;
+    var slc = try fmt.bufPrint(&buf, "\x1b[{d};0H\x1b[0J", .{row});
+    _ = try self.writer.write(slc);
+}
