@@ -99,6 +99,68 @@ pub const Viewport = struct {
     }
 };
 
+pub const View = struct {
+    allocator: mem.Allocator,
+    buffer: std.ArrayList(Entry),
+
+    first: usize, // first index (top buffer boundary)
+    last: usize, // last index (bottom buffer boundar)
+    cursor: usize, // location in buffer boundary
+
+    pub fn init(allocator: mem.Allocator) View {
+        return .{
+            .allocator = allocator,
+            .buffer = std.ArrayList(Entry).init(allocator),
+            .cursor = 0,
+            .first = 0,
+            .last = 0,
+        };
+    }
+
+    fn deinit(self: *View) void {
+        self.buffer.deinit();
+    }
+
+    pub fn update(self: *View, iter: Manager.Iterator) !void {
+        // Cursor exceeds bottom boundary
+        if (self.cursor > self.last) {
+            try self.updateBottomBounds(iter);
+        }
+
+        // Cursor exceeds top boundary
+        else if (self.cursor < self.first) {
+            self.updateTopBounds();
+        }
+    }
+
+    fn updateBottomBounds(self: *View, _iter: Manager.Iterator) !void {
+        var iter = _iter; // _iter is const
+
+        // View buffer in range, no need to append
+        if (self.last < (self.buffer.items.len - 1)) {
+            self.first += 1;
+            self.last += 1;
+        }
+
+        // View buffer out of range, need to append
+        else if (iter.next()) |e| {
+            try self.buffer.append(e);
+            self.first += 1;
+            self.last += 1;
+        }
+
+        // No more items, reset cursor
+        else {
+            self.cursor = self.last;
+        }
+    }
+
+    fn updateTopBounds(self: *View) void {
+        self.first -= 1;
+        self.last -= 1;
+    }
+};
+
 const Entry = Manager.Iterator.Entry;
 pub fn run(self: *Self) !void {
     var vp = try Viewport.init();
@@ -109,8 +171,8 @@ pub fn run(self: *Self) !void {
     _ = try self.manager.root.children();
 
     // Buffer iterated elements to allow backtracking
-    var view_buffer = std.ArrayList(Entry).init(self.allocator);
-    defer view_buffer.deinit();
+    var view = View.init(self.allocator);
+    defer view.deinit();
 
     // Tree View to format output
     var tv = tree.TreeView.init(self.allocator);
@@ -127,11 +189,6 @@ pub fn run(self: *Self) !void {
     var rbuf: [2048]u8 = undefined;
     var input = tui.Input{ .reader = reader };
 
-    // Cursor and view boundaries
-    var cursor: usize = 0;
-    var vb_first: usize = 0; // First Index
-    var vb_last: usize = 0; // Last Index
-
     // Iterates over fs tree
     var iter = try self.manager.iterate(-2);
     defer iter.deinit();
@@ -147,8 +204,8 @@ pub fn run(self: *Self) !void {
         }
 
         const e = _e.?;
-        try view_buffer.append(e);
-        vb_last = i;
+        try view.buffer.append(e);
+        view.last = i;
     }
 
     try draw.hideCursor();
@@ -159,7 +216,7 @@ pub fn run(self: *Self) !void {
         if (reiterate) {
             defer reiterate = false;
 
-            view_buffer.clearAndFree();
+            view.buffer.clearAndFree();
             iter.deinit();
 
             iter = try self.manager.iterate(-2);
@@ -171,44 +228,19 @@ pub fn run(self: *Self) !void {
                 }
 
                 const e = _e.?;
-                try view_buffer.append(e);
-                vb_last = i;
+                try view.buffer.append(e);
+                view.last = i;
             }
         }
 
-        // Cursor exceeds bottom boundary
-        if (cursor > vb_last) {
-            // View buffer in range, no need to append
-            if (vb_last < (view_buffer.items.len - 1)) {
-                vb_first += 1;
-                vb_last += 1;
-            }
-
-            // View buffer out of range, need to append
-            else if (iter.next()) |e| {
-                try view_buffer.append(e);
-                vb_first += 1;
-                vb_last += 1;
-            }
-
-            // No more items, reset cursor
-            else {
-                cursor = vb_last;
-            }
-        }
-
-        // Cursor exceeds top boundary
-        else if (cursor < vb_first) {
-            vb_first -= 1;
-            vb_last -= 1;
-        }
+        try view.update(iter);
 
         // Print contents of view buffer in range
         try draw.moveCursor(vp.start_row, 0);
-        for (vb_first..(vb_last + 1)) |i| {
-            const e = view_buffer.items[i];
+        for (view.first..(view.last + 1)) |i| {
+            const e = view.buffer.items[i];
 
-            const fg = if (cursor == i) tui.style.Color.cyan else tui.style.Color.default;
+            const fg = if (view.cursor == i) tui.style.Color.cyan else tui.style.Color.default;
             const cursor_style = try bS(&sbuf, .{ .fg = fg });
 
             var line = try tv.line(e, &obuf);
@@ -221,10 +253,10 @@ pub fn run(self: *Self) !void {
             const action = try input.readAction(&rbuf);
             switch (action) {
                 .quit => return,
-                .down => cursor += 1,
-                .up => cursor -|= 1,
+                .down => view.cursor += 1,
+                .up => view.cursor -|= 1,
                 .select => {
-                    const item = view_buffer.items[cursor].item;
+                    const item = view.buffer.items[view.cursor].item;
                     if (item.hasChildren()) {
                         item.freeChildren(null);
                     } else {
