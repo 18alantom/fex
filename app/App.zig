@@ -161,6 +161,83 @@ pub const View = struct {
     }
 };
 
+const Output = struct {
+    // Output
+    draw: tui.Draw,
+    writer: fs.File.Writer,
+    obuf: [2048]u8, // Content Buffer
+    sbuf: [2048]u8, // Style Buffer
+
+    pub fn init() !Output {
+        const writer = io.getStdOut().writer();
+        const draw = tui.Draw{ .writer = writer };
+
+        try draw.hideCursor();
+        return .{
+            .writer = writer,
+            .draw = draw,
+            .obuf = undefined,
+            .sbuf = undefined,
+        };
+    }
+
+    pub fn deinit(self: *Output) void {
+        self.draw.showCursor() catch {};
+    }
+
+    pub fn printContents(self: *Output, start_row: u16, view: View, tree_view: tree.TreeView) !void {
+        try self.draw.moveCursor(start_row, 0);
+        var tv = tree_view;
+        for (view.first..(view.last + 1)) |i| {
+            const e = view.buffer.items[i];
+
+            const fg = if (view.cursor == i) tui.style.Color.cyan else tui.style.Color.default;
+            const cursor_style = try bS(&self.sbuf, .{ .fg = fg });
+
+            var line = try tv.line(e, &self.obuf);
+            try self.draw.println(line, cursor_style);
+        }
+    }
+};
+
+pub const AppAction = enum {
+    up,
+    down,
+    select,
+    quit,
+};
+
+const Input = struct {
+    reader: fs.File.Reader,
+    rbuf: [2048]u8,
+    input: tui.Input,
+
+    pub fn init() Input {
+        const reader = io.getStdIn().reader();
+        var input = tui.Input{ .reader = reader };
+        return .{
+            .reader = reader,
+            .input = input,
+            .rbuf = undefined,
+        };
+    }
+
+    pub fn deinit(_: *Input) void {}
+
+    pub fn getAppAction(self: *Input) !AppAction {
+        while (true) {
+            switch (try self.input.readAction(&self.rbuf)) {
+                .up => return AppAction.up,
+                .down => return AppAction.down,
+                .select => return AppAction.select,
+                .quit => return AppAction.quit,
+                .unknown => continue,
+                else => continue,
+            }
+        }
+    }
+};
+
 const Entry = Manager.Iterator.Entry;
 pub fn run(self: *Self) !void {
     var vp = try Viewport.init();
@@ -178,16 +255,11 @@ pub fn run(self: *Self) !void {
     var tv = tree.TreeView.init(self.allocator);
     defer tv.deinit();
 
-    // Stdout writer and buffer
-    const writer = io.getStdOut().writer();
-    var obuf: [2048]u8 = undefined; // content buffer
-    var sbuf: [2048]u8 = undefined; // style buffer
-    var draw = tui.Draw{ .writer = writer };
+    var out = try Output.init();
+    defer out.deinit();
 
-    // Stdin reader and buffer
-    const reader = io.getStdIn().reader();
-    var rbuf: [2048]u8 = undefined;
-    var input = tui.Input{ .reader = reader };
+    var inp = Input.init();
+    defer inp.deinit();
 
     // Iterates over fs tree
     var reiterate = true;
@@ -196,9 +268,7 @@ pub fn run(self: *Self) !void {
         if (iter_or_null != null) iter_or_null.?.deinit();
     }
 
-    try draw.hideCursor();
-    defer draw.showCursor() catch {};
-
+    // select (try inp.get)
     while (true) {
         // If manager tree changes in any way
         if (reiterate) {
@@ -222,43 +292,25 @@ pub fn run(self: *Self) !void {
         try view.update(iter_or_null.?);
 
         // Print contents of view buffer in range
-        try draw.moveCursor(vp.start_row, 0);
-        for (view.first..(view.last + 1)) |i| {
-            const e = view.buffer.items[i];
-
-            const fg = if (view.cursor == i) tui.style.Color.cyan else tui.style.Color.default;
-            const cursor_style = try bS(&sbuf, .{ .fg = fg });
-
-            var line = try tv.line(e, &obuf);
-            try draw.println(line, cursor_style);
-        }
+        try out.printContents(vp.start_row, view, tv);
         std.debug.print("app.run post print position={any}\n", .{try terminal.getCursorPosition()});
 
-        // Wait for input
-        while (true) {
-            const action = try input.readAction(&rbuf);
-            switch (action) {
-                .quit => return,
-                .down => view.cursor += 1,
-                .up => view.cursor -|= 1,
-                .select => {
-                    const item = view.buffer.items[view.cursor].item;
-                    if (item.hasChildren()) {
-                        item.freeChildren(null);
-                    } else {
-                        _ = try item.children();
-                    }
-                    reiterate = true;
-                },
-                // Implement others
-                .unknown => continue,
-                else => continue,
-            }
-
-            break;
+        switch (try inp.getAppAction()) {
+            .quit => return,
+            .down => view.cursor += 1,
+            .up => view.cursor -|= 1,
+            .select => {
+                const item = view.buffer.items[view.cursor].item;
+                if (item.hasChildren()) {
+                    item.freeChildren(null);
+                } else {
+                    _ = try item.children();
+                }
+                reiterate = true;
+            },
         }
 
-        try draw.clearLinesBelow(vp.start_row);
+        try out.draw.clearLinesBelow(vp.start_row);
     }
 }
 
