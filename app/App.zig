@@ -1,6 +1,7 @@
 const std = @import("std");
 const tree = @import("./tree.zig");
 const Manager = @import("../fs/Manager.zig");
+const fsitem = @import("../fs/item.zig");
 const tui = @import("../tui.zig");
 const utils = @import("../utils.zig");
 
@@ -12,6 +13,9 @@ const io = std.io;
 const print = std.debug.print;
 const bS = tui.style.bufStyle;
 const terminal = tui.terminal;
+
+const Item = fsitem.Item;
+const ItemError = fsitem.ItemError;
 
 allocator: mem.Allocator,
 manager: *Manager,
@@ -296,17 +300,27 @@ pub fn run(self: *Self) !void {
             .up => view.cursor -|= 1,
             .select => {
                 const item = view.buffer.items[view.cursor].item;
-                if (item.hasChildren()) {
-                    item.freeChildren(null);
-                } else {
-                    _ = try item.children();
-                }
-                reiterate = true;
+                reiterate = try toggleChildren(item);
             },
         }
 
         try out.draw.clearLinesBelow(vp.start_row);
     }
+}
+
+fn toggleChildren(item: *Item) !bool {
+    if (item.hasChildren()) {
+        item.freeChildren(null);
+        return true;
+    }
+
+    _ = item.children() catch |e| {
+        switch (e) {
+            ItemError.IsNotDirectory => return false,
+            else => return e,
+        }
+    };
+    return true;
 }
 
 test "test" {}
