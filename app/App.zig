@@ -185,16 +185,15 @@ const Output = struct {
         self.draw.showCursor() catch {};
     }
 
-    pub fn printContents(self: *Output, start_row: u16, view: View, tree_view: tree.TreeView) !void {
+    pub fn printContents(self: *Output, start_row: u16, view: View, tree_view: *tree.TreeView) !void {
         try self.draw.moveCursor(start_row, 0);
-        var tv = tree_view;
         for (view.first..(view.last + 1)) |i| {
             const e = view.buffer.items[i];
 
             const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
             const cursor_style = try bS(&self.sbuf, .{ .fg = fg });
 
-            var line = try tv.line(e, &self.obuf);
+            var line = try tree_view.line(e, &self.obuf);
             try self.draw.println(line, cursor_style);
         }
     }
@@ -292,7 +291,7 @@ pub fn run(self: *Self) !void {
         try view.update(&iter_or_null.?);
 
         // Print contents of view buffer in range
-        try out.printContents(vp.start_row, view, tv);
+        try out.printContents(vp.start_row, view, &tv);
 
         switch (try inp.getAppAction()) {
             .quit => return,

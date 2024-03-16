@@ -100,8 +100,8 @@ pub const Iterator = struct {
         item: *Item,
         depth: usize,
         index: usize, // child index
-        first: bool, // first child
-        last: bool, // last child
+        first: bool, // is first child
+        last: bool, // is last child
     };
     const EntryList = std.ArrayList(Entry);
 
