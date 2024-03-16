@@ -62,10 +62,6 @@ pub const Viewport = struct {
             self.rows,
             self.position,
         );
-        std.debug.print(
-            "vp.setBounds size={any}, position={any}, rows={any}, start_row={any}\n",
-            .{ self.size, self.position, self.rows, self.start_row },
-        );
     }
 
     fn getAdjustedPosition(size: terminal.Size) !terminal.Position {
@@ -121,7 +117,7 @@ pub const View = struct {
         self.buffer.deinit();
     }
 
-    pub fn update(self: *View, iter: Manager.Iterator) !void {
+    pub fn update(self: *View, iter: *Manager.Iterator) !void {
         // Cursor exceeds bottom boundary
         if (self.cursor > self.last) {
             try self.updateBottomBounds(iter);
@@ -133,7 +129,7 @@ pub const View = struct {
         }
     }
 
-    fn updateBottomBounds(self: *View, _iter: Manager.Iterator) !void {
+    fn updateBottomBounds(self: *View, _iter: *Manager.Iterator) !void {
         var iter = _iter; // _iter is const
 
         // View buffer in range, no need to append
@@ -191,7 +187,7 @@ const Output = struct {
         for (view.first..(view.last + 1)) |i| {
             const e = view.buffer.items[i];
 
-            const fg = if (view.cursor == i) tui.style.Color.cyan else tui.style.Color.default;
+            const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
             const cursor_style = try bS(&self.sbuf, .{ .fg = fg });
 
             var line = try tv.line(e, &self.obuf);
@@ -289,11 +285,10 @@ pub fn run(self: *Self) !void {
             }
         }
 
-        try view.update(iter_or_null.?);
+        try view.update(&iter_or_null.?);
 
         // Print contents of view buffer in range
         try out.printContents(vp.start_row, view, tv);
-        std.debug.print("app.run post print position={any}\n", .{try terminal.getCursorPosition()});
 
         switch (try inp.getAppAction()) {
             .quit => return,

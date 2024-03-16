@@ -221,7 +221,6 @@ pub fn clearNLines(self: *const Self, n: u16) !void {
 }
 
 pub fn clearLinesBelow(self: *const Self, row: u16) !void {
-    std.debug.print("clearing lines arg.row={d}, pos={any}\n", .{ row, try terminal.getCursorPosition() });
     var buf: [128]u8 = undefined;
     var slc = try fmt.bufPrint(&buf, "\x1b[{d};0H\x1b[0J", .{row});
     _ = try self.writer.write(slc);

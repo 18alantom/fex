@@ -137,20 +137,26 @@ pub const Iterator = struct {
             return null;
         }
 
-        const last: Entry = self.stack.pop();
-        self.growStack(last) catch return null;
-        return last;
+        const last_or_null: ?Entry = self.stack.popOrNull();
+        if (last_or_null) |last| {
+            self.growStack(last) catch return null;
+        }
+
+        return last_or_null;
     }
 
     fn growStack(self: *Iterator, entry: Entry) !void {
+        // Invalid depth value < -2
         if (self.depth < -2) {
             return;
         }
 
+        // Append children only if present == -2
         if (self.depth == -2 and !entry.item.hasChildren()) {
             return;
         }
 
+        // Don't append children deeper than configured
         if (self.depth >= 0 and entry.depth > self.depth) {
             return;
         }
