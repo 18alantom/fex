@@ -10,7 +10,6 @@ const mem = std.mem;
 const os = std.os;
 const io = std.io;
 
-const print = std.debug.print;
 const bS = tui.style.bufStyle;
 const terminal = tui.terminal;
 
@@ -124,16 +123,19 @@ pub const View = struct {
     pub fn update(self: *View, iter: *Manager.Iterator) !void {
         // Cursor exceeds bottom boundary
         if (self.cursor > self.last) {
-            try self.updateBottomBounds(iter);
+            try self.incrementIndices(iter);
         }
 
         // Cursor exceeds top boundary
         else if (self.cursor < self.first) {
-            self.updateTopBounds();
+            self.decrementIndices();
         }
+
+        // No-op
+        else {}
     }
 
-    fn updateBottomBounds(self: *View, _iter: *Manager.Iterator) !void {
+    fn incrementIndices(self: *View, _iter: *Manager.Iterator) !void {
         var iter = _iter; // _iter is const
 
         // View buffer in range, no need to append
@@ -155,7 +157,7 @@ pub const View = struct {
         }
     }
 
-    fn updateTopBounds(self: *View) void {
+    fn decrementIndices(self: *View) void {
         self.first -= 1;
         self.last -= 1;
     }
@@ -267,25 +269,20 @@ pub fn run(self: *Self) !void {
         if (iter_or_null != null) iter_or_null.?.deinit();
     }
 
-    // select (try inp.get)
     while (true) {
-        // If manager tree changes in any way
         if (reiterate) {
             defer reiterate = false;
             view.buffer.clearAndFree();
             if (iter_or_null != null) iter_or_null.?.deinit();
 
             iter_or_null = try self.manager.iterate(-2);
-            for (0..vp.rows) |i| {
-                const _e = iter_or_null.?.next();
-                if (_e == null) {
-                    break;
-                }
 
-                const e = _e.?;
+            var max_append = view.first + vp.rows;
+            while (iter_or_null.?.next()) |e| {
+                if (view.buffer.items.len > max_append) break;
                 try view.buffer.append(e);
-                view.last = i;
             }
+            view.last = @min(max_append, view.buffer.items.len) - 1;
         }
 
         try view.update(&iter_or_null.?);
