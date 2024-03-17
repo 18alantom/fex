@@ -24,10 +24,10 @@ const State = {};
 
 const Self = @This();
 
-pub fn init(allocator: mem.Allocator) !Self {
+pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
     return .{
         .allocator = allocator,
-        .manager = try Manager.init(allocator),
+        .manager = try Manager.init(allocator, root),
     };
 }
 

@@ -29,10 +29,10 @@ pub const Item = struct {
     /// is opened.
     ///
     /// Note: init_path should always point to a dir.
-    pub fn init(allocator: mem.Allocator, init_path: []const u8) !*Self {
+    pub fn init(allocator: mem.Allocator, root: []const u8) !*Self {
         var dir = fs.cwd();
-        if (init_path.len > 1 or init_path[0] != '.') {
-            dir = try dir.openDir(init_path, .{});
+        if (root.len > 1 or root[0] != '.') {
+            dir = try dir.openDir(root, .{});
         }
 
         var item = try allocator.create(Self);

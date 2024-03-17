@@ -61,7 +61,9 @@ pub const TreeView = struct {
     }
 
     fn setIndentList(self: *Self, entry: Manager.Iterator.Entry) !void {
-        try self.indent_list.resize(entry.depth + 1);
+        if (self.indent_list.items.len <= entry.depth) {
+            try self.indent_list.resize(entry.depth + 1);
+        }
         self.indent_list.items[entry.depth] = entry.last;
     }
 

@@ -16,10 +16,10 @@ const Self = @This();
 root: *Item,
 allocator: mem.Allocator,
 
-pub fn init(allocator: mem.Allocator) !*Self {
+pub fn init(allocator: mem.Allocator, root: []const u8) !*Self {
     var m = try allocator.create(Self);
 
-    m.root = try Item.init(allocator, ".");
+    m.root = try Item.init(allocator, root);
     m.allocator = allocator;
 
     return m;
@@ -190,7 +190,7 @@ pub fn getEntry(index: usize, parent_depth: usize, children: ItemList) Iterator.
 
 const testing = std.testing;
 test "leaks in Manager" {
-    var m = try Self.init(testing.allocator);
+    var m = try Self.init(testing.allocator, ".");
     var r = m.root;
     _ = try m.up();
     try testing.expect(m.root != r);
