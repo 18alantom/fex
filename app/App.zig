@@ -1,9 +1,11 @@
 const std = @import("std");
 const tree = @import("./tree.zig");
-const Manager = @import("../fs/Manager.zig");
 const fsitem = @import("../fs/item.zig");
 const tui = @import("../tui.zig");
 const utils = @import("../utils.zig");
+
+const Manager = @import("../fs/Manager.zig");
+const View = @import("./View.zig");
 
 const fs = std.fs;
 const mem = std.mem;
@@ -15,6 +17,7 @@ const terminal = tui.terminal;
 
 const Item = fsitem.Item;
 const ItemError = fsitem.ItemError;
+const TreeView = tree.TreeView;
 
 allocator: mem.Allocator,
 manager: *Manager,
@@ -98,86 +101,25 @@ pub const Viewport = struct {
     }
 };
 
-pub const View = struct {
-    allocator: mem.Allocator,
-    buffer: std.ArrayList(Entry),
-
-    first: usize, // first index (top buffer boundary)
-    last: usize, // last index (bottom buffer boundar)
-    cursor: usize, // location in buffer boundary
-
-    pub fn init(allocator: mem.Allocator) View {
-        return .{
-            .allocator = allocator,
-            .buffer = std.ArrayList(Entry).init(allocator),
-            .cursor = 0,
-            .first = 0,
-            .last = 0,
-        };
-    }
-
-    fn deinit(self: *View) void {
-        self.buffer.deinit();
-    }
-
-    pub fn update(self: *View, iter: *Manager.Iterator) !void {
-        // Cursor exceeds bottom boundary
-        if (self.cursor > self.last) {
-            try self.incrementIndices(iter);
-        }
-
-        // Cursor exceeds top boundary
-        else if (self.cursor < self.first) {
-            self.decrementIndices();
-        }
-
-        // No-op
-        else {}
-    }
-
-    fn incrementIndices(self: *View, _iter: *Manager.Iterator) !void {
-        var iter = _iter; // _iter is const
-
-        // View buffer in range, no need to append
-        if (self.last < (self.buffer.items.len - 1)) {
-            self.first += 1;
-            self.last += 1;
-        }
-
-        // View buffer out of range, need to append
-        else if (iter.next()) |e| {
-            try self.buffer.append(e);
-            self.first += 1;
-            self.last += 1;
-        }
-
-        // No more items, reset cursor
-        else {
-            self.cursor = self.last;
-        }
-    }
-
-    fn decrementIndices(self: *View) void {
-        self.first -= 1;
-        self.last -= 1;
-    }
-};
-
 const Output = struct {
     // Output
     draw: tui.Draw,
     writer: fs.File.Writer,
+
+    tree_view: TreeView,
     obuf: [2048]u8, // Content Buffer
     sbuf: [2048]u8, // Style Buffer
 
-    pub fn init() !Output {
+    pub fn init(allocator: mem.Allocator) !Output {
         const writer = io.getStdOut().writer();
         const draw = tui.Draw{ .writer = writer };
+        var tree_view = tree.TreeView.init(allocator);
 
         try draw.hideCursor();
         return .{
             .writer = writer,
             .draw = draw,
+            .tree_view = tree_view,
             .obuf = undefined,
             .sbuf = undefined,
         };
@@ -185,19 +127,25 @@ const Output = struct {
 
     pub fn deinit(self: *Output) void {
         self.draw.showCursor() catch {};
+        self.tree_view.deinit();
     }
 
-    pub fn printContents(self: *Output, start_row: u16, view: View, tree_view: *tree.TreeView) !void {
+    pub fn printContents(self: *Output, start_row: u16, view: View) !void {
         try self.draw.moveCursor(start_row, 0);
-        for (view.first..(view.last + 1)) |i| {
-            const e = view.buffer.items[i];
+        try self.tree_view.printLines(
+            &view,
+            self.draw,
+        );
 
-            const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
-            const cursor_style = try bS(&self.sbuf, .{ .fg = fg });
+        // for (view.first..(view.last + 1)) |i| {
+        //     const e = view.buffer.items[i];
 
-            var line = try tree_view.line(e, &self.obuf);
-            try self.draw.println(line, cursor_style);
-        }
+        //     const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
+        //     const cursor_style = try bS(&self.sbuf, .{ .fg = fg });
+
+        //     var line = try tree_view.line(e, &self.obuf);
+        //     try self.draw.println(line, cursor_style);
+        // }
     }
 };
 
@@ -252,11 +200,7 @@ pub fn run(self: *Self) !void {
     var view = View.init(self.allocator);
     defer view.deinit();
 
-    // Tree View to format output
-    var tv = tree.TreeView.init(self.allocator);
-    defer tv.deinit();
-
-    var out = try Output.init();
+    var out = try Output.init(self.allocator);
     defer out.deinit();
 
     var inp = Input.init();
@@ -288,7 +232,7 @@ pub fn run(self: *Self) !void {
         try view.update(&iter_or_null.?);
 
         // Print contents of view buffer in range
-        try out.printContents(vp.start_row, view, &tv);
+        try out.printContents(vp.start_row, view);
 
         switch (try inp.getAppAction()) {
             .quit => return,
