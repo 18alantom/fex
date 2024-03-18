@@ -52,13 +52,17 @@ pub const TreeView = struct {
 
         // Need to iterate over items before the view buffer because
         // calculating the indent list depends on previous items.
-        for (0..view.last) |i| {
+        for (0..(view.last + 1)) |i| {
+            const entry = view.buffer.items[i];
+
+            std.debug.print("\n{s}\n", .{entry.item.name()});
+            std.debug.print("\til_bef={any}\n", .{self.indent_list.items});
+            try self.updateIndentList(entry);
+            std.debug.print("\til_aft={any}\n", .{self.indent_list.items});
+
             if (i > view.last) {
                 break;
             }
-
-            const entry = view.buffer.items[i];
-            try self.updateIndentList(entry);
 
             if (i < view.first) {
                 continue;
@@ -88,7 +92,6 @@ pub const TreeView = struct {
         self: *Self,
         entry: Entry,
     ) ![]u8 {
-        std.debug.print("\nil_bef={any} {s}\n", .{ self.indent_list.items, entry.item.name() });
         var prefix = try self.getPrefix(entry, &self.obuf);
         var suffix = try fmt.bufPrint(
             self.obuf[prefix.len..],
@@ -100,12 +103,10 @@ pub const TreeView = struct {
             },
         );
 
-        std.debug.print("il_aft={any}\n", .{self.indent_list.items});
         return self.obuf[0..(prefix.len + suffix.len)];
     }
 
     fn getPrefix(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
-        try self.updateIndentList(entry);
         var e = self.setIndentLines(entry, obuf).len;
         var ec = if (entry.last) "└───" else "├───";
         @memcpy(obuf[e .. e + ec.len], ec);
@@ -114,32 +115,19 @@ pub const TreeView = struct {
     }
 
     fn updateIndentList(self: *Self, entry: Manager.Iterator.Entry) !void {
-        var resized = false;
+        // default first value is `false`
+        var prev: bool = false;
+
         if (self.indent_list.items.len <= entry.depth) {
             try self.indent_list.resize(entry.depth + 1);
-            resized = true;
+        } else {
+            // previous value, if present, gets inherited
+            prev = self.indent_list.items[entry.depth];
         }
 
-        var val = false;
-        var prev = if (resized) false else self.indent_list.items[entry.depth];
-
-        // if first then iterating over siblings and their children,
-        // indent line should be drawn to connect the siblings
-        //
-        // valid transition: to start a new line, previous should have
-        // ended i.e indent list would be false.
-        if (entry.first and !prev) {
-            val = true;
-        }
-
-        // if last then not in list and line should not be drawn
-        //
-        // valid transition: to end a line, it should have been
-        // started or the item should be the first and the last
-        if (entry.last and (prev or entry.first)) {
-            val = false;
-        }
-        self.indent_list.items[entry.depth] = val;
+        // `true` if not last child, and either first
+        // or previous sibling had a connection.
+        self.indent_list.items[entry.depth] = !entry.last and (entry.first or prev);
     }
 
     fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
