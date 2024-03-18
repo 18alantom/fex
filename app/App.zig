@@ -193,8 +193,10 @@ const Input = struct {
             return switch (key) {
                 .enter => AppAction.select,
                 // Navigation
-                .up => AppAction.up,
-                .down => AppAction.down,
+                .up_arrow => AppAction.up,
+                .k => AppAction.up,
+                .down_arrow => AppAction.down,
+                .j => AppAction.down,
                 .gg => AppAction.top,
                 .G => AppAction.bottom,
                 // Toggle fold

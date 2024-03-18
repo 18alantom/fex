@@ -7,13 +7,17 @@ const io = std.io;
 const os = std.os;
 
 pub const Key = enum {
-    up,
-    down,
-    left,
-    right,
+    up_arrow,
+    down_arrow,
+    left_arrow,
+    right_arrow,
     enter,
     question,
     fslash,
+    h,
+    j,
+    k,
+    l,
     q,
     C,
     E,
@@ -82,10 +86,10 @@ pub fn readKeys(self: *Self) !Key {
             '?' => Key.question,
             '/' => Key.fslash,
             // Directional chars
-            'h' => Key.left,
-            'j' => Key.down,
-            'k' => Key.up,
-            'l' => Key.right,
+            'h' => Key.h,
+            'j' => Key.j,
+            'k' => Key.k,
+            'l' => Key.l,
             // Navigation chars
             'G' => Key.G,
             'g' => {
@@ -121,22 +125,22 @@ pub fn readKeys(self: *Self) !Key {
 fn getTripleCharMappedAction(chars: []u8) Key {
     // Up Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 65 })) {
-        return Key.up;
+        return Key.up_arrow;
     }
 
     // Down Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 66 })) {
-        return Key.down;
+        return Key.down_arrow;
     }
 
     // Right Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 67 })) {
-        return Key.right;
+        return Key.right_arrow;
     }
 
     // Left Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 68 })) {
-        return Key.left;
+        return Key.left_arrow;
     }
 
     return Key.unknown;
