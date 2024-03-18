@@ -15,11 +15,23 @@ pub const Key = enum {
     question,
     fslash,
     q,
-    gg,
+    C,
+    E,
     G,
+    gg,
     unknown,
     ctrl_c,
     ctrl_d,
+    // numerics
+    one,
+    two,
+    three,
+    four,
+    five,
+    six,
+    seven,
+    eight,
+    nine,
 };
 
 const print = std.debug.print;
@@ -81,6 +93,19 @@ pub fn readKeys(self: *Self) !Key {
                 prev = 'g';
                 continue;
             },
+            // Toggles
+            'C' => Key.C,
+            'E' => Key.E,
+            // Numerics
+            '1' => Key.one,
+            '2' => Key.two,
+            '3' => Key.three,
+            '4' => Key.four,
+            '5' => Key.five,
+            '6' => Key.six,
+            '7' => Key.seven,
+            '8' => Key.eight,
+            '9' => Key.nine,
             // Quit chars
             'q' => Key.q,
             3 => Key.ctrl_c, // Ctrl-C

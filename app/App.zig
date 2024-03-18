@@ -156,6 +156,17 @@ pub const AppAction = enum {
     quit,
     top,
     bottom,
+    depth_one,
+    depth_two,
+    depth_three,
+    depth_four,
+    depth_five,
+    depth_six,
+    depth_seven,
+    depth_eight,
+    depth_nine,
+    expand_all,
+    collapse_all,
 };
 
 const Input = struct {
@@ -180,11 +191,26 @@ const Input = struct {
             const key = try self.input.readKeys();
             std.debug.print("{any}\n", .{key});
             return switch (key) {
+                .enter => AppAction.select,
+                // Navigation
                 .up => AppAction.up,
                 .down => AppAction.down,
-                .enter => AppAction.select,
                 .gg => AppAction.top,
                 .G => AppAction.bottom,
+                // Toggle fold
+                .C => AppAction.collapse_all,
+                .E => AppAction.expand_all,
+                // Expand to depth
+                .one => AppAction.depth_one,
+                .two => AppAction.depth_two,
+                .three => AppAction.depth_three,
+                .four => AppAction.depth_four,
+                .five => AppAction.depth_five,
+                .six => AppAction.depth_six,
+                .seven => AppAction.depth_seven,
+                .eight => AppAction.depth_eight,
+                .nine => AppAction.depth_nine,
+                // Quit
                 .q => AppAction.quit,
                 .ctrl_c => AppAction.quit,
                 .ctrl_d => AppAction.quit,
@@ -220,13 +246,14 @@ pub fn run(self: *Self) !void {
         if (iter_or_null != null) iter_or_null.?.deinit();
     }
 
+    var iter_mode: i32 = -2;
     while (true) {
         if (reiterate) {
             defer reiterate = false;
             view.buffer.clearAndFree();
             if (iter_or_null != null) iter_or_null.?.deinit();
 
-            iter_or_null = try self.manager.iterate(-2);
+            iter_or_null = try self.manager.iterate(iter_mode);
 
             var max_append = view.first + vp.rows;
             while (iter_or_null.?.next()) |e| {
@@ -234,6 +261,7 @@ pub fn run(self: *Self) !void {
                 try view.buffer.append(e);
             }
             view.last = @min(max_append, view.buffer.items.len) - 1;
+            iter_mode = -2;
         }
 
         try view.update(&iter_or_null.?);
@@ -253,6 +281,51 @@ pub fn run(self: *Self) !void {
             .select => {
                 const item = view.buffer.items[view.cursor].item;
                 reiterate = try toggleChildren(item);
+            },
+            .expand_all => {
+                iter_mode = -1;
+                reiterate = true;
+            },
+            .collapse_all => {
+                self.manager.root.freeChildren(null);
+                view.cursor = 0;
+                reiterate = true;
+            },
+            .depth_one => {
+                iter_mode = 0;
+                reiterate = true;
+            },
+            .depth_two => {
+                iter_mode = 1;
+                reiterate = true;
+            },
+            .depth_three => {
+                iter_mode = 2;
+                reiterate = true;
+            },
+            .depth_four => {
+                iter_mode = 3;
+                reiterate = true;
+            },
+            .depth_five => {
+                iter_mode = 4;
+                reiterate = true;
+            },
+            .depth_six => {
+                iter_mode = 5;
+                reiterate = true;
+            },
+            .depth_seven => {
+                iter_mode = 6;
+                reiterate = true;
+            },
+            .depth_eight => {
+                iter_mode = 7;
+                reiterate = true;
+            },
+            .depth_nine => {
+                iter_mode = 8;
+                reiterate = true;
             },
             .quit => return,
         }
