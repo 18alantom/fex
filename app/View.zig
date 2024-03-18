@@ -32,18 +32,23 @@ pub fn deinit(self: *Self) void {
 }
 
 pub fn update(self: *Self, iter: *Manager.Iterator) !void {
-    // Cursor exceeds bottom boundary
-    if (self.cursor > self.last) {
-        try self.incrementIndices(iter);
-    }
+    // TODO: can do without loop
+    while (true) {
+        // Cursor exceeds bottom boundary
+        if (self.cursor > self.last) {
+            try self.incrementIndices(iter);
+        }
 
-    // Cursor exceeds top boundary
-    else if (self.cursor < self.first) {
-        self.decrementIndices();
-    }
+        // Cursor exceeds top boundary
+        else if (self.cursor < self.first) {
+            self.decrementIndices();
+        }
 
-    // No-op
-    else {}
+        // Break
+        else {
+            break;
+        }
+    }
 }
 
 fn incrementIndices(self: *Self, _iter: *Manager.Iterator) !void {

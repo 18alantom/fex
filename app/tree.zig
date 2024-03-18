@@ -55,11 +55,7 @@ pub const TreeView = struct {
         for (0..(view.last + 1)) |i| {
             const entry = view.buffer.items[i];
 
-            std.debug.print("\n{s}\n", .{entry.item.name()});
-            std.debug.print("\til_bef={any}\n", .{self.indent_list.items});
             try self.updateIndentList(entry);
-            std.debug.print("\til_aft={any}\n", .{self.indent_list.items});
-
             if (i > view.last) {
                 break;
             }

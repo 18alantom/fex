@@ -154,6 +154,8 @@ pub const AppAction = enum {
     down,
     select,
     quit,
+    top,
+    bottom,
 };
 
 const Input = struct {
@@ -175,14 +177,19 @@ const Input = struct {
 
     pub fn getAppAction(self: *Input) !AppAction {
         while (true) {
-            switch (try self.input.readAction(&self.rbuf)) {
-                .up => return AppAction.up,
-                .down => return AppAction.down,
-                .select => return AppAction.select,
-                .quit => return AppAction.quit,
-                .unknown => continue,
+            const key = try self.input.readKeys();
+            std.debug.print("{any}\n", .{key});
+            return switch (key) {
+                .up => AppAction.up,
+                .down => AppAction.down,
+                .enter => AppAction.select,
+                .gg => AppAction.top,
+                .G => AppAction.bottom,
+                .q => AppAction.quit,
+                .ctrl_c => AppAction.quit,
+                .ctrl_d => AppAction.quit,
                 else => continue,
-            }
+            };
         }
     }
 };
@@ -234,19 +241,27 @@ pub fn run(self: *Self) !void {
         // Print contents of view buffer in range
         try out.printContents(vp.start_row, view);
 
-        switch (try inp.getAppAction()) {
-            .quit => return,
+        const app_action = try inp.getAppAction();
+        switch (app_action) {
             .down => view.cursor += 1,
             .up => view.cursor -|= 1,
+            .top => view.cursor = 0,
+            .bottom => {
+                while (iter_or_null.?.next()) |e| try view.buffer.append(e);
+                view.cursor = view.buffer.items.len - 1;
+            },
             .select => {
                 const item = view.buffer.items[view.cursor].item;
                 reiterate = try toggleChildren(item);
             },
+            .quit => return,
         }
 
         try out.draw.clearLinesBelow(vp.start_row);
     }
 }
+
+fn appendAll() void {}
 
 fn toggleChildren(item: *Item) !bool {
     if (item.hasChildren()) {

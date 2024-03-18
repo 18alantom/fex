@@ -6,16 +6,20 @@ const mem = std.mem;
 const io = std.io;
 const os = std.os;
 
-pub const Action = enum {
+pub const Key = enum {
     up,
     down,
     left,
     right,
-    select,
-    help,
-    find,
-    quit,
+    enter,
+    question,
+    fslash,
+    q,
+    gg,
+    G,
     unknown,
+    ctrl_c,
+    ctrl_d,
 };
 
 const print = std.debug.print;
@@ -47,64 +51,68 @@ pub fn readUntil(self: *Self, buf: []u8, delimiter: u8, max: usize) []u8 {
     return fbs.getWritten();
 }
 
-pub fn readAction(self: *Self, buf: []u8) !Action {
-    const value = try self.read(buf);
-    return getAction(value);
-}
+pub fn readKeys(self: *Self) !Key {
+    var buf: [256]u8 = undefined;
+    var prev: ?u8 = null;
+    while (true) {
+        const value = try self.read(&buf);
+        if (value.len == 3) {
+            return getTripleCharMappedAction(value);
+        }
 
-pub fn getAction(value: []u8) Action {
-    if (value.len == 1) {
-        return getSingleCharMappedAction(value[0]);
+        if (value.len != 1) {
+            return Key.unknown;
+        }
+
+        const char = value[0];
+        return switch (char) {
+            // Help and other chars
+            '?' => Key.question,
+            '/' => Key.fslash,
+            // Directional chars
+            'h' => Key.left,
+            'j' => Key.down,
+            'k' => Key.up,
+            'l' => Key.right,
+            // Navigation chars
+            'G' => Key.G,
+            'g' => {
+                if (prev == 'g') return Key.gg;
+                prev = 'g';
+                continue;
+            },
+            // Quit chars
+            'q' => Key.q,
+            3 => Key.ctrl_c, // Ctrl-C
+            4 => Key.ctrl_d, // Ctrl-D
+            // Misc control chars
+            10 => Key.enter,
+            // Unknown
+            else => Key.unknown,
+        };
     }
-
-    if (value.len == 3) {
-        return getTripleCharMappedAction(value);
-    }
-    return Action.unknown;
 }
 
-fn getSingleCharMappedAction(char: u8) Action {
-    return switch (char) {
-        // Help and other chars
-        '?' => Action.help,
-        'H' => Action.help,
-        '/' => Action.find,
-        // Directional chars
-        'h' => Action.left,
-        'j' => Action.down,
-        'k' => Action.up,
-        'l' => Action.right,
-        // Quit chars
-        'q' => Action.quit,
-        3 => Action.quit, // Ctrl-C
-        4 => Action.quit, // Ctrl-D
-        // Misc control chars
-        10 => Action.select,
-        // Unknown
-        else => Action.unknown,
-    };
-}
-
-fn getTripleCharMappedAction(chars: []u8) Action {
+fn getTripleCharMappedAction(chars: []u8) Key {
     // Up Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 65 })) {
-        return Action.up;
+        return Key.up;
     }
 
     // Down Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 66 })) {
-        return Action.down;
+        return Key.down;
     }
 
     // Right Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 67 })) {
-        return Action.right;
+        return Key.right;
     }
 
     // Left Arrow
     if (mem.eql(u8, chars, &[_]u8{ 27, 91, 68 })) {
-        return Action.left;
+        return Key.left;
     }
 
-    return Action.unknown;
+    return Key.unknown;
 }
