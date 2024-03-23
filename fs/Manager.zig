@@ -199,11 +199,20 @@ test "leaks in Manager" {
     var iter = try m.iterate(-1);
     defer iter.deinit();
 
-    while (iter.next()) |itm| {
-        _ = itm;
-    }
+    while (iter.next()) |_| continue;
 
     _ = try m.down(r);
     try testing.expectEqual(m.root, r);
     m.deinit();
+}
+
+test "change root free children" {
+    var m = try Self.init(testing.allocator, ".");
+    defer m.deinit();
+
+    var iter = try m.iterate(-1);
+    defer iter.deinit();
+    while (iter.next()) |_| continue;
+    _ = try m.up();
+    if (try m.up()) |root| root.freeChildren(null);
 }
