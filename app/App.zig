@@ -43,13 +43,13 @@ pub const Viewport = struct {
     position: terminal.Position, // cursor position
 
     // Display related fields
-    rows: u16 = 1, // max rows
+    max_rows: u16 = 1, // max rows
     start_row: u16 = 0,
 
     pub fn init() !Viewport {
         try terminal.enableRawMode();
         return .{
-            .rows = 0,
+            .max_rows = 0,
             .start_row = 0,
             .size = terminal.Size{ .cols = 0, .rows = 0 },
             .position = terminal.Position{ .col = 0, .row = 0 },
@@ -63,9 +63,9 @@ pub const Viewport = struct {
     pub fn setBounds(self: *Viewport) !void {
         self.size = terminal.getTerminalSize();
         self.position = try Viewport.getAdjustedPosition(self.size);
-        self.rows = self.size.rows - self.position.row;
+        self.max_rows = self.size.rows - self.position.row;
         self.start_row = Viewport.getStartRow(
-            self.rows,
+            self.max_rows,
             self.position,
         );
     }
@@ -136,22 +136,14 @@ const Output = struct {
             &view,
             self.draw,
         );
-
-        // for (view.first..(view.last + 1)) |i| {
-        //     const e = view.buffer.items[i];
-
-        //     const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
-        //     const cursor_style = try bS(&self.sbuf, .{ .fg = fg });
-
-        //     var line = try tree_view.line(e, &self.obuf);
-        //     try self.draw.println(line, cursor_style);
-        // }
     }
 };
 
 pub const AppAction = enum {
     up,
     down,
+    left,
+    right,
     select,
     quit,
     top,
@@ -189,7 +181,7 @@ const Input = struct {
     pub fn getAppAction(self: *Input) !AppAction {
         while (true) {
             const key = try self.input.readKeys();
-            std.debug.print("{any}\n", .{key});
+            // std.debug.print("{any}\n", .{key});
             return switch (key) {
                 .enter => AppAction.select,
                 // Navigation
@@ -197,6 +189,10 @@ const Input = struct {
                 .k => AppAction.up,
                 .down_arrow => AppAction.down,
                 .j => AppAction.down,
+                .left_arrow => AppAction.left,
+                .h => AppAction.left,
+                .right_arrow => AppAction.right,
+                .l => AppAction.right,
                 .gg => AppAction.top,
                 .G => AppAction.bottom,
                 // Toggle fold
@@ -252,21 +248,23 @@ pub fn run(self: *Self) !void {
     while (true) {
         if (reiterate) {
             defer reiterate = false;
-            view.buffer.clearAndFree();
             if (iter_or_null != null) iter_or_null.?.deinit();
 
             iter_or_null = try self.manager.iterate(iter_mode);
 
-            var max_append = view.first + vp.rows;
+            var max_append = view.first + vp.max_rows;
+            view.buffer.clearAndFree();
             while (iter_or_null.?.next()) |e| {
                 if (view.buffer.items.len > max_append) break;
                 try view.buffer.append(e);
             }
-            view.last = @min(max_append, view.buffer.items.len) - 1;
             iter_mode = -2;
         }
 
-        try view.update(&iter_or_null.?);
+        try view.update(
+            &iter_or_null.?,
+            vp.max_rows,
+        );
 
         // Print contents of view buffer in range
         try out.printContents(vp.start_row, view);
@@ -276,6 +274,23 @@ pub fn run(self: *Self) !void {
             .down => view.cursor += 1,
             .up => view.cursor -|= 1,
             .top => view.cursor = 0,
+            .left => if (view.buffer.items[view.cursor].item._parent) |parent| {
+                reiterate = try toggleChildren(parent);
+                for (0..view.buffer.items.len) |i| {
+                    if (view.buffer.items[i].item != parent) continue;
+                    view.cursor = i;
+                    break;
+                }
+            } else continue,
+            .right => {
+                const item = view.buffer.items[view.cursor].item;
+                if (item.hasChildren()) {
+                    reiterate = true;
+                } else {
+                    reiterate = try toggleChildren(item);
+                }
+                if (reiterate) view.cursor += 1;
+            },
             .bottom => {
                 while (iter_or_null.?.next()) |e| try view.buffer.append(e);
                 view.cursor = view.buffer.items.len - 1;

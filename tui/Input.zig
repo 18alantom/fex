@@ -22,6 +22,9 @@ pub const Key = enum {
     C,
     E,
     G,
+    cd,
+    rm,
+    mv,
     gg,
     unknown,
     ctrl_c,
@@ -95,6 +98,31 @@ pub fn readKeys(self: *Self) !Key {
             'g' => {
                 if (prev == 'g') return Key.gg;
                 prev = 'g';
+                continue;
+            },
+            // Functional chars
+            'c' => {
+                if (prev != null) return Key.unknown;
+                prev = 'c';
+                continue;
+            },
+            'd' => {
+                if (prev == 'c') return Key.cd;
+                return Key.unknown;
+            },
+            'm' => {
+                if (prev == 'r') return Key.rm;
+                if (prev != null) return Key.unknown;
+                prev = 'm';
+                continue;
+            },
+            'v' => {
+                if (prev == 'm') return Key.mv;
+                return Key.unknown;
+            },
+            'r' => {
+                if (prev != null) return Key.unknown;
+                prev = 'r';
                 continue;
             },
             // Toggles

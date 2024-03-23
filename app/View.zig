@@ -31,8 +31,12 @@ pub fn deinit(self: *Self) void {
     self.buffer.deinit();
 }
 
-pub fn update(self: *Self, iter: *Manager.Iterator) !void {
-    // TODO: can do without loop
+pub fn update(
+    self: *Self,
+    iter: *Manager.Iterator,
+    max_rows: u16,
+) !void {
+    if (self.first == 0) self.fixLast(max_rows);
     while (true) {
         // Cursor exceeds bottom boundary
         if (self.cursor > self.last) {
@@ -49,6 +53,13 @@ pub fn update(self: *Self, iter: *Manager.Iterator) !void {
             break;
         }
     }
+    self.fixLast(max_rows);
+}
+
+fn fixLast(self: *Self, max_rows: u16) void {
+    const max_diff = self.first + max_rows;
+    const buffer_len = self.buffer.items.len;
+    self.last = @min(max_diff, buffer_len) - 1;
 }
 
 fn incrementIndices(self: *Self, _iter: *Manager.Iterator) !void {
@@ -74,6 +85,7 @@ fn incrementIndices(self: *Self, _iter: *Manager.Iterator) !void {
 }
 
 fn decrementIndices(self: *Self) void {
-    self.first -= 1;
-    self.last -= 1;
+    const diff = self.last - self.first;
+    self.first = self.cursor;
+    self.last = self.first + diff;
 }
