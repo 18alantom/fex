@@ -275,7 +275,6 @@ pub fn run(self: *Self) !void {
             .up => view.cursor -|= 1,
             .top => view.cursor = 0,
             .left => if (view.buffer.items[view.cursor].item._parent) |parent| {
-                reiterate = try toggleChildren(parent);
                 for (0..view.buffer.items.len) |i| {
                     if (view.buffer.items[i].item != parent) continue;
                     view.cursor = i;
