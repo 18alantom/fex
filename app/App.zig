@@ -280,7 +280,12 @@ pub fn run(self: *Self) !void {
                     view.cursor = i;
                     break;
                 }
-            } else continue,
+            } else if (try self.manager.up()) |_| {
+                view.cursor = 0;
+                reiterate = true;
+            } else {
+                continue;
+            },
             .right => {
                 const item = view.buffer.items[view.cursor].item;
                 if (item.hasChildren()) {
