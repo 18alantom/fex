@@ -122,7 +122,7 @@ pub const Item = struct {
         var pc: ItemList = try p.children();
         for (0..pc.items.len) |i| {
             var ch = pc.items[i];
-            if (self.abs_path_len == ch.abs_path_len or
+            if (self.abs_path_len == ch.abs_path_len and
                 mem.eql(
                 u8,
                 &self.abs_path_buf,
