@@ -1,6 +1,9 @@
+/// Output is responsible for writing out values in View.buffer
+/// to stdout. It uses TreeView—which handles formatting—to do so.
 const std = @import("std");
 const tui = @import("../tui.zig");
 const View = @import("./View.zig");
+
 const TreeView = @import("./TreeView.zig");
 
 const fs = std.fs;

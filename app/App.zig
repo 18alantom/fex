@@ -1,3 +1,4 @@
+/// The main struct, App.run is used to run *fex*
 const std = @import("std");
 const tui = @import("../tui.zig");
 const utils = @import("../utils.zig");

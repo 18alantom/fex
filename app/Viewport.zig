@@ -1,3 +1,5 @@
+/// Viewport is responsible for setting the terminal bounds within
+/// which to display the contents of app.
 const std = @import("std");
 const terminal = @import("../tui/terminal.zig");
 const utils = @import("../utils.zig");
@@ -71,4 +73,3 @@ fn getStartRow(rows: u16, pos: terminal.Position) u16 {
 
     return pos.row;
 }
-// };

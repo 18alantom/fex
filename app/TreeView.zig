@@ -1,3 +1,16 @@
+/// TreeView is responsible for formatting values in View.buffer
+/// into output strings.
+///
+/// It is required because `indent_list` needs to be calculated to
+/// generate the indent string of the tree.
+///
+/// Indent string consists of indent lines which connect sibling
+/// items in a file system.
+///
+/// `indent_list` is a boolean list that indicates whether the
+/// current item at depth `d` being iterated over has non iterated
+/// siblings by checking if it's the first or the last item in the
+/// list.
 const std = @import("std");
 
 const Manager = @import("../fs/Manager.zig");
@@ -15,16 +28,6 @@ const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
 const bufStyle = tui.style.bufStyle;
 
-// TreeView is required because `indent_list` needs to be
-// computed to generate the indent string of the tree.
-//
-// Indent string consists of indent lines which connect
-// sibling items in a file system.
-//
-// `indent_list` is a boolean list that indicates whether
-// the current item at depth `d` being iterated over has
-// non iterated siblings by checking if it's the first or
-// the last item in the list.
 obuf: [2048]u8, // Content Buffer
 sbuf: [2048]u8, // Style Buffer
 

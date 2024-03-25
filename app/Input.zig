@@ -1,3 +1,5 @@
+/// Input is responsible for converting values read from stdin
+/// into AppAction values which are carried out by App.
 const std = @import("std");
 const tui = @import("../tui.zig");
 const View = @import("./View.zig");

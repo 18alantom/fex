@@ -1,3 +1,8 @@
+/// View is responsible for maintaing View.buffer which is an
+/// ArrayList of fs items to be displayed.
+///
+/// It maintains the cursor, and first and last incices to keep
+/// track of what portion of the buffer is in view.
 const std = @import("std");
 
 const fs = std.fs;
