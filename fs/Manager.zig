@@ -35,6 +35,13 @@ pub fn up(self: *Self) !?*Item {
             return err;
         }
     };
+
+    // Prevent memory leak, deinit orphaned children
+    const index = try new_root.indexOfChild(self.root);
+    if (index == null) {
+        self.root.deinit();
+    }
+
     self.root = new_root;
     return self.root;
 }

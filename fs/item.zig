@@ -23,7 +23,6 @@ _stat: ?os.Stat = null,
 _parent: ?*Self = null,
 _children: ?ItemList = null,
 
-
 /// init_path can be absolute or relative paths if init_path is "." then cwd
 /// is opened.
 ///
@@ -129,8 +128,18 @@ fn setParentsChildren(self: *Self) !void {
         )) {
             pc.items[i] = self;
             self.allocator.destroy(ch);
+            return;
         }
     }
+    // unreachable; // ideally, but not always
+    //
+    // If the code execution reaches here, then there's
+    // a possibility of a memory leak if references to the
+    // item calling this function are lost because they will
+    // not be under the parent's child list.
+    //
+    // The function `self.parent` is responsible for freeing
+    // the orphaned child tree in such a case.
 }
 
 pub fn hasChildren(self: *Self) bool {
