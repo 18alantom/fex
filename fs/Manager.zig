@@ -1,9 +1,8 @@
 const std = @import("std");
 
-const _item = @import("./item.zig");
-const Item = _item.Item;
-const ItemList = _item.ItemList;
-const ItemError = _item.ItemError;
+const Item = @import("./Item.zig");
+const ItemList = Item.ItemList;
+const ItemError = Item.ItemError;
 
 const fs = std.fs;
 const mem = std.mem;
