@@ -15,18 +15,15 @@ const Self = @This();
 root: *Item,
 allocator: mem.Allocator,
 
-pub fn init(allocator: mem.Allocator, root: []const u8) !*Self {
-    var m = try allocator.create(Self);
-
-    m.root = try Item.init(allocator, root);
-    m.allocator = allocator;
-
-    return m;
+pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
+    return .{
+        .root = try Item.init(allocator, root),
+        .allocator = allocator,
+    };
 }
 
 pub fn deinit(self: *Self) void {
     self.root.deinit();
-    self.allocator.destroy(self);
 }
 
 /// Sets root to current roots parent directory.

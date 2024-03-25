@@ -40,6 +40,7 @@ pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
 
 pub fn deinit(self: *Self) void {
     self.state.deinit();
+    self.allocator.destroy(self.state);
 }
 
 pub fn run(self: *Self) !void {

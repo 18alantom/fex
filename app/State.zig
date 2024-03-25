@@ -42,7 +42,8 @@ pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
     var input = try allocator.create(Input);
     input.* = Input.init();
 
-    var manager = try Manager.init(allocator, root);
+    var manager = try allocator.create(Manager);
+    manager.* = try Manager.init(allocator, root);
 
     return .{
         .viewport = viewport,
@@ -61,14 +62,24 @@ pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
 
 pub fn deinit(self: *Self) void {
     self.viewport.deinit();
+    self.allocator.destroy(self.viewport);
+
     self.view.deinit();
+    self.allocator.destroy(self.view);
+
     self.output.deinit();
+    self.allocator.destroy(self.output);
+
     self.input.deinit();
+    self.allocator.destroy(self.input);
 
     if (self.iterator) |iter| {
         iter.deinit();
+        self.allocator.destroy(iter);
     }
+
     self.manager.deinit();
+    self.allocator.destroy(self.manager);
 }
 
 pub fn preRun(self: *Self) !void {
