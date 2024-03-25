@@ -149,6 +149,8 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .select => try actions.toggleChildren(self),
         .expand_all => actions.expandAll(self),
         .collapse_all => actions.collapseAll(self),
+        .prev_sibling => actions.toPrevSibling(self),
+        .next_sibling => try actions.toNextSibling(self),
         .change_root => try actions.changeRoot(self),
         .depth_one => actions.expandToDepth(self, 0),
         .depth_two => actions.expandToDepth(self, 1),
@@ -181,4 +183,18 @@ pub fn getItemIndex(self: *Self, item: *Item) !usize {
     }
 
     return error.NotFound;
+}
+
+pub fn appendOne(self: *Self) !bool {
+    if (self.iterator == null) {
+        return false;
+    }
+
+    var entry = self.iterator.?.next();
+    if (entry == null) {
+        return false;
+    }
+
+    try self.view.buffer.append(entry.?);
+    return true;
 }

@@ -30,6 +30,8 @@ pub const Key = enum {
     unknown,
     ctrl_c,
     ctrl_d,
+    curly_open,
+    curly_close,
     // numerics
     one,
     two,
@@ -89,19 +91,18 @@ pub fn readKeys(self: *Self) !Key {
             // Help and other chars
             '?' => Key.question,
             '/' => Key.fslash,
-            // Directional chars
+            '{' => Key.curly_open,
+            '}' => Key.curly_close,
+            // Lowercase
             'h' => Key.h,
             'j' => Key.j,
             'k' => Key.k,
             'l' => Key.l,
-            // Navigation chars
-            'G' => Key.G,
             'g' => {
                 if (prev == 'g') return Key.gg;
                 prev = 'g';
                 continue;
             },
-            // Functional chars
             'c' => {
                 if (prev != null) return Key.unknown;
                 prev = 'c';
@@ -126,9 +127,11 @@ pub fn readKeys(self: *Self) !Key {
                 prev = 'r';
                 continue;
             },
-            // Toggles
+            'q' => Key.q,
+            // Uppercase
             'C' => Key.C,
             'E' => Key.E,
+            'G' => Key.G,
             'R' => Key.R,
             // Numerics
             '1' => Key.one,
@@ -140,11 +143,10 @@ pub fn readKeys(self: *Self) !Key {
             '7' => Key.seven,
             '8' => Key.eight,
             '9' => Key.nine,
-            // Quit chars
-            'q' => Key.q,
+            // Ctrl modded
             3 => Key.ctrl_c, // Ctrl-C
             4 => Key.ctrl_d, // Ctrl-D
-            // Misc control chars
+            // Ctrl chars
             10 => Key.enter,
             // Unknown
             else => Key.unknown,
