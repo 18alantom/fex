@@ -42,7 +42,7 @@ pub fn shiftIntoParent(state: *State) !void {
 pub fn shiftIntoChild(state: *State) !void {
     const item = state.itemUnderCursor();
     if (item.hasChildren()) {
-        state.reiterate = true; // TODO: is this required?
+        state.reiterate = true;
     } else {
         state.reiterate = try toggleItemChildren(item);
     }

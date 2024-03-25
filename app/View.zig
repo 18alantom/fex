@@ -41,7 +41,10 @@ pub fn update(
     iter: *Manager.Iterator,
     max_rows: u16,
 ) !void {
-    if (self.first == 0) self.fixLast(max_rows);
+    if (self.first == 0) {
+        self.correct(max_rows);
+    }
+
     while (true) {
         // Cursor exceeds bottom boundary
         if (self.cursor > self.last) {
@@ -53,23 +56,39 @@ pub fn update(
             self.decrementIndices();
         }
 
-        // Break
+        // Break, cursor within bounds
         else {
             break;
         }
     }
-    self.fixLast(max_rows);
+    self.correct(max_rows);
 }
 
-fn fixLast(self: *Self, max_rows: u16) void {
-    const max_diff = self.first + max_rows;
-    const buffer_len = self.buffer.items.len;
-    self.last = @min(max_diff, buffer_len) - 1;
+fn correct(self: *Self, max_rows: u16) void {
+    const current_diff: usize = self.last -| self.first;
+    const max_diff: usize = self.first + max_rows;
+
+    // Correct `last`: ensure `last` less than buffer len
+    self.last = @min(max_diff, self.buffer.items.len) - 1;
+    if (self.first == 0) {
+        return;
+    }
+
+    // Correct `first`: ensure `first` before `last`
+    if (current_diff > 0) {
+        self.first = self.last -| current_diff;
+    }
+
+    // no-op after update loop
+    // Correct `cursor`: place `cursor` within bounds
+    if (self.cursor < self.first) {
+        self.cursor = self.first;
+    } else if (self.cursor > self.last) {
+        self.cursor = self.last;
+    }
 }
 
-fn incrementIndices(self: *Self, _iter: *Manager.Iterator) !void {
-    var iter = _iter; // _iter is const
-
+fn incrementIndices(self: *Self, iter: *Manager.Iterator) !void {
     // Self buffer in range, no need to append
     if (self.last < (self.buffer.items.len - 1)) {
         self.first += 1;
