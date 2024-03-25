@@ -40,10 +40,10 @@ pub fn deinit(self: *Self) void {
     self.treeview.deinit();
 }
 
-pub fn printContents(self: *Self, start_row: u16, view: View) !void {
+pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
     try self.draw.moveCursor(start_row, 0);
     try self.treeview.printLines(
-        &view,
+        view,
         self.draw,
     );
 }
