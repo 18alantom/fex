@@ -65,13 +65,13 @@ pub fn run(self: *Self) !void {
         if (iter_or_null != null) iter_or_null.?.deinit();
     }
 
-    var iter_mode: i32 = -2;
+    var itermode: i32 = -2;
     while (true) {
         if (reiterate) {
             defer reiterate = false;
             if (iter_or_null != null) iter_or_null.?.deinit();
 
-            iter_or_null = try self.manager.iterate(iter_mode);
+            iter_or_null = try self.manager.iterate(itermode);
 
             var max_append = view.first + vp.max_rows;
             view.buffer.clearAndFree();
@@ -79,7 +79,7 @@ pub fn run(self: *Self) !void {
                 if (view.buffer.items.len > max_append) break;
                 try view.buffer.append(e);
             }
-            iter_mode = -2;
+            itermode = -2;
         }
 
         try view.update(
@@ -125,7 +125,7 @@ pub fn run(self: *Self) !void {
                 reiterate = try toggleChildren(item);
             },
             .expand_all => {
-                iter_mode = -1;
+                itermode = -1;
                 reiterate = true;
             },
             .collapse_all => {
@@ -134,39 +134,39 @@ pub fn run(self: *Self) !void {
                 reiterate = true;
             },
             .depth_one => {
-                iter_mode = 0;
+                itermode = 0;
                 reiterate = true;
             },
             .depth_two => {
-                iter_mode = 1;
+                itermode = 1;
                 reiterate = true;
             },
             .depth_three => {
-                iter_mode = 2;
+                itermode = 2;
                 reiterate = true;
             },
             .depth_four => {
-                iter_mode = 3;
+                itermode = 3;
                 reiterate = true;
             },
             .depth_five => {
-                iter_mode = 4;
+                itermode = 4;
                 reiterate = true;
             },
             .depth_six => {
-                iter_mode = 5;
+                itermode = 5;
                 reiterate = true;
             },
             .depth_seven => {
-                iter_mode = 6;
+                itermode = 6;
                 reiterate = true;
             },
             .depth_eight => {
-                iter_mode = 7;
+                itermode = 7;
                 reiterate = true;
             },
             .depth_nine => {
-                iter_mode = 8;
+                itermode = 8;
                 reiterate = true;
             },
             .quit => return,

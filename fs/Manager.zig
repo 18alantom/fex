@@ -104,15 +104,15 @@ pub const Iterator = struct {
     };
     const EntryList = std.ArrayList(Entry);
 
-    //// Depth values:
+    //// Itermode values:
     /// -1 : as deep as possible
     /// -2 : only if children are present
     ///  0 : do not expand
     ///  n : expand until depth `n`
-    depth: i32 = -1,
+    itermode: i32 = -1,
     stack: EntryList,
 
-    pub fn init(allocator: mem.Allocator, first: *Item, depth: i32) !Iterator {
+    pub fn init(allocator: mem.Allocator, first: *Item, itermode: i32) !Iterator {
         var stack = EntryList.init(allocator);
         try stack.append(.{
             .item = first,
@@ -123,7 +123,7 @@ pub const Iterator = struct {
         });
         return .{
             .stack = stack,
-            .depth = depth,
+            .itermode = itermode,
         };
     }
 
@@ -145,18 +145,18 @@ pub const Iterator = struct {
     }
 
     fn growStack(self: *Iterator, entry: Entry) !void {
-        // Invalid depth value < -2
-        if (self.depth < -2) {
+        // Invalid itermode value < -2
+        if (self.itermode < -2) {
             return;
         }
 
         // Append children only if present == -2
-        if (self.depth == -2 and !entry.item.hasChildren()) {
+        if (self.itermode == -2 and !entry.item.hasChildren()) {
             return;
         }
 
         // Don't append children deeper than configured
-        if (self.depth >= 0 and entry.depth > self.depth) {
+        if (self.itermode >= 0 and entry.depth > self.itermode) {
             return;
         }
 
