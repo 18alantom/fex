@@ -75,6 +75,16 @@ pub fn expandToDepth(state: *State, itermode: i32) void {
     state.reiterate = true;
 }
 
+pub fn changeRoot(state: *State) !void {
+    var new_root = state.itemUnderCursor();
+    if (!try new_root.isDir()) {
+        new_root = try new_root.parent();
+    }
+
+    state.manager.changeRoot(new_root);
+    state.reiterate = true;
+}
+
 fn toggleItemChildren(item: *Item) !bool {
     if (item.hasChildren()) {
         item.freeChildren(null);

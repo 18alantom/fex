@@ -30,6 +30,7 @@ pub const AppAction = enum {
     depth_nine,
     expand_all,
     collapse_all,
+    change_root,
 };
 
 reader: fs.File.Reader,
@@ -67,6 +68,8 @@ pub fn getAppAction(self: *Self) !AppAction {
             .l => AppAction.right,
             .gg => AppAction.top,
             .G => AppAction.bottom,
+            // Tree actions
+            .R => AppAction.change_root,
             // Toggle fold
             .C => AppAction.collapse_all,
             .E => AppAction.expand_all,

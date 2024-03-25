@@ -67,6 +67,11 @@ pub fn down(self: *Self, child: *Item) !?*Item {
     return self.root;
 }
 
+pub fn changeRoot(self: *Self, new_root: *Item) void {
+    self.root.deinitSkipChild(new_root);
+    self.root = new_root;
+}
+
 pub fn findParent(self: *Self, child: *Item) !?*Item {
     return try _findParent(self.root, child);
 }

@@ -100,11 +100,10 @@ pub fn fillBuffer(self: *Self) !void {
     self.view.buffer.clearAndFree();
 
     while (self.iterator.?.next()) |e| {
+        try self.view.buffer.append(e);
         if (self.view.buffer.items.len > max_append) {
             break;
         }
-
-        try self.view.buffer.append(e);
     }
     self.itermode = -2;
 }
@@ -150,6 +149,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .select => try actions.toggleChildren(self),
         .expand_all => actions.expandAll(self),
         .collapse_all => actions.collapseAll(self),
+        .change_root => try actions.changeRoot(self),
         .depth_one => actions.expandToDepth(self, 0),
         .depth_two => actions.expandToDepth(self, 1),
         .depth_three => actions.expandToDepth(self, 2),

@@ -227,6 +227,7 @@ pub fn freeChildren(self: *Self, child_to_skip: ?*Self) void {
 
     for (self._children.?.items) |i| {
         if (child_to_skip != null and child_to_skip.? == i) {
+            child_to_skip.?._parent = null;
             continue;
         }
 
