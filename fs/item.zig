@@ -162,11 +162,14 @@ pub fn children(self: *Self) !ItemList {
     }
 
     const ap = self.abspath();
+
     var dir = try fs.openDirAbsolute(ap, .{});
     var idir = try dir.openIterableDir(".", .{});
     var iter = idir.iterate();
     var contents = ItemList.init(self.allocator);
 
+    // Will not work on windows
+    var is_root = self.abs_path_len == 1 and self.abs_path_buf[0] == '/';
     while (true) {
         var entry: ?fs.IterableDir.Entry = iter.next() catch break;
         if (entry == null) {
@@ -174,12 +177,17 @@ pub fn children(self: *Self) !ItemList {
         }
 
         var item = try self.allocator.create(Self);
-        var len = ap.len + 1 + entry.?.name.len;
+        var len: usize = 0;
 
         @memcpy(item.abs_path_buf[0..ap.len], ap);
-        item.abs_path_buf[ap.len] = fs.path.sep;
-
-        @memcpy(item.abs_path_buf[(ap.len + 1)..len], entry.?.name);
+        if (is_root) {
+            len = ap.len + entry.?.name.len;
+            @memcpy(item.abs_path_buf[(ap.len)..len], entry.?.name);
+        } else {
+            item.abs_path_buf[ap.len] = fs.path.sep;
+            len = ap.len + 1 + entry.?.name.len;
+            @memcpy(item.abs_path_buf[(ap.len + 1)..len], entry.?.name);
+        }
         item.abs_path_buf[len] = 0;
         item.abs_path_len = len;
 
