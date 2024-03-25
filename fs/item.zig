@@ -232,7 +232,7 @@ pub fn freeChildren(self: *Self, child_to_skip: ?*Self) void {
         }
 
         var itm = i;
-        itm.freeChildren(null);
+        itm.freeChildren(child_to_skip);
         self.allocator.destroy(itm);
     }
     self._children.?.deinit();

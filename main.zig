@@ -11,7 +11,23 @@ const print = std.debug.print;
 pub fn main() !void {
     var gpa = heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
-    try exe(allocator, ".");
+    try exe(
+        allocator,
+        getRoot(),
+    );
+}
+
+fn getRoot() []const u8 {
+    var args_iter = std.process.args();
+    if (!args_iter.skip()) {
+        return ".";
+    }
+
+    if (args_iter.next()) |r| {
+        return r;
+    }
+
+    return ".";
 }
 
 fn exe(allocator: mem.Allocator, root: []const u8) !void {
