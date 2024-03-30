@@ -45,7 +45,7 @@ pub const StyleConfig = struct {
     bg_b: u8 = 0,
 };
 
-pub fn bufStyle(buf: []u8, config: StyleConfig) ![]u8 {
+pub fn style(buf: []u8, config: StyleConfig) ![]u8 {
     var slc = try fmt.bufPrint(buf, "\x1b[", .{});
     var index: usize = slc.len;
 
@@ -122,20 +122,20 @@ pub fn bufStyle(buf: []u8, config: StyleConfig) ![]u8 {
     return buf[0..index];
 }
 
-test "bufStyle" {
+test "style" {
     var buf: [512]u8 = undefined;
     try testing.expectEqualStrings(
-        try bufStyle(&buf, .{}),
+        try style(&buf, .{}),
         "",
     );
 
     try testing.expectEqualStrings(
-        try bufStyle(&buf, .{ .bold = true }),
+        try style(&buf, .{ .bold = true }),
         "\x1b[1m",
     );
 
     try testing.expectEqualStrings(
-        try bufStyle(&buf, .{
+        try style(&buf, .{
             .bold = true,
             .italic = true,
             .inverse = true,
@@ -144,7 +144,7 @@ test "bufStyle" {
     );
 
     try testing.expectEqualStrings(
-        try bufStyle(&buf, .{
+        try style(&buf, .{
             .bold = true,
             .italic = true,
             .inverse = true,
@@ -155,7 +155,7 @@ test "bufStyle" {
     );
 
     try testing.expectEqualStrings(
-        try bufStyle(&buf, .{
+        try style(&buf, .{
             .bold = true,
             .fg = .rgb,
             .fg_r = 255,

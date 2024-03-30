@@ -1,4 +1,5 @@
 const std = @import("std");
+const _style = @import("./style.zig");
 const terminal = @import("terminal.zig");
 
 const fs = std.fs;
@@ -6,6 +7,8 @@ const fmt = std.fmt;
 const mem = std.mem;
 const unicode = std.unicode;
 const testing = std.testing;
+const SyleConfig = _style.StyleConfig;
+const getStyle = _style.style;
 
 const VLineConfig = struct {
     col: usize = 0,
@@ -179,11 +182,21 @@ pub fn string(
     }
 }
 
-pub fn print(self: *const Self, str: []const u8, style: []const u8) !void {
+pub fn styled(buf: []u8, str: []const u8, config: SyleConfig) ![]u8 {
+    var sbuf: [2048]u8 = undefined;
+    var style = try getStyle(&sbuf, config);
+    return try fmt.bufPrint(buf, "\x1b[{s}{s}\x1b[m", .{ str, style });
+}
+
+pub fn print(self: *const Self, str: []const u8, config: SyleConfig) !void {
+    var sbuf: [2048]u8 = undefined;
+    var style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m", .{ style, str });
 }
 
-pub fn println(self: *const Self, str: []const u8, style: []const u8) !void {
+pub fn println(self: *const Self, str: []const u8, config: SyleConfig) !void {
+    var sbuf: [2048]u8 = undefined;
+    var style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m\n", .{ style, str });
 }
 

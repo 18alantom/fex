@@ -26,7 +26,7 @@ const mem = std.mem;
 
 const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
-const bufStyle = tui.style.bufStyle;
+const getStyle = tui.style.style;
 
 obuf: [2048]u8, // Content Buffer
 sbuf: [2048]u8, // Style Buffer
@@ -70,41 +70,26 @@ pub fn printLines(self: *Self, view: *const View, draw: Draw) !void {
     }
 }
 
-fn printLine(self: *Self, i: usize, view: *const View, draw: Draw) !void {
-    const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
-    const cursor_style = try bufStyle(&self.sbuf, .{ .fg = fg });
-
-    var entry = view.buffer.items[i];
-    const line_str = try self.line(entry);
-    try draw.println(line_str, cursor_style);
-}
-
 fn resetIndentList(self: *Self) void {
     for (0..self.indent_list.items.len) |i| {
         self.indent_list.items[i] = false;
     }
 }
 
-/// prints a single line of a dir tree in tree view
-pub fn line(
-    self: *Self,
-    entry: Entry,
-) ![]u8 {
-    var prefix = try self.getPrefix(entry, &self.obuf);
-    var suffix = try fmt.bufPrint(
-        self.obuf[prefix.len..],
-        " [{d:02},{d:02}] {s}",
-        .{
-            entry.index,
-            entry.depth,
-            entry.item.name(),
-        },
-    );
+fn printLine(self: *Self, i: usize, view: *const View, draw: Draw) !void {
+    var entry = view.buffer.items[i];
 
-    return self.obuf[0..(prefix.len + suffix.len)];
+    // Print tree branches
+    var branch = try self.getBranch(entry, &self.obuf);
+    try draw.print(branch, .{ .faint = true });
+
+    // Print name
+    const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
+    const out = try fmt.bufPrint(&self.obuf, " {s}", .{entry.item.name()});
+    try draw.println(out, .{ .fg = fg });
 }
 
-fn getPrefix(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
+fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
     var e = self.setIndentLines(entry, obuf).len;
     var ec = if (entry.last) "└───" else "├───";
     @memcpy(obuf[e .. e + ec.len], ec);

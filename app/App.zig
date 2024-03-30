@@ -18,7 +18,7 @@ const mem = std.mem;
 const os = std.os;
 const io = std.io;
 
-const bS = tui.style.bufStyle;
+const bS = tui.style.style;
 const terminal = tui.terminal;
 
 const ItemError = Item.ItemError;
