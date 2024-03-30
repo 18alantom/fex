@@ -91,6 +91,11 @@ pub fn isDir(self: *Self) !bool {
     return os.S.ISDIR(s.mode);
 }
 
+pub fn isExec(self: *Self) !bool {
+    const s = try self.stat();
+    return (os.S.IXUSR & s.mode) > 0;
+}
+
 /// Returns Item that references the parent directory of the calling Item.
 /// Initializes parents children and sets self in the list of children.
 ///

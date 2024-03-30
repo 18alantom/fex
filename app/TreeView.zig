@@ -121,19 +121,25 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: Draw) !void {
     try draw.print(branch, .{ .faint = true });
 
     // Print name
-    const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
     const icon = if (self.config.show_icons) try getIcon(entry) else "\u{0008}";
     const out = try fmt.bufPrint(
         &self.obuf,
-        " {s} {s}",
+        "{s} {s}",
         .{ icon, entry.item.name() },
     );
-    try draw.println(out, .{ .fg = fg });
+    try draw.println(out, .{ .fg = try getFg(entry, view.cursor == i) });
+}
+
+fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {
+    if (is_selected) return .red;
+    if (try entry.item.isDir()) return .blue;
+    if (try entry.item.isExec()) return .green;
+    return .default;
 }
 
 fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
     var e = self.setIndentLines(entry, obuf).len;
-    var ec = if (entry.last) "└───" else "├───";
+    var ec = if (entry.last) "└── " else "├── ";
     @memcpy(obuf[e .. e + ec.len], ec);
     e = e + ec.len;
     return obuf[0..e];
