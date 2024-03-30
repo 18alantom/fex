@@ -14,6 +14,7 @@
 const std = @import("std");
 
 const Manager = @import("../fs/Manager.zig");
+const icons = @import("./icons.zig");
 const View = @import("./View.zig");
 const tui = @import("../tui.zig");
 
@@ -27,12 +28,18 @@ const mem = std.mem;
 const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
 const getStyle = tui.style.style;
+const getIcon = icons.getIcon;
+
+const Config = struct {
+    show_icons: bool = true,
+};
 
 obuf: [2048]u8, // Content Buffer
 sbuf: [2048]u8, // Style Buffer
 
 allocator: mem.Allocator,
 indent_list: IndentList,
+config: Config,
 
 const Self = @This();
 pub fn init(allocator: mem.Allocator) Self {
@@ -42,6 +49,7 @@ pub fn init(allocator: mem.Allocator) Self {
         .allocator = allocator,
         .obuf = undefined,
         .sbuf = undefined,
+        .config = .{},
     };
 }
 
@@ -76,27 +84,6 @@ fn resetIndentList(self: *Self) void {
     }
 }
 
-fn printLine(self: *Self, i: usize, view: *const View, draw: Draw) !void {
-    var entry = view.buffer.items[i];
-
-    // Print tree branches
-    var branch = try self.getBranch(entry, &self.obuf);
-    try draw.print(branch, .{ .faint = true });
-
-    // Print name
-    const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
-    const out = try fmt.bufPrint(&self.obuf, " {s}", .{entry.item.name()});
-    try draw.println(out, .{ .fg = fg });
-}
-
-fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
-    var e = self.setIndentLines(entry, obuf).len;
-    var ec = if (entry.last) "└───" else "├───";
-    @memcpy(obuf[e .. e + ec.len], ec);
-    e = e + ec.len;
-    return obuf[0..e];
-}
-
 fn updateIndentList(self: *Self, entry: Manager.Iterator.Entry) !void {
     // default first value is `false`
     var prev: bool = false;
@@ -123,5 +110,31 @@ fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
         );
         e += ic.len;
     }
+    return obuf[0..e];
+}
+
+fn printLine(self: *Self, i: usize, view: *const View, draw: Draw) !void {
+    var entry = view.buffer.items[i];
+
+    // Print tree branches
+    var branch = try self.getBranch(entry, &self.obuf);
+    try draw.print(branch, .{ .faint = true });
+
+    // Print name
+    const fg = if (view.cursor == i) tui.style.Color.red else tui.style.Color.default;
+    const icon = if (self.config.show_icons) try getIcon(entry) else "\u{0008}";
+    const out = try fmt.bufPrint(
+        &self.obuf,
+        " {s} {s}",
+        .{ icon, entry.item.name() },
+    );
+    try draw.println(out, .{ .fg = fg });
+}
+
+fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
+    var e = self.setIndentLines(entry, obuf).len;
+    var ec = if (entry.last) "└───" else "├───";
+    @memcpy(obuf[e .. e + ec.len], ec);
+    e = e + ec.len;
     return obuf[0..e];
 }
