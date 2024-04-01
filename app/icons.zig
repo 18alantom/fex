@@ -9,13 +9,11 @@ const Entry = Manager.Iterator.Entry;
 
 pub fn getIcon(entry: Entry) ![]const u8 {
     const item = entry.item;
-    const ext = path.extension(item.abspath());
-
-    if (try item.isDir()) {
-        return if (item.hasChildren()) icons.folder_open else icons.folder;
+    var ext = path.extension(item.abspath());
+    if (ext.len == 0) {
+        ext = item.name();
     }
-
-    // TODO: add most common fonts
+    std.debug.print("{s} {s}\n", .{ item.name(), ext });
 
     // Python
     if (eql(ext, ".py")) return icons.python;
@@ -52,22 +50,69 @@ pub fn getIcon(entry: Entry) ![]const u8 {
     if (eql(ext, ".erl")) return icons.erlang;
     if (eql(ext, ".hrl")) return icons.erlang;
 
-    // JVM
+    // Java
     if (eql(ext, ".java")) return icons.java;
     if (eql(ext, ".class")) return icons.java;
     if (eql(ext, ".jar")) return icons.java;
     if (eql(ext, ".jmod")) return icons.java;
 
+    // Clojure
+    if (eql(ext, ".clj")) return icons.clojure;
+    if (eql(ext, ".cljs")) return icons.clojure;
+    if (eql(ext, ".cljr")) return icons.clojure;
+    if (eql(ext, ".cljc")) return icons.clojure;
+    if (eql(ext, ".edn")) return icons.clojure;
+
+    // Kotlin
+    if (eql(ext, ".kt")) return icons.kotlin;
+    if (eql(ext, ".kts")) return icons.kotlin;
+    if (eql(ext, ".kexe")) return icons.kotlin;
+    if (eql(ext, ".klib")) return icons.kotlin;
+
+    // Scala
+    if (eql(ext, ".scala")) return icons.scala;
+    if (eql(ext, ".sc")) return icons.scala;
+
+    // Haskell
+    if (eql(ext, ".hs")) return icons.haskell;
+    if (eql(ext, ".lhs")) return icons.haskell;
+
     // Text
     if (eql(ext, ".md")) return icons.markdown;
     if (eql(ext, ".txt")) return icons.txt;
 
+    // Vim
+    if (eql(ext, ".viminfo")) return icons.vim;
+    if (eql(ext, ".vimrc")) return icons.vim;
+    if (eql(ext, ".vim")) return icons.vim;
+
+    // Git
+    if (eql(ext, ".git")) return icons.git;
+    if (eql(ext, ".gitignore")) return icons.git;
+
+    // Perl
+    if (eql(ext, ".pl")) return icons.perl;
+    if (eql(ext, ".plx")) return icons.perl;
+
+    // Font
+    if (eql(ext, ".woff")) return icons.font;
+    if (eql(ext, ".otf")) return icons.font;
+    if (eql(ext, ".ttf")) return icons.font;
+
     // Misc
     if (eql(ext, ".rs")) return icons.rust;
     if (eql(ext, ".rb")) return icons.ruby;
-    if (eql(ext, ".cr")) return icons.crylstal;
+    if (eql(ext, ".cr")) return icons.crystal;
     if (eql(ext, ".asm")) return icons.assembly;
     if (eql(ext, ".zig")) return icons.zig;
+    if (eql(ext, ".go")) return icons.go;
+    if (eql(ext, ".elm")) return icons.elm;
+    if (eql(ext, ".php")) return icons.php;
+    if (eql(ext, ".sqlite")) return icons.sqlite;
+
+    if (try item.isDir()) {
+        return if (item.hasChildren()) icons.folder_open else icons.folder;
+    }
 
     // TODO: Add fonts for audio, video, etc
     return icons.file;
@@ -77,6 +122,8 @@ fn eql(a: []const u8, b: []const u8) bool {
     return mem.eql(u8, a, b);
 }
 
+// Unicode values sourced from the Nerd-fonts cheatsheet.
+// https://www.nerdfonts.com/cheat-sheet
 const icons = .{
     .assembly = "\u{e6ab}",
     .c = "\u{e61e}",
@@ -89,7 +136,6 @@ const icons = .{
     .folder = "\u{e5ff}",
     .folder_open = "\u{e5fe}",
     .go = "\u{e626}",
-    .home = "\u{e617}",
     .kotlin = "\u{e634}",
     .neovim = "\u{e6ae}",
     .play_arrow = "\u{e602}",
@@ -117,26 +163,13 @@ const icons = .{
     .drupal = "\u{e742}",
     .firebase = "\u{e787}",
     .firefox = "\u{e745}",
-    .git = "\u{e702}",
-    .git_branch = "\u{e725}",
-    .git_commit = "\u{e729}",
-    .git_compare = "\u{e728}",
-    .git_merge = "\u{e727}",
-    .git_pull_request = "\u{e726}",
-    .github = "\u{e70a}",
-    .github_alt = "\u{e708}",
-    .google_drive = "\u{e731}",
-    .grails = "\u{e7b3}",
+    .git = "\u{f1d3}",
     .grunt = "\u{e74c}",
     .gulp = "\u{e763}",
     .haskell = "\u{e777}",
-    .heroku = "\u{e77b}",
     .html5 = "\u{e736}",
-    .illustrator = "\u{e7b4}",
-    .ionic = "\u{e7a9}",
     .java = "\u{e66d}",
     .javascript = "\u{e74e}",
-    .jenkins = "\u{e767}",
     .joomla = "\u{e741}",
     .less = "\u{e758}",
     .linux = "\u{e712}",
@@ -159,6 +192,7 @@ const icons = .{
     .stylus = "\u{e759}",
     .sublime = "\u{e7aa}",
     .swift = "\u{e755}",
+    .sqlite = "\u{e7c4}",
     .terminal = "\u{e795}",
     .trello = "\u{e75a}",
     .toml = "\u{e6b2}",
@@ -183,24 +217,6 @@ const icons = .{
     .briefcase = "\u{f0b1}",
     .bug = "\u{f188}",
     .calendar = "\u{f073}",
-    .check = "\u{f00c}",
-    .check_circle = "\u{f058}",
-    .chevron_down = "\u{f078}",
-    .chevron_left = "\u{f053}",
-    .chevron_right = "\u{f054}",
-    .chevron_up = "\u{f077}",
-    .circle = "\u{f111}",
-    .cloud = "\u{f0c2}",
-    .coffee = "\u{f0f4}",
-    .columns = "\u{f0db}",
-    .comment = "\u{f075}",
-    .copy = "\u{f0c5}",
-    .credit_card = "\u{f09d}",
-    .diamond = "\u{f219}",
-    .download = "\u{f019}",
-    .envelope_open = "\u{f2b6}",
-    .envelope_open_o = "\u{f2b7}",
-    .eye = "\u{f06e}",
     .file = "\u{f15b}",
     .filter = "\u{f0b0}",
     .font = "\u{f031}",
@@ -256,17 +272,6 @@ const icons = .{
     .tree = "\u{f1bb}",
     .trophy = "\u{f091}",
     .umbrella = "\u{f0e9}",
-    .unlink = "\u{f127}",
-    .unlock = "\u{f09c}",
-    .upload = "\u{f093}",
-    .infinity = "\u{e255}",
-    .mustache = "\u{e228}",
-    .pulse = "\u{e234}",
-    .telescope = "\u{e209}",
-    .tools = "\u{e20f}",
-    .line = "\u{e621}",
-    .checkbox = "\u{f4a7}",
-    .clock = "\u{f43a}",
     .project = "\u{f502}",
     .video = "\u{f52c}",
     .zig = "\u{e6a9}",
