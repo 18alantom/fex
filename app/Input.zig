@@ -56,7 +56,6 @@ pub fn deinit(_: *Self) void {}
 pub fn getAppAction(self: *Self) !AppAction {
     while (true) {
         const key = try self.input.readKeys();
-        // std.debug.print("{any}\n", .{key});
         return switch (key) {
             .enter => AppAction.select,
             // Navigation

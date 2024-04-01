@@ -13,7 +13,6 @@ pub fn getIcon(entry: Entry) ![]const u8 {
     if (ext.len == 0) {
         ext = item.name();
     }
-    std.debug.print("{s} {s}\n", .{ item.name(), ext });
 
     // Python
     if (eql(ext, ".py")) return icons.python;
