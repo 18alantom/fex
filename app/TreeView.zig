@@ -114,7 +114,6 @@ fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
 }
 
 fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
-    // draw.writer.bufferOutput();
     var entry = view.buffer.items[i];
 
     // Print tree branches
@@ -129,7 +128,6 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
         .{ icon, entry.item.name() },
     );
     try draw.println(out, .{ .fg = try getFg(entry, view.cursor == i) });
-    // try draw.writer.flushAndUnbufferOutput();
 }
 
 fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {

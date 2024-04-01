@@ -41,10 +41,11 @@ pub fn deinit(self: *Self) void {
 }
 
 pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
+    self.writer.buffered();
+    defer self.writer.flushAndUnbuffered() catch {};
     try self.draw.moveCursor(start_row, 0);
     try self.treeview.printLines(
         view,
         &self.draw,
     );
-    try self.draw.writer.flush();
 }

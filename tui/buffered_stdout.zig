@@ -8,11 +8,11 @@ const FileWriter = fs.File.Writer;
 
 pub fn BufferedStdOut(comptime buffer_size: usize) type {
     return struct {
-        unbuffered_writer: FileWriter,
+        unuse_buffer_writer: FileWriter,
         buf: [buffer_size]u8 = undefined,
         fbuf: [buffer_size]u8 = undefined,
         end: usize = 0,
-        buffered: bool = false,
+        use_buffer: bool = false,
 
         pub const Writer = io.Writer(
             *Self,
@@ -24,26 +24,26 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
 
         pub fn init() Self {
             return .{
-                .unbuffered_writer = io.getStdOut().writer(),
+                .unuse_buffer_writer = io.getStdOut().writer(),
             };
         }
 
         pub fn flush(self: *Self) !void {
-            try self.unbuffered_writer.writeAll(self.buf[0..self.end]);
+            try self.unuse_buffer_writer.writeAll(self.buf[0..self.end]);
             self.end = 0;
         }
 
-        pub fn bufferOutput(self: *Self) void {
-            self.buffered = true;
+        pub fn buffered(self: *Self) void {
+            self.use_buffer = true;
         }
 
-        pub fn flushAndUnbufferOutput(self: *Self) !void {
+        pub fn flushAndUnbuffered(self: *Self) !void {
             try self.flush();
-            self.buffered = false;
+            self.use_buffer = false;
         }
 
         pub fn write(self: *Self, bytes: []const u8) !usize {
-            if (self.buffered) {
+            if (self.use_buffer) {
                 return try self.writebf(bytes);
             }
 
@@ -54,7 +54,7 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
             if (self.end + bytes.len > self.buf.len) {
                 try self.flush();
                 if (bytes.len > self.buf.len)
-                    return self.unbuffered_writer.write(bytes);
+                    return self.unuse_buffer_writer.write(bytes);
             }
 
             const new_end = self.end + bytes.len;
@@ -64,11 +64,11 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
         }
 
         pub fn writefl(self: *Self, bytes: []const u8) !usize {
-            return try self.unbuffered_writer.write(bytes);
+            return try self.unuse_buffer_writer.write(bytes);
         }
 
         pub fn print(self: *Self, comptime bytes: []const u8, args: anytype) !usize {
-            if (self.buffered) {
+            if (self.use_buffer) {
                 return try self.printbf(bytes, args);
             }
 
@@ -83,14 +83,14 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
             return try self._print(bytes, args, false);
         }
 
-        pub fn _print(self: *Self, comptime bytes: []const u8, args: anytype, is_buffered: bool) !usize {
+        pub fn _print(self: *Self, comptime bytes: []const u8, args: anytype, is_use_buffer: bool) !usize {
             var fbs = std.io.fixedBufferStream(&self.fbuf);
             try fmt.format(fbs.writer(), bytes, args);
             var fbytes = fbs.getWritten();
-            if (is_buffered) {
-                return try self.writebf(bytes);
+            if (is_use_buffer) {
+                return try self.writebf(fbytes);
             } else {
-                return try self.write(fbytes);
+                return try self.writefl(fbytes);
             }
         }
     };
