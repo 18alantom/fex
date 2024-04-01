@@ -1,6 +1,7 @@
 const std = @import("std");
 const _style = @import("./style.zig");
 const terminal = @import("terminal.zig");
+const tui = @import("../tui.zig");
 
 const fs = std.fs;
 const fmt = std.fmt;
@@ -70,11 +71,12 @@ const BoxConfig = struct {
     style: []const u8 = "", // common style, overriden if `styles.value` is set.
 };
 
-writer: fs.File.Writer,
+// writer: fs.File.Writer,
+writer: tui.BufferedStdOut,
 
 const Self = @This();
 
-pub fn vline(self: *const Self, config: VLineConfig) !void {
+pub fn vline(self: *Self, config: VLineConfig) !void {
     if (config.len == 0) {
         return;
     }
@@ -97,7 +99,7 @@ pub fn vline(self: *const Self, config: VLineConfig) !void {
     }
 }
 
-pub fn hline(self: *const Self, config: HLineConfig) !void {
+pub fn hline(self: *Self, config: HLineConfig) !void {
     if (config.len == 0) {
         return;
     }
@@ -120,7 +122,7 @@ pub fn hline(self: *const Self, config: HLineConfig) !void {
     }
 }
 
-pub fn box(self: *const Self, config: BoxConfig) !void {
+pub fn box(self: *Self, config: BoxConfig) !void {
     const c = config.col;
     const r = config.row;
     const w = config.width;
@@ -171,7 +173,7 @@ fn getBoxStyle(config: BoxConfig) BoxStyles {
 }
 
 pub fn string(
-    self: *const Self,
+    self: *Self,
     str: []const u8,
     config: StringConfig,
 ) !void {
@@ -188,52 +190,52 @@ pub fn styled(buf: []u8, str: []const u8, config: SyleConfig) ![]u8 {
     return try fmt.bufPrint(buf, "\x1b[{s}{s}\x1b[m", .{ str, style });
 }
 
-pub fn print(self: *const Self, str: []const u8, config: SyleConfig) !void {
+pub fn print(self: *Self, str: []const u8, config: SyleConfig) !void {
     var sbuf: [2048]u8 = undefined;
     var style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m", .{ style, str });
 }
 
-pub fn println(self: *const Self, str: []const u8, config: SyleConfig) !void {
+pub fn println(self: *Self, str: []const u8, config: SyleConfig) !void {
     var sbuf: [2048]u8 = undefined;
     var style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m\n", .{ style, str });
 }
 
-pub fn moveCursor(self: *const Self, row: usize, col: usize) !void {
+pub fn moveCursor(self: *Self, row: usize, col: usize) !void {
     _ = try self.writer.print("\x1b[{d};{d}H", .{ row, col });
 }
 
-pub fn saveCursor(self: *const Self) !void {
+pub fn saveCursor(self: *Self) !void {
     _ = try self.writer.write("\x1b[s");
 }
 
-pub fn loadCursor(self: *const Self) !void {
+pub fn loadCursor(self: *Self) !void {
     _ = try self.writer.write("\x1b[u");
 }
 
-pub fn hideCursor(self: *const Self) !void {
+pub fn hideCursor(self: *Self) !void {
     _ = try self.writer.write("\x1b[?25l");
 }
 
-pub fn showCursor(self: *const Self) !void {
+pub fn showCursor(self: *Self) !void {
     _ = try self.writer.write("\x1b[?25h");
 }
 
 /// Clear the screen and set cursor to the top left position.
-pub fn clearScreen(self: *const Self) !void {
+pub fn clearScreen(self: *Self) !void {
     _ = try self.writer.write("\x1b[2J\x1b[H");
 }
 
 /// Clear N lines from the terminal screen off the bottom.
-pub fn clearNLines(self: *const Self, n: u16) !void {
+pub fn clearNLines(self: *Self, n: u16) !void {
     const size = terminal.getTerminalSize();
     var buf: [128]u8 = undefined;
     var slc = try fmt.bufPrint(&buf, "\x1b[{d}H\x1b[{d}A\x1b[0J", .{ size.rows, n });
     _ = try self.writer.write(slc);
 }
 
-pub fn clearLinesBelow(self: *const Self, row: u16) !void {
+pub fn clearLinesBelow(self: *Self, row: u16) !void {
     var buf: [128]u8 = undefined;
     var slc = try fmt.bufPrint(&buf, "\x1b[{d};0H\x1b[0J", .{row});
     _ = try self.writer.write(slc);
