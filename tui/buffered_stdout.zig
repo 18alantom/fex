@@ -29,6 +29,7 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
         }
 
         pub fn flush(self: *Self) !void {
+            if (self.end == 0) return;
             try self.unuse_buffer_writer.writeAll(self.buf[0..self.end]);
             self.end = 0;
         }
