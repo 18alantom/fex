@@ -139,6 +139,7 @@ pub fn waitForAction(self: *Self) !Input.AppAction {
 }
 
 pub fn executeAction(self: *Self, action: AppAction) !void {
+    self.view.prev_cursor = self.view.cursor;
     switch (action) {
         .up => actions.moveCursorUp(self),
         .down => actions.moveCursorDown(self),
@@ -165,7 +166,11 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
     }
 }
 
-pub fn cleanup(self: *Self) !void {
+pub fn start(self: *Self) !void {
+    _ = self;
+}
+
+pub fn end(self: *Self) !void {
     _ = self;
 }
 

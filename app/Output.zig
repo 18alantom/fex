@@ -51,6 +51,7 @@ pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
     try self.treeview.printLines(
         view,
         &self.draw,
+        start_row,
     );
 
     const rendered_rows: u16 = @intCast(view.last - view.first);

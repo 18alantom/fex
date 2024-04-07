@@ -18,6 +18,10 @@ const Self = @This();
 allocator: mem.Allocator,
 buffer: std.ArrayList(Entry),
 
+did_scroll: bool, // Whether cursor exceded bounds
+did_diff_change: bool, // last - first changed
+prev_cursor: usize, // Previous cursor position.
+
 first: usize, // first index (top buffer boundary)
 last: usize, // last index (bottom buffer boundar)
 cursor: usize, // location in buffer boundary
@@ -29,6 +33,9 @@ pub fn init(allocator: mem.Allocator) Self {
         .cursor = 0,
         .first = 0,
         .last = 0,
+        .prev_cursor = 0,
+        .did_scroll = false,
+        .did_diff_change = false,
     };
 }
 
@@ -41,10 +48,12 @@ pub fn update(
     iter: *Manager.Iterator,
     max_rows: u16,
 ) !void {
+    const initial_diff = self.last - self.first;
     if (self.first == 0) {
         self.correct(max_rows);
     }
 
+    self.did_scroll = self.cursor > self.last or self.cursor < self.first;
     while (true) {
         // Cursor exceeds bottom boundary
         if (self.cursor > self.last) {
@@ -62,6 +71,7 @@ pub fn update(
         }
     }
     self.correct(max_rows);
+    self.did_diff_change = (self.last - self.first) != initial_diff;
 }
 
 fn correct(self: *Self, max_rows: u16) void {

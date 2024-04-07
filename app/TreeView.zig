@@ -57,7 +57,12 @@ pub fn deinit(self: *Self) void {
     self.indent_list.deinit();
 }
 
-pub fn printLines(self: *Self, view: *const View, draw: *Draw) !void {
+pub fn printLines(
+    self: *Self,
+    view: *const View,
+    draw: *Draw,
+    start_row: usize,
+) !void {
     self.resetIndentList();
 
     // Need to iterate over items before the view buffer because
@@ -74,8 +79,16 @@ pub fn printLines(self: *Self, view: *const View, draw: *Draw) !void {
             continue;
         }
 
-        try draw.clearLine();
-        try self.printLine(i, view, draw);
+        // _ = start_row;
+        // try self.printLine(i, view, draw);
+        if (view.did_scroll or view.did_diff_change) {
+            try self.printLine(i, view, draw);
+        } else if (view.cursor == i or view.prev_cursor == i) {
+            const row: usize = view.first + i + start_row;
+            std.debug.print("prev = {d}, curr = {d}, i = {d}\n", .{ view.prev_cursor, view.cursor, i });
+            try draw.moveCursor(row, 0);
+            try self.printLine(i, view, draw);
+        }
     }
 }
 
@@ -115,6 +128,7 @@ fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
 }
 
 fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
+    try draw.clearLine();
     var entry = view.buffer.items[i];
 
     // Print tree branches
