@@ -163,7 +163,8 @@ pub fn fillScreenChar(char: u8, writer_: BW) !FSStats {
     const end_fill = time.nanoTimestamp();
 
     const bytes: f64 = @floatFromInt(writer.end);
-    try writer.flushAndUnbuffered();
+    try writer.flush();
+    writer.unbuffered();
     const end_flush = time.nanoTimestamp();
 
     const diff_fill: f64 = @floatFromInt(end_fill - start_fill);
