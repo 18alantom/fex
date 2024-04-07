@@ -88,19 +88,6 @@ pub fn printLines(
         }
     }
     view.print_all = false;
-
-    // var row = start_row + (view.cursor - view.first); // Row where the cursor is drawn
-    // std.debug.print("first = {d}, start_row = {d}\n", .{ view.first, start_row });
-    // try draw.moveCursor(row, 0);
-    // std.debug.print("curr = {d}, row = {d}, name {s}\n", .{ view.cursor, row, view.buffer.items[view.cursor].item.name() });
-    // try self.printLine(view.cursor, view, draw);
-
-    // row = start_row + (view.prev_cursor - view.first);
-    // try draw.moveCursor(row, 0);
-    // std.debug.print("prev = {d}, row = {d}, name {s}\n", .{ view.prev_cursor, row, view.buffer.items[view.prev_cursor].item.name() });
-    // try self.printLine(view.prev_cursor, view, draw);
-
-    // std.debug.print("\n", .{});
 }
 
 fn resetIndentList(self: *Self) void {
