@@ -42,10 +42,17 @@ pub fn deinit(self: *Self) void {
 
 pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
     self.writer.buffered();
-    defer self.writer.flushAndUnbuffered() catch {};
+    defer {
+        self.writer.flush() catch {};
+        self.writer.unbuffered();
+    }
+
     try self.draw.moveCursor(start_row, 0);
     try self.treeview.printLines(
         view,
         &self.draw,
     );
+
+    const rendered_rows: u16 = @intCast(view.last - view.first);
+    try self.draw.clearLinesBelow(start_row + rendered_rows + 1);
 }

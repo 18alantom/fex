@@ -166,7 +166,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
 }
 
 pub fn cleanup(self: *Self) !void {
-    try self.output.draw.clearLinesBelow(self.viewport.start_row);
+    _ = self;
 }
 
 pub fn itemUnderCursor(self: *Self) *Item {

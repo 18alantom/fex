@@ -235,8 +235,14 @@ pub fn clearNLines(self: *Self, n: u16) !void {
     _ = try self.writer.write(slc);
 }
 
+/// Move cursor to {row=row, col=0} and erase from cursor to screen end.
 pub fn clearLinesBelow(self: *Self, row: u16) !void {
     var buf: [128]u8 = undefined;
     var slc = try fmt.bufPrint(&buf, "\x1b[{d};0H\x1b[0J", .{row});
     _ = try self.writer.write(slc);
+}
+
+// Clear line underneath the cursor.
+pub fn clearLine(self: *Self) !void {
+    _ = try self.writer.write("\x1b[K");
 }

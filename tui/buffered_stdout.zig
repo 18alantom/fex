@@ -38,8 +38,7 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
             self.use_buffer = true;
         }
 
-        pub fn flushAndUnbuffered(self: *Self) !void {
-            try self.flush();
+        pub fn unbuffered(self: *Self) void {
             self.use_buffer = false;
         }
 

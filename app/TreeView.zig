@@ -74,6 +74,7 @@ pub fn printLines(self: *Self, view: *const View, draw: *Draw) !void {
             continue;
         }
 
+        try draw.clearLine();
         try self.printLine(i, view, draw);
     }
 }
