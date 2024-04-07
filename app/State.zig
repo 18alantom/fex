@@ -106,6 +106,7 @@ pub fn fillBuffer(self: *Self) !void {
         }
     }
     self.itermode = -2;
+    self.view.print_all = true;
 }
 
 fn initializeIterator(self: *Self) !void {

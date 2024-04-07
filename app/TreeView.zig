@@ -59,7 +59,7 @@ pub fn deinit(self: *Self) void {
 
 pub fn printLines(
     self: *Self,
-    view: *const View,
+    view: *View,
     draw: *Draw,
     start_row: usize,
 ) !void {
@@ -75,21 +75,30 @@ pub fn printLines(
             break;
         }
 
-        if (i < view.first) {
+        if (i < view.first or !view.print_all) {
             continue;
         }
 
-        // _ = start_row;
-        // try self.printLine(i, view, draw);
-        if (view.did_scroll or view.did_diff_change) {
-            try self.printLine(i, view, draw);
-        } else if (view.cursor == i or view.prev_cursor == i) {
-            const row: usize = view.first + i + start_row;
-            std.debug.print("prev = {d}, curr = {d}, i = {d}\n", .{ view.prev_cursor, view.cursor, i });
-            try draw.moveCursor(row, 0);
-            try self.printLine(i, view, draw);
-        }
+        try self.printLine(i, view, draw);
     }
+
+    if (view.print_all or view.prev_cursor == view.cursor) {
+        view.print_all = false;
+        return;
+    }
+
+    var row = start_row + (view.cursor - view.first); // Row where the cursor is drawn
+    std.debug.print("first = {d}, start_row = {d}\n", .{ view.first, start_row });
+    try draw.moveCursor(row, 0);
+    std.debug.print("curr = {d}, row = {d}, name {s}\n", .{ view.cursor, row, view.buffer.items[view.cursor].item.name() });
+    try self.printLine(view.cursor, view, draw);
+
+    row = start_row + (view.prev_cursor - view.first);
+    try draw.moveCursor(row, 0);
+    std.debug.print("prev = {d}, row = {d}, name {s}\n", .{ view.prev_cursor, row, view.buffer.items[view.prev_cursor].item.name() });
+    try self.printLine(view.prev_cursor, view, draw);
+
+    std.debug.print("\n", .{});
 }
 
 fn resetIndentList(self: *Self) void {

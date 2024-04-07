@@ -18,13 +18,18 @@ const Self = @This();
 allocator: mem.Allocator,
 buffer: std.ArrayList(Entry),
 
-did_scroll: bool, // Whether cursor exceded bounds
-did_diff_change: bool, // last - first changed
-prev_cursor: usize, // Previous cursor position.
-
 first: usize, // first index (top buffer boundary)
 last: usize, // last index (bottom buffer boundar)
 cursor: usize, // location in buffer boundary
+
+// Value is unset only after printing all
+// all values have to be printed if contents in
+// buffer bounds or buffer bounds change.
+//
+// Else just reprinting current and previous cursor
+// positions are enough.
+print_all: bool,
+prev_cursor: usize, // Previous cursor position.
 
 pub fn init(allocator: mem.Allocator) Self {
     return .{
@@ -34,8 +39,7 @@ pub fn init(allocator: mem.Allocator) Self {
         .first = 0,
         .last = 0,
         .prev_cursor = 0,
-        .did_scroll = false,
-        .did_diff_change = false,
+        .print_all = false,
     };
 }
 
@@ -48,12 +52,12 @@ pub fn update(
     iter: *Manager.Iterator,
     max_rows: u16,
 ) !void {
-    const initial_diff = self.last - self.first;
+    const prev_first = self.first;
+    const prev_last = self.last;
     if (self.first == 0) {
         self.correct(max_rows);
     }
 
-    self.did_scroll = self.cursor > self.last or self.cursor < self.first;
     while (true) {
         // Cursor exceeds bottom boundary
         if (self.cursor > self.last) {
@@ -71,7 +75,12 @@ pub fn update(
         }
     }
     self.correct(max_rows);
-    self.did_diff_change = (self.last - self.first) != initial_diff;
+
+    // Whether buffer diff has changed
+    self.print_all = self.print_all or (self.last != prev_last) or (self.first != prev_first);
+
+    // Whether buffer bounds have scrolled
+    self.print_all = self.print_all or (self.last - self.first) != (prev_last - prev_first);
 }
 
 fn correct(self: *Self, max_rows: u16) void {
