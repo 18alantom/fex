@@ -167,14 +167,6 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
     }
 }
 
-pub fn start(self: *Self) !void {
-    _ = self;
-}
-
-pub fn end(self: *Self) !void {
-    _ = self;
-}
-
 pub fn itemUnderCursor(self: *Self) *Item {
     return self.view.buffer.items[self.view.cursor].item;
 }

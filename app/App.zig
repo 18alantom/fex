@@ -55,6 +55,5 @@ pub fn run(self: *Self) !void {
             error.QuitApp => return,
             else => return err,
         };
-        try self.state.end();
     }
 }
