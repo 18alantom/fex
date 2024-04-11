@@ -101,7 +101,7 @@ pub fn fillBuffer(self: *Self) !void {
 
     while (self.iterator.?.next()) |e| {
         try self.view.buffer.append(e);
-        if (self.view.buffer.items.len > max_append) {
+        if (self.view.buffer.items.len >= max_append) {
             break;
         }
     }

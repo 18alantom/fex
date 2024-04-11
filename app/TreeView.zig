@@ -64,6 +64,7 @@ pub fn printLines(
     start_row: usize,
 ) !void {
     self.resetIndentList();
+    try draw.moveCursor(start_row, 0);
 
     // Need to iterate over items before the view buffer because
     // calculating the indent list depends on previous items.
@@ -87,7 +88,6 @@ pub fn printLines(
             try self.printLine(i, view, draw);
         }
     }
-    try draw.moveCursor(start_row, 0);
     view.print_all = false;
 }
 
