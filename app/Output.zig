@@ -10,23 +10,28 @@ const fs = std.fs;
 const mem = std.mem;
 const io = std.io;
 
-// Self
-draw: tui.Draw,
-writer: tui.BufferedStdOut,
+allocator: mem.Allocator,
+draw: *tui.Draw,
+writer: *tui.BufferedStdOut,
 
-treeview: TreeView,
+treeview: *TreeView,
 obuf: [2048]u8, // Content Buffer
 sbuf: [2048]u8, // Style Buffer
 
 const Self = @This();
 
 pub fn init(allocator: mem.Allocator) !Self {
-    var writer = tui.BufferedStdOut.init();
-    var draw = tui.Draw{ .writer = writer };
-    var treeview = TreeView.init(allocator);
+    var treeview = try allocator.create(TreeView);
+    var writer = try allocator.create(tui.BufferedStdOut);
+    var draw = try allocator.create(tui.Draw);
+
+    writer.* = tui.BufferedStdOut.init();
+    draw.* = tui.Draw{ .writer = writer };
+    treeview.* = TreeView.init(allocator);
 
     try draw.hideCursor();
     return .{
+        .allocator = allocator,
         .writer = writer,
         .draw = draw,
         .treeview = treeview,
@@ -38,6 +43,9 @@ pub fn init(allocator: mem.Allocator) !Self {
 pub fn deinit(self: *Self) void {
     self.draw.showCursor() catch {};
     self.treeview.deinit();
+    self.allocator.destroy(self.draw);
+    self.allocator.destroy(self.treeview);
+    self.allocator.destroy(self.writer);
 }
 
 pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
@@ -50,7 +58,7 @@ pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
     try self.draw.moveCursor(start_row, 0);
     try self.treeview.printLines(
         view,
-        &self.draw,
+        self.draw,
         start_row,
     );
 

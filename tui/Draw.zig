@@ -72,7 +72,7 @@ const BoxConfig = struct {
 };
 
 // writer: fs.File.Writer,
-writer: tui.BufferedStdOut,
+writer: *tui.BufferedStdOut,
 
 const Self = @This();
 

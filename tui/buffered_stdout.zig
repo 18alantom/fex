@@ -50,7 +50,7 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
             return try self.writefl(bytes);
         }
 
-        pub fn writebf(self: *Self, bytes: []const u8) !usize {
+        fn writebf(self: *Self, bytes: []const u8) !usize {
             if (self.end + bytes.len > self.buf.len) {
                 try self.flush();
                 if (bytes.len > self.buf.len)
@@ -63,11 +63,12 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
             return bytes.len;
         }
 
-        pub fn writefl(self: *Self, bytes: []const u8) !usize {
+        fn writefl(self: *Self, bytes: []const u8) !usize {
             return try self.unuse_buffer_writer.write(bytes);
         }
 
         pub fn print(self: *Self, comptime bytes: []const u8, args: anytype) !usize {
+            std.debug.print("print len {d} {any}\n", .{ bytes.len, self.use_buffer });
             if (self.use_buffer) {
                 return try self.printbf(bytes, args);
             }
@@ -75,15 +76,15 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
             return try self.printfl(bytes, args);
         }
 
-        pub fn printbf(self: *Self, comptime bytes: []const u8, args: anytype) !usize {
+        fn printbf(self: *Self, comptime bytes: []const u8, args: anytype) !usize {
             return try self._print(bytes, args, true);
         }
 
-        pub fn printfl(self: *Self, comptime bytes: []const u8, args: anytype) !usize {
+        fn printfl(self: *Self, comptime bytes: []const u8, args: anytype) !usize {
             return try self._print(bytes, args, false);
         }
 
-        pub fn _print(self: *Self, comptime bytes: []const u8, args: anytype, is_use_buffer: bool) !usize {
+        fn _print(self: *Self, comptime bytes: []const u8, args: anytype, is_use_buffer: bool) !usize {
             var fbs = std.io.fixedBufferStream(&self.fbuf);
             try fmt.format(fbs.writer(), bytes, args);
             var fbytes = fbs.getWritten();
