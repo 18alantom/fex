@@ -87,6 +87,7 @@ pub fn printLines(
             try self.printLine(i, view, draw);
         }
     }
+    try draw.moveCursor(start_row, 0);
     view.print_all = false;
 }
 

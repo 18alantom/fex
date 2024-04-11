@@ -120,7 +120,7 @@ pub fn loop(draw: *Draw, is_manual: bool, timelog: *TimeLog) !void {
         }
 
         const clear_start = time.nanoTimestamp();
-        try draw.clearScreen();
+        // try draw.clearScreen();
         const total_end = time.nanoTimestamp();
 
         const clear_diff: f64 = @floatFromInt(total_end - clear_start);
@@ -156,7 +156,7 @@ pub fn fillScreenChar(char: u8, writer_: BW) !FSStats {
     const start_fill = time.nanoTimestamp();
     for (0..size.rows) |r| {
         for (0..size.cols) |_| {
-            _ = try writer.print("\x1b[{d}m{c}\x1b[0m", .{ (c +| r) % 7 + 31, c });
+            _ = try writer.print("\x1b[K\x1b[{d}m{c}\x1b[0m", .{ (c +| r) % 7 + 31, c });
         }
         _ = try writer.write("\n");
     }
