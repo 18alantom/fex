@@ -68,7 +68,6 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
         }
 
         pub fn print(self: *Self, comptime bytes: []const u8, args: anytype) !usize {
-            std.debug.print("print len {d} {any}\n", .{ bytes.len, self.use_buffer });
             if (self.use_buffer) {
                 return try self.printbf(bytes, args);
             }
