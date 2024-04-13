@@ -1,4 +1,7 @@
+const builtin = @import("builtin");
+
 const std = @import("std");
+const utils = @import("../utils.zig");
 const State = @import("./State.zig");
 const Item = @import("../fs/Item.zig");
 
@@ -143,4 +146,9 @@ fn toggleItemChildren(item: *Item) !bool {
     };
 
     return true;
+}
+
+pub fn openItem(state: *State) !void {
+    const item = state.itemUnderCursor();
+    try utils.os.open(item.abspath());
 }

@@ -2,3 +2,6 @@ temp.*
 test.*
 *.log
 temp*
+*.o
+notes.md
+.DS_Store

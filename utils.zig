@@ -1,12 +1,13 @@
 const std = @import("std");
 const Tui = @import("tui.zig");
 
-const os = std.os;
 const fs = std.fs;
 const fmt = std.fmt;
 const unicode = std.unicode;
 
 const print = std.debug.print;
+
+pub const os = @import("./utils/os.zig");
 
 /// Returns width of a grapheme in terms of number of characters required to display it
 /// assuming a monospace font.

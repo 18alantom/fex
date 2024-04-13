@@ -18,6 +18,7 @@ pub const Key = enum {
     j,
     k,
     l,
+    o,
     q,
     C,
     E,
@@ -127,6 +128,7 @@ pub fn readKeys(self: *Self) !Key {
                 prev = 'r';
                 continue;
             },
+            'o' => Key.o,
             'q' => Key.q,
             // Uppercase
             'C' => Key.C,
