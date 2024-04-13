@@ -151,8 +151,8 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .select => try actions.toggleChildren(self),
         .expand_all => actions.expandAll(self),
         .collapse_all => actions.collapseAll(self),
-        .prev_sibling => actions.toPrevSibling(self),
-        .next_sibling => try actions.toNextSibling(self),
+        .prev_fold => actions.toPrevFold(self),
+        .next_fold => try actions.toNextFold(self),
         .change_root => try actions.changeRoot(self),
         .depth_one => actions.expandToDepth(self, 0),
         .depth_two => actions.expandToDepth(self, 1),
@@ -167,8 +167,12 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
     }
 }
 
+pub fn entryUnderCursor(self: *Self) *Manager.Iterator.Entry {
+    return &self.view.buffer.items[self.view.cursor];
+}
+
 pub fn itemUnderCursor(self: *Self) *Item {
-    return self.view.buffer.items[self.view.cursor].item;
+    return self.entryUnderCursor().item;
 }
 
 pub fn getItemIndex(self: *Self, item: *Item) !usize {

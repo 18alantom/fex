@@ -30,8 +30,8 @@ pub const AppAction = enum {
     depth_nine,
     expand_all,
     collapse_all,
-    prev_sibling,
-    next_sibling,
+    prev_fold,
+    next_fold,
     change_root,
 };
 
@@ -69,8 +69,8 @@ pub fn getAppAction(self: *Self) !AppAction {
             .l => AppAction.right,
             .gg => AppAction.top,
             .G => AppAction.bottom,
-            .curly_open => AppAction.prev_sibling,
-            .curly_close => AppAction.next_sibling,
+            .curly_open => AppAction.prev_fold,
+            .curly_close => AppAction.next_fold,
             // Tree actions
             .R => AppAction.change_root,
             // Toggle fold

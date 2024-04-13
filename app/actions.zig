@@ -90,13 +90,13 @@ pub fn changeRoot(state: *State) !void {
     state.reiterate = true;
 }
 
-pub fn toPrevSibling(state: *State) void {
-    const item = state.itemUnderCursor();
-
+pub fn toPrevFold(state: *State) void {
+    const entry = state.entryUnderCursor();
+    const item = entry.item;
     var i: usize = (state.getItemIndex(item) catch return) -| 1;
     while (i > 0) : (i = i - 1) {
-        const possible_sibling = state.view.buffer.items[i].item;
-        if (possible_sibling._parent != item._parent) {
+        const possible_sibling = state.view.buffer.items[i];
+        if (possible_sibling.depth == entry.depth) {
             continue;
         }
 
@@ -107,8 +107,9 @@ pub fn toPrevSibling(state: *State) void {
     state.view.cursor -|= 1;
 }
 
-pub fn toNextSibling(state: *State) !void {
-    const item = state.itemUnderCursor();
+pub fn toNextFold(state: *State) !void {
+    const entry = state.entryUnderCursor();
+    const item = entry.item;
 
     var i: usize = (state.getItemIndex(item) catch return) + 1;
     while (i < state.view.buffer.items.len) : (i = i + 1) {
@@ -116,8 +117,8 @@ pub fn toNextSibling(state: *State) !void {
             if (!(try state.appendOne())) break;
         }
 
-        const possible_sibling = state.view.buffer.items[i].item;
-        if (possible_sibling._parent != item._parent) {
+        const possible_sibling = state.view.buffer.items[i];
+        if (possible_sibling.depth == entry.depth) {
             continue;
         }
 
