@@ -70,11 +70,21 @@ pub fn getCursorPosition() !Position {
 }
 
 /// Sets the following
+/// - ~IXON: disables start/stop output flow (reads CTRL-S, CTRL-Q)
+/// - ~ICRNL: disables CR to NL translation (reads CTRL-M)
+/// - ~IEXTEN: disable implementation defined functions (reads CTRL-V, CTRL-O)
 /// - ~ECHO: user input is not printed to terminal
 /// - ~ICANON: read runs for every input (no waiting for `\n`)
-pub fn enableRawMode() !void {
+/// - ISIG: enable QUIT, ISIG, SUSP.
+///
+/// `bak`: pointer to store termios struct backup before
+/// altering, this is used to disable raw mode.
+pub fn enableRawMode(bak: *os.system.termios) !void {
     var termios = try os.tcgetattr(os.STDIN_FILENO);
-    termios.lflag &= ~(os.system.ECHO | os.system.ICANON);
+    bak.* = termios;
+
+    termios.iflag &= ~(os.system.IXON | os.system.ICRNL);
+    termios.lflag &= ~(os.system.ECHO | os.system.ICANON | os.system.IEXTEN) | os.system.ISIG;
     try os.tcsetattr(
         os.STDIN_FILENO,
         os.TCSA.FLUSH,
@@ -83,12 +93,11 @@ pub fn enableRawMode() !void {
 }
 
 /// Reverts `enableRawMode` to restore initial functionality.
-pub fn disableRawMode() !void {
-    var termios = try os.tcgetattr(os.STDIN_FILENO);
-    termios.lflag &= (os.system.ECHO | os.system.ICANON);
+pub fn disableRawMode(bak: *os.system.termios) !void {
     try os.tcsetattr(
         os.STDIN_FILENO,
         os.TCSA.FLUSH,
-        termios,
+        bak.*,
     );
+    return;
 }

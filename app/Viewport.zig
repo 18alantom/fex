@@ -17,21 +17,24 @@ position: terminal.Position, // cursor position
 // Display related fields
 max_rows: u16 = 1, // max rows
 start_row: u16 = 1, // 1 based index
+termios_bak: os.termios,
 
 const Self = @This();
 
 pub fn init() !Self {
-    try terminal.enableRawMode();
+    var bak: os.termios = undefined;
+    try terminal.enableRawMode(&bak);
     return .{
         .max_rows = 1,
         .start_row = 1,
         .size = terminal.Size{ .cols = 1, .rows = 1 },
         .position = terminal.Position{ .col = 1, .row = 1 },
+        .termios_bak = bak,
     };
 }
 
-pub fn deinit(_: *Self) void {
-    terminal.disableRawMode() catch {};
+pub fn deinit(self: *Self) void {
+    terminal.disableRawMode(&self.termios_bak) catch {};
 }
 
 pub fn setBounds(self: *Self) !void {

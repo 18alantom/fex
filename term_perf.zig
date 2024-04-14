@@ -34,11 +34,12 @@ const RenderStats = struct {
 };
 const TimeLog = std.ArrayList(RenderStats);
 pub fn main() !void {
-    try terminal.enableRawMode();
-    defer terminal.disableRawMode() catch {};
+    var bak: os.termios = undefined;
+    try terminal.enableRawMode(&bak);
+    defer terminal.disableRawMode(&bak) catch {};
 
     var writer = BW.init();
-    var draw = Draw{ .writer = writer };
+    var draw = Draw{ .writer = &writer };
     try draw.hideCursor();
     defer draw.showCursor() catch {};
 
@@ -142,7 +143,7 @@ pub fn loop(draw: *Draw, is_manual: bool, timelog: *TimeLog) !void {
     }
 }
 
-pub fn fillScreenChar(char: u8, writer_: BW) !FSStats {
+pub fn fillScreenChar(char: u8, writer_: *BW) !FSStats {
     var writer = writer_;
     const c: u8 = switch (char) {
         0...32 => char + 32,
