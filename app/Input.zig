@@ -34,6 +34,7 @@ pub const AppAction = enum {
     next_fold,
     change_root,
     open_item,
+    change_dir,
 };
 
 reader: fs.File.Reader,
@@ -74,6 +75,7 @@ pub fn getAppAction(self: *Self) !AppAction {
             .curly_close => AppAction.next_fold,
             // External actions
             .o => AppAction.open_item,
+            .cd => AppAction.change_dir,
             // Tree actions
             .R => AppAction.change_root,
             // Toggle fold

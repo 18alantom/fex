@@ -155,6 +155,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .next_fold => try actions.toNextFold(self),
         .change_root => try actions.changeRoot(self),
         .open_item => try actions.openItem(self),
+        .change_dir => try actions.changeDir(self),
         .depth_one => actions.expandToDepth(self, 0),
         .depth_two => actions.expandToDepth(self, 1),
         .depth_three => actions.expandToDepth(self, 2),

@@ -152,3 +152,14 @@ pub fn openItem(state: *State) !void {
     const item = state.itemUnderCursor();
     try utils.os.open(item.abspath());
 }
+
+pub fn changeDir(state: *State) !void {
+    _ = state;
+    // TODO: Cant change calling shell cwd this way
+    // const item = state.itemUnderCursor();
+    // if (!(try item.isDir())) {
+    //     return;
+    // }
+    // var argv = [_][]const u8{ "cd", item.abspath() };
+    // try utils.os.run(&argv);
+}
