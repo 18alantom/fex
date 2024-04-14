@@ -149,7 +149,8 @@ pub fn readKeys(self: *Self) !Key {
             3 => Key.ctrl_c, // Ctrl-C
             4 => Key.ctrl_d, // Ctrl-D
             // Ctrl chars
-            10 => Key.enter,
+            10 => Key.enter, // If  ICRNL
+            13 => Key.enter, // If ~ICRNL
             // Unknown
             else => Key.unknown,
         };

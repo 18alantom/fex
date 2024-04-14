@@ -96,6 +96,11 @@ pub fn isExec(self: *Self) !bool {
     return (os.S.IXUSR & s.mode) > 0;
 }
 
+pub fn size(self: *Self) !i64 {
+    const s = try self.stat();
+    return s.size;
+}
+
 /// Returns Item that references the parent directory of the calling Item.
 /// Initializes parents children and sets self in the list of children.
 ///

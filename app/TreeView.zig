@@ -40,6 +40,9 @@ sbuf: [2048]u8, // Style Buffer
 allocator: mem.Allocator,
 indent_list: IndentList,
 config: Config,
+print_size: bool,
+print_modebits: bool,
+print_modified: bool,
 
 const Self = @This();
 pub fn init(allocator: mem.Allocator) Self {
@@ -50,6 +53,9 @@ pub fn init(allocator: mem.Allocator) Self {
         .obuf = undefined,
         .sbuf = undefined,
         .config = .{},
+        .print_size = false,
+        .print_modebits = false,
+        .print_modified = false,
     };
 }
 
@@ -130,6 +136,15 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
 
+    if (self.print_size) {
+        var size = try getSize(entry, &self.obuf);
+        try draw.print(size, .{ .fg = .cyan });
+    }
+
+    if (self.print_modified) {}
+
+    if (self.print_modebits) {}
+
     // Print tree branches
     var branch = try self.getBranch(entry, &self.obuf);
     try draw.print(branch, .{ .faint = true });
@@ -157,4 +172,39 @@ fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
     @memcpy(obuf[e .. e + ec.len], ec);
     e = e + ec.len;
     return obuf[0..e];
+}
+
+fn getSize(entry: Entry, obuf: []u8) ![]u8 {
+    var raw_size = try entry.item.size();
+    var size = @max(@as(f64, @floatFromInt(raw_size)), 0);
+    if (size < 1000) {
+        return fmt.bufPrint(obuf, "{d:7} ", .{size});
+    }
+
+    if (size < 1_000_000) {
+        size /= 1_000;
+        return fmt.bufPrint(obuf, "{d:6.1}k ", .{size});
+    }
+
+    if (size < 1_000_000_000) {
+        size /= 1_000_000;
+        return fmt.bufPrint(obuf, "{d:6.1}M ", .{size});
+    }
+
+    if (size < 1_000_000_000_000) {
+        size /= 1_000_000_000;
+        return fmt.bufPrint(obuf, "{d:6.1}G ", .{size});
+    }
+
+    if (size < 1_000_000_000_000_000) {
+        size /= 1_000_000_000_000;
+        return fmt.bufPrint(obuf, "{d:6.1}T ", .{size});
+    }
+
+    if (size < 1_000_000_000_000_000_000) {
+        size /= 1_000_000_000_000_000;
+        return fmt.bufPrint(obuf, "{d:6.1}P ", .{size});
+    }
+
+    return fmt.bufPrint(obuf, "{d:7} ", .{0});
 }
