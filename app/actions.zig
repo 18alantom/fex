@@ -153,6 +153,14 @@ pub fn openItem(state: *State) !void {
     try utils.os.open(item.abspath());
 }
 
+pub fn toggleInfo(state: *State) void {
+    const value = !state.output.treeview.print_modebits;
+    state.output.treeview.print_modebits = value;
+    state.output.treeview.print_modified = value;
+    state.output.treeview.print_size = value;
+    state.view.print_all = true;
+}
+
 pub fn changeDir(state: *State) !void {
     _ = state;
     // TODO: Cant change calling shell cwd this way

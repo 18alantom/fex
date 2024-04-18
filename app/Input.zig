@@ -35,6 +35,7 @@ pub const AppAction = enum {
     change_root,
     open_item,
     change_dir,
+    toggle_info,
 };
 
 reader: fs.File.Reader,
@@ -81,6 +82,7 @@ pub fn getAppAction(self: *Self) !AppAction {
             // Toggle fold
             .C => AppAction.collapse_all,
             .E => AppAction.expand_all,
+            .I => AppAction.toggle_info,
             // Expand to depth
             .one => AppAction.depth_one,
             .two => AppAction.depth_two,

@@ -23,6 +23,7 @@ pub const Key = enum {
     C,
     E,
     G,
+    I,
     R,
     cd,
     rm,
@@ -134,6 +135,7 @@ pub fn readKeys(self: *Self) !Key {
             'C' => Key.C,
             'E' => Key.E,
             'G' => Key.G,
+            'I' => Key.I,
             'R' => Key.R,
             // Numerics
             '1' => Key.one,

@@ -165,6 +165,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_seven => actions.expandToDepth(self, 6),
         .depth_eight => actions.expandToDepth(self, 7),
         .depth_nine => actions.expandToDepth(self, 8),
+        .toggle_info => actions.toggleInfo(self),
         .quit => return error.QuitApp,
     }
 }
