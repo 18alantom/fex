@@ -3,13 +3,17 @@ const Stat = @import("./Stat.zig");
 
 const fmt = std.fmt;
 
-// Color string consts
-const d = "\x1b[34md\x1b[m"; // Blue 'd'
-const l = "\x1b[36ml\x1b[m"; // Cyan 'l'
-const x = "\x1b[32mx\x1b[m"; // Green 'x'
-const w = "\x1b[33mw\x1b[m"; // Yellow 'w'
-const r = "\x1b[31mr\x1b[m"; // Red 'r'
-const dash = "-";
+// Item Type
+const d = "\x1b[34;1md\x1b[m"; // Blue 'd' for dir
+const l = "\x1b[36;1ml\x1b[m"; // Cyan 'l' for link
+const b = "\x1b[31;1ml\x1b[m"; // Red 'b' for block
+const c = "\x1b[33;1ml\x1b[m"; // Yellow 'c' for char
+
+// Item Perms
+const x = "\x1b[32mx\x1b[m"; // Green 'x' for exec
+const w = "\x1b[33mw\x1b[m"; // Yellow 'w' for write
+const r = "\x1b[31mr\x1b[m"; // Red 'r' for read
+const dash = "\x1b[2m-\x1b[m";
 
 pub fn size(stat: Stat, obuf: []u8) ![]u8 {
     var raw_size = stat.size;
@@ -47,7 +51,6 @@ pub fn size(stat: Stat, obuf: []u8) ![]u8 {
 }
 
 pub fn mode(stat: Stat, obuf: []u8) ![]u8 {
-    const item_type = if (stat.isDir()) d else if (stat.isLink()) l else " ";
     // User perms
     const exec_user = if (stat.hasUserExec()) x else dash; // & 0o100
     const write_user = if (stat.hasUserWrite()) w else dash; // & 0o200
@@ -62,7 +65,7 @@ pub fn mode(stat: Stat, obuf: []u8) ![]u8 {
     const read_other = if (stat.hasOtherRead()) r else dash; // & 0o4
 
     return fmt.bufPrint(obuf, "{s}{s}{s}{s}{s}{s}{s}{s}{s}{s} ", .{
-        item_type,
+        itemType(stat),
         // User
         exec_user,
         write_user,
@@ -76,4 +79,24 @@ pub fn mode(stat: Stat, obuf: []u8) ![]u8 {
         write_other,
         read_other,
     });
+}
+
+fn itemType(stat: Stat) []const u8 {
+    if (stat.isDir()) {
+        return d;
+    }
+
+    if (stat.isLink()) {
+        return l;
+    }
+
+    if (stat.isChr()) {
+        return c;
+    }
+
+    if (stat.isBlock()) {
+        return b;
+    }
+
+    return " ";
 }
