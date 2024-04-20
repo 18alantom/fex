@@ -2,7 +2,11 @@ const std = @import("std");
 const utils = @import("./utils.zig");
 const builtin = std.builtin;
 
-pub fn typeInfo(comptime T: type, indent: usize) void {
+pub fn typeInfo(comptime T: type) void {
+    _typeInfo(T, 0);
+}
+
+fn _typeInfo(comptime T: type, indent: usize) void {
     if (indent == 0) std.debug.print("\x1b[31m{any}\x1b[m\n", .{T});
     const info = @typeInfo(T);
     switch (info) {
@@ -27,7 +31,7 @@ fn printStruct(comptime S: builtin.Type.Struct, indent: usize) void {
         std.debug.print("is_comptime: {any}, ", .{field.is_comptime});
         std.debug.print("default_value: {any}\x1b[m", .{field.default_value});
         std.debug.print("\n", .{});
-        typeInfo(field.type, indent + 1);
+        _typeInfo(field.type, indent + 1);
     }
 
     // Declarations
