@@ -13,6 +13,7 @@ pub const ItemError = error{
     NoParent,
     IsNotDirectory,
 };
+const has_lstat = @hasDecl(std.os.system, "lstat");
 
 /// Item is a view into a file system item it can be a directory or a file
 /// or something else. It should be initialized to a directory.
@@ -77,23 +78,45 @@ pub fn stat(self: *Self) !os.Stat {
         self.abs_path_buf[0 .. self.abs_path_len + 1].ptr,
     );
 
-    var s: os.Stat = undefined;
-    if (os.system.stat(abs_path_w, &s) != 0) {
+    var statbuf: os.Stat = undefined;
+    var ret: c_int = 1;
+
+    if (has_lstat) {
+        ret = os.system.lstat(abs_path_w, &statbuf);
+    } else {
+        ret = os.system.stat(abs_path_w, &statbuf);
+    }
+
+    if (ret != 0) {
         return ItemError.StatError;
     }
 
-    self._stat = s;
+    self._stat = statbuf;
     return self._stat.?;
 }
 
 pub fn isDir(self: *Self) !bool {
     const s = try self.stat();
-    return os.S.ISDIR(s.mode);
+    return (os.S.IFDIR & s.mode) > 0;
 }
 
 pub fn isExec(self: *Self) !bool {
     const s = try self.stat();
     return (os.S.IXUSR & s.mode) > 0;
+}
+
+pub fn isLink(self: *Self) !bool {
+    if (!has_lstat) {
+        return false;
+    }
+
+    const s = try self.stat();
+    return (os.S.IFLNK & s.mode) > 0;
+}
+
+pub fn mode(self: *Self) !u16 {
+    const s = try self.stat();
+    return s.mode;
 }
 
 pub fn size(self: *Self) !i64 {

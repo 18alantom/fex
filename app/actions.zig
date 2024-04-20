@@ -154,8 +154,8 @@ pub fn openItem(state: *State) !void {
 }
 
 pub fn toggleInfo(state: *State) void {
-    const value = !state.output.treeview.print_modebits;
-    state.output.treeview.print_modebits = value;
+    const value = !state.output.treeview.print_mode;
+    state.output.treeview.print_mode = value;
     state.output.treeview.print_modified = value;
     state.output.treeview.print_size = value;
     state.view.print_all = true;

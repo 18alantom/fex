@@ -21,6 +21,8 @@ pub const Color = enum(u8) {
 };
 
 pub const StyleConfig = struct {
+    no_style: bool = false,
+
     bold: bool = false,
     faint: bool = false,
     italic: bool = false,

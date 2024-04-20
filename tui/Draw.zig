@@ -191,12 +191,22 @@ pub fn styled(buf: []u8, str: []const u8, config: SyleConfig) ![]u8 {
 }
 
 pub fn print(self: *Self, str: []const u8, config: SyleConfig) !void {
+    if (config.no_style) {
+        _ = try self.writer.write(str);
+        return;
+    }
+
     var sbuf: [2048]u8 = undefined;
     var style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m", .{ style, str });
 }
 
 pub fn println(self: *Self, str: []const u8, config: SyleConfig) !void {
+    if (config.no_style) {
+        _ = try self.writer.print("{s}\n", .{str});
+        return;
+    }
+
     var sbuf: [2048]u8 = undefined;
     var style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m\n", .{ style, str });

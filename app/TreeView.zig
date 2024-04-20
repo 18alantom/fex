@@ -41,7 +41,7 @@ allocator: mem.Allocator,
 indent_list: IndentList,
 config: Config,
 print_size: bool,
-print_modebits: bool,
+print_mode: bool,
 print_modified: bool,
 
 const Self = @This();
@@ -54,7 +54,7 @@ pub fn init(allocator: mem.Allocator) Self {
         .sbuf = undefined,
         .config = .{},
         .print_size = false,
-        .print_modebits = false,
+        .print_mode = false,
         .print_modified = false,
     };
 }
@@ -136,14 +136,17 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
 
+    if (self.print_mode) {
+        var mode = try getMode(entry, &self.obuf);
+        try draw.print(mode, .{ .no_style = true });
+    }
+
     if (self.print_size) {
         var size = try getSize(entry, &self.obuf);
         try draw.print(size, .{ .fg = .cyan });
     }
 
     if (self.print_modified) {}
-
-    if (self.print_modebits) {}
 
     // Print tree branches
     var branch = try self.getBranch(entry, &self.obuf);
@@ -207,4 +210,47 @@ fn getSize(entry: Entry, obuf: []u8) ![]u8 {
     }
 
     return fmt.bufPrint(obuf, "{d:7} ", .{0});
+}
+
+fn getMode(entry: Entry, obuf: []u8) ![]u8 {
+    const item = entry.item;
+    const mode = try item.mode();
+
+    // Color string consts
+    const d = "\x1b[34md\x1b[m"; // Blue 'd'
+    const l = "\x1b[36ml\x1b[m"; // Cyan 'l'
+    const x = "\x1b[32mx\x1b[m"; // Green 'x'
+    const w = "\x1b[33mw\x1b[m"; // Yellow 'w'
+    const r = "\x1b[31mr\x1b[m"; // Red 'r'
+    const dash = "-";
+
+    const item_type = if (try item.isDir()) d else if (try item.isLink()) l else " ";
+    // User perms
+    const exec_user = if (mode & os.S.IXUSR > 0) x else dash; // & 0o100
+    const write_user = if (mode & os.S.IWUSR > 0) w else dash; // & 0o200
+    const read_user = if (mode & os.S.IRUSR > 0) r else dash; // & 0o400
+    // Group perms
+    const exec_group = if (mode & os.S.IXGRP > 0) x else dash; // & 0o10
+    const write_group = if (mode & os.S.IWGRP > 0) w else dash; // & 0o20
+    const read_group = if (mode & os.S.IRGRP > 0) r else dash; // & 0o40
+    // Other perms
+    const exec_other = if (mode & os.S.IXOTH > 0) x else dash; // & 0o1
+    const write_other = if (mode & os.S.IWOTH > 0) w else dash; // & 0o2
+    const read_other = if (mode & os.S.IROTH > 0) r else dash; // & 0o4
+
+    return fmt.bufPrint(obuf, "{s}{s}{s}{s}{s}{s}{s}{s}{s}{s} ", .{
+        item_type,
+        // User
+        exec_user,
+        write_user,
+        read_user,
+        // Group
+        exec_group,
+        write_group,
+        read_group,
+        // Other
+        exec_other,
+        write_other,
+        read_other,
+    });
 }
