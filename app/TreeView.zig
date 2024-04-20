@@ -17,6 +17,7 @@ const Manager = @import("../fs/Manager.zig");
 const icons = @import("./icons.zig");
 const View = @import("./View.zig");
 const tui = @import("../tui.zig");
+const statfmt = @import("../fs/statfmt.zig");
 
 const Entry = Manager.Iterator.Entry;
 
@@ -137,12 +138,12 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     var entry = view.buffer.items[i];
 
     if (self.print_mode) {
-        var mode = try getMode(entry, &self.obuf);
+        var mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
         try draw.print(mode, .{ .no_style = true });
     }
 
     if (self.print_size) {
-        var size = try getSize(entry, &self.obuf);
+        var size = try statfmt.size(try entry.item.stat(), &self.obuf);
         try draw.print(size, .{ .fg = .cyan });
     }
 
@@ -164,8 +165,11 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
 
 fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {
     if (is_selected) return .red;
-    if (try entry.item.isDir()) return .blue;
-    if (try entry.item.isExec()) return .green;
+    const s = try entry.item.stat();
+
+    if (s.isDir()) return .blue;
+    if (s.isLink()) return .cyan;
+    if (s.isExec()) return .green;
     return .default;
 }
 
@@ -175,82 +179,4 @@ fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
     @memcpy(obuf[e .. e + ec.len], ec);
     e = e + ec.len;
     return obuf[0..e];
-}
-
-fn getSize(entry: Entry, obuf: []u8) ![]u8 {
-    var raw_size = try entry.item.size();
-    var size = @max(@as(f64, @floatFromInt(raw_size)), 0);
-    if (size < 1000) {
-        return fmt.bufPrint(obuf, "{d:7} ", .{size});
-    }
-
-    if (size < 1_000_000) {
-        size /= 1_000;
-        return fmt.bufPrint(obuf, "{d:6.1}k ", .{size});
-    }
-
-    if (size < 1_000_000_000) {
-        size /= 1_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}M ", .{size});
-    }
-
-    if (size < 1_000_000_000_000) {
-        size /= 1_000_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}G ", .{size});
-    }
-
-    if (size < 1_000_000_000_000_000) {
-        size /= 1_000_000_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}T ", .{size});
-    }
-
-    if (size < 1_000_000_000_000_000_000) {
-        size /= 1_000_000_000_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}P ", .{size});
-    }
-
-    return fmt.bufPrint(obuf, "{d:7} ", .{0});
-}
-
-fn getMode(entry: Entry, obuf: []u8) ![]u8 {
-    const item = entry.item;
-    const mode = try item.mode();
-
-    // Color string consts
-    const d = "\x1b[34md\x1b[m"; // Blue 'd'
-    const l = "\x1b[36ml\x1b[m"; // Cyan 'l'
-    const x = "\x1b[32mx\x1b[m"; // Green 'x'
-    const w = "\x1b[33mw\x1b[m"; // Yellow 'w'
-    const r = "\x1b[31mr\x1b[m"; // Red 'r'
-    const dash = "-";
-
-    const item_type = if (try item.isDir()) d else if (try item.isLink()) l else " ";
-    // User perms
-    const exec_user = if (mode & os.S.IXUSR > 0) x else dash; // & 0o100
-    const write_user = if (mode & os.S.IWUSR > 0) w else dash; // & 0o200
-    const read_user = if (mode & os.S.IRUSR > 0) r else dash; // & 0o400
-    // Group perms
-    const exec_group = if (mode & os.S.IXGRP > 0) x else dash; // & 0o10
-    const write_group = if (mode & os.S.IWGRP > 0) w else dash; // & 0o20
-    const read_group = if (mode & os.S.IRGRP > 0) r else dash; // & 0o40
-    // Other perms
-    const exec_other = if (mode & os.S.IXOTH > 0) x else dash; // & 0o1
-    const write_other = if (mode & os.S.IWOTH > 0) w else dash; // & 0o2
-    const read_other = if (mode & os.S.IROTH > 0) r else dash; // & 0o4
-
-    return fmt.bufPrint(obuf, "{s}{s}{s}{s}{s}{s}{s}{s}{s}{s} ", .{
-        item_type,
-        // User
-        exec_user,
-        write_user,
-        read_user,
-        // Group
-        exec_group,
-        write_group,
-        read_group,
-        // Other
-        exec_other,
-        write_other,
-        read_other,
-    });
 }

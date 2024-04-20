@@ -4,6 +4,7 @@ const builtin = std.builtin;
 
 pub fn typeInfo(comptime T: type) void {
     _typeInfo(T, 0);
+    std.debug.print("\n", .{});
 }
 
 fn _typeInfo(comptime T: type, indent: usize) void {

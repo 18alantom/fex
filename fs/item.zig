@@ -1,4 +1,5 @@
 const std = @import("std");
+const Stat = @import("./Stat.zig");
 
 const fs = std.fs;
 const mem = std.mem;
@@ -13,14 +14,13 @@ pub const ItemError = error{
     NoParent,
     IsNotDirectory,
 };
-const has_lstat = @hasDecl(std.os.system, "lstat");
 
 /// Item is a view into a file system item it can be a directory or a file
 /// or something else. It should be initialized to a directory.
 allocator: mem.Allocator,
 abs_path_buf: [fs.MAX_PATH_BYTES]u8,
 abs_path_len: usize,
-_stat: ?os.Stat = null,
+_stat: ?Stat = null,
 _parent: ?*Self = null,
 _children: ?ItemList = null,
 
@@ -68,60 +68,33 @@ pub fn dirpath(self: *const Self) ?[]const u8 {
     return fs.path.dirname(self.abspath());
 }
 
-pub fn stat(self: *Self) !os.Stat {
+pub fn stat(self: *Self) !Stat {
     if (self._stat) |s| {
         return s;
     }
 
-    // To sentinel terminated pointer
-    var abs_path_w: [*:0]const u8 = @ptrCast(
-        self.abs_path_buf[0 .. self.abs_path_len + 1].ptr,
-    );
-
-    var statbuf: os.Stat = undefined;
-    var ret: c_int = 1;
-
-    if (has_lstat) {
-        ret = os.system.lstat(abs_path_w, &statbuf);
-    } else {
-        ret = os.system.stat(abs_path_w, &statbuf);
-    }
-
-    if (ret != 0) {
-        return ItemError.StatError;
-    }
-
-    self._stat = statbuf;
+    self._stat = try Stat.stat(self.abspath());
     return self._stat.?;
 }
 
 pub fn isDir(self: *Self) !bool {
-    const s = try self.stat();
-    return (os.S.IFDIR & s.mode) > 0;
+    return (try self.stat()).isDir();
 }
 
 pub fn isExec(self: *Self) !bool {
-    const s = try self.stat();
-    return (os.S.IXUSR & s.mode) > 0;
+    return (try self.stat()).isExec();
 }
 
 pub fn isLink(self: *Self) !bool {
-    if (!has_lstat) {
-        return false;
-    }
-
-    const s = try self.stat();
-    return (os.S.IFLNK & s.mode) > 0;
+    return (try self.stat()).isLink();
 }
 
 pub fn mode(self: *Self) !u16 {
-    const s = try self.stat();
-    return s.mode;
+    return (try self.stat()).mode;
 }
 
 pub fn size(self: *Self) !i64 {
-    const s = try self.stat();
-    return s.size;
+    return (try self.stat()).size;
 }
 
 /// Returns Item that references the parent directory of the calling Item.
