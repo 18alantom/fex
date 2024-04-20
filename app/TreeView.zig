@@ -54,9 +54,9 @@ pub fn init(allocator: mem.Allocator) Self {
         .obuf = undefined,
         .sbuf = undefined,
         .config = .{},
-        .print_size = false,
-        .print_mode = false,
-        .print_modified = false,
+        .print_size = true,
+        .print_mode = true,
+        .print_modified = true,
     };
 }
 

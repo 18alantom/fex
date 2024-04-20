@@ -1,3 +1,4 @@
+const builtin = @import("builtin");
 const std = @import("std");
 const libc = @cImport({
     @cInclude("sys/stat.h");
@@ -9,6 +10,18 @@ const os = std.os;
 
 mode: u16,
 size: i64,
+
+// Modified
+mtime_sec: isize,
+mtime_nsec: isize,
+
+// Accessed
+atime_sec: isize,
+atime_nsec: isize,
+
+// Last Status Change
+ctime_sec: isize,
+ctime_nsec: isize,
 
 const Self = @This();
 
@@ -22,10 +35,35 @@ pub fn stat(abspath: []const u8) !Self {
         return error.StatError;
     }
 
-    return .{
-        .mode = @intCast(statbuf.st_mode),
-        .size = @intCast(statbuf.st_size),
-    };
+    switch (builtin.target.os.tag) {
+        .macos => return .{
+            .mode = statbuf.st_mode,
+            .size = statbuf.st_size,
+            // mtime
+            .mtime_sec = statbuf.st_mtimespec.tv_sec,
+            .mtime_nsec = statbuf.st_mtimespec.tv_nsec,
+            // atime
+            .atime_sec = statbuf.st_atimespec.tv_sec,
+            .atime_nsec = statbuf.st_atimespec.tv_nsec,
+            // ctime
+            .ctime_sec = statbuf.st_ctimespec.tv_sec,
+            .ctime_nsec = statbuf.st_ctimespec.tv_nsec,
+        },
+        .linux => return .{
+            .mode = statbuf.st_mode,
+            .size = statbuf.st_size,
+            // mtime
+            .mtime_sec = statbuf.st_mtim.tv_sec,
+            .mtime_nsec = statbuf.st_mtim.tv_nsec,
+            // atime
+            .atime_sec = statbuf.st_atim.tv_sec,
+            .atime_nsec = statbuf.st_atim.tv_nsec,
+            // ctime
+            .ctime_sec = statbuf.st_ctim.tv_sec,
+            .ctime_nsec = statbuf.st_ctim.tv_nsec,
+        },
+        else => return error.NotImplemented,
+    }
 }
 
 // File type checks
