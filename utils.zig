@@ -5,6 +5,10 @@ const fs = std.fs;
 const fmt = std.fmt;
 const unicode = std.unicode;
 
+const libc = @cImport({
+    @cInclude("sys/time.h");
+});
+
 const print = std.debug.print;
 
 pub const os = @import("./utils/os.zig");
@@ -54,4 +58,27 @@ pub fn repeat(buf: []u8, str: []const u8, reps: usize) []u8 {
     }
 
     return buf[0 .. str.len * reps];
+}
+
+pub fn strftime(format: []const u8, sec: isize, buf: []u8) []u8 {
+    var time_info = libc.localtime(&sec);
+    const wlen = libc.strftime(
+        buf.ptr,
+        buf.len,
+        @ptrCast(format.ptr),
+        time_info,
+    );
+    return buf[0..wlen];
+}
+
+pub fn lpad(str: []const u8, len: usize, pad: u8, buf: []u8) []u8 {
+    const diff = len -| str.len;
+    if (diff == 0) {
+        @memcpy(buf[0..str.len], str);
+        return buf[0..str.len];
+    }
+
+    @memset(buf[0..diff], pad);
+    @memcpy(buf[diff..(diff + str.len)], str);
+    return buf[0..(diff + str.len)];
 }

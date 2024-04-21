@@ -18,6 +18,7 @@ const icons = @import("./icons.zig");
 const View = @import("./View.zig");
 const tui = @import("../tui.zig");
 const statfmt = @import("../fs/statfmt.zig");
+const Stat = @import("../fs/Stat.zig");
 
 const Entry = Manager.Iterator.Entry;
 
@@ -31,8 +32,14 @@ const Draw = tui.Draw;
 const getStyle = tui.style.style;
 const getIcon = icons.getIcon;
 
-const Config = struct {
-    show_icons: bool = true,
+const Info = struct {
+    icons: bool = true,
+    size: bool = true,
+    mode: bool = true,
+    modified: bool = true,
+    changed: bool = false,
+    accessed: bool = false,
+    show: bool = true,
 };
 
 obuf: [2048]u8, // Content Buffer
@@ -40,10 +47,7 @@ sbuf: [2048]u8, // Style Buffer
 
 allocator: mem.Allocator,
 indent_list: IndentList,
-config: Config,
-print_size: bool,
-print_mode: bool,
-print_modified: bool,
+info: Info,
 
 const Self = @This();
 pub fn init(allocator: mem.Allocator) Self {
@@ -53,10 +57,7 @@ pub fn init(allocator: mem.Allocator) Self {
         .allocator = allocator,
         .obuf = undefined,
         .sbuf = undefined,
-        .config = .{},
-        .print_size = true,
-        .print_mode = true,
-        .print_modified = true,
+        .info = .{},
     };
 }
 
@@ -137,30 +138,42 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
 
-    if (self.print_mode) {
+    if (self.info.show and self.info.mode) {
         var mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
         try draw.print(mode, .{ .no_style = true });
     }
 
-    if (self.print_size) {
+    if (self.info.show and self.info.size) {
         var size = try statfmt.size(try entry.item.stat(), &self.obuf);
         try draw.print(size, .{ .fg = .cyan });
     }
 
-    if (self.print_modified) {}
+    if (self.timeType()) |time_type| {
+        var time = statfmt.time(try entry.item.stat(), time_type, &self.obuf);
+        try draw.print(time, .{ .fg = .yellow });
+    }
 
     // Print tree branches
     var branch = try self.getBranch(entry, &self.obuf);
     try draw.print(branch, .{ .faint = true });
 
     // Print name
-    const icon = if (self.config.show_icons) try getIcon(entry) else "\u{0008}";
+    const icon = if (self.info.icons) try getIcon(entry) else "\u{0008}";
     const out = try fmt.bufPrint(
         &self.obuf,
         "{s} {s}",
         .{ icon, entry.item.name() },
     );
     try draw.println(out, .{ .fg = try getFg(entry, view.cursor == i) });
+}
+
+fn timeType(self: *Self) ?Stat.TimeType {
+    if (!self.info.show) return null;
+
+    if (self.info.modified) return .mtime;
+    if (self.info.accessed) return .atime;
+    if (self.info.changed) return .ctime;
+    return null;
 }
 
 fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {

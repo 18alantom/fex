@@ -1,5 +1,10 @@
 const std = @import("std");
+const utils = @import("../utils.zig");
 const Stat = @import("./Stat.zig");
+
+const libc = @cImport({
+    @cInclude("sys/time.h");
+});
 
 const fmt = std.fmt;
 
@@ -15,42 +20,42 @@ const w = "\x1b[33mw\x1b[m"; // Yellow 'w' for write
 const r = "\x1b[31mr\x1b[m"; // Red 'r' for read
 const dash = "\x1b[2m-\x1b[m";
 
-pub fn size(stat: Stat, obuf: []u8) ![]u8 {
+pub fn size(stat: Stat, buf: []u8) ![]u8 {
     var raw_size = stat.size;
     var fmt_size = @max(@as(f64, @floatFromInt(raw_size)), 0);
     if (fmt_size < 1000) {
-        return fmt.bufPrint(obuf, "{d:7} ", .{fmt_size});
+        return fmt.bufPrint(buf, "{d:7} ", .{fmt_size});
     }
 
     if (fmt_size < 1_000_000) {
         fmt_size /= 1_000;
-        return fmt.bufPrint(obuf, "{d:6.1}k ", .{fmt_size});
+        return fmt.bufPrint(buf, "{d:6.1}k ", .{fmt_size});
     }
 
     if (fmt_size < 1_000_000_000) {
         fmt_size /= 1_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}M ", .{fmt_size});
+        return fmt.bufPrint(buf, "{d:6.1}M ", .{fmt_size});
     }
 
     if (fmt_size < 1_000_000_000_000) {
         fmt_size /= 1_000_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}G ", .{fmt_size});
+        return fmt.bufPrint(buf, "{d:6.1}G ", .{fmt_size});
     }
 
     if (fmt_size < 1_000_000_000_000_000) {
         fmt_size /= 1_000_000_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}T ", .{fmt_size});
+        return fmt.bufPrint(buf, "{d:6.1}T ", .{fmt_size});
     }
 
     if (fmt_size < 1_000_000_000_000_000_000) {
         fmt_size /= 1_000_000_000_000_000;
-        return fmt.bufPrint(obuf, "{d:6.1}P ", .{fmt_size});
+        return fmt.bufPrint(buf, "{d:6.1}P ", .{fmt_size});
     }
 
-    return fmt.bufPrint(obuf, "{d:7} ", .{0});
+    return fmt.bufPrint(buf, "{d:7} ", .{0});
 }
 
-pub fn mode(stat: Stat, obuf: []u8) ![]u8 {
+pub fn mode(stat: Stat, buf: []u8) ![]u8 {
     // User perms
     const exec_user = if (stat.hasUserExec()) x else dash; // & 0o100
     const write_user = if (stat.hasUserWrite()) w else dash; // & 0o200
@@ -64,7 +69,7 @@ pub fn mode(stat: Stat, obuf: []u8) ![]u8 {
     const write_other = if (stat.hasOtherWrite()) w else dash; // & 0o2
     const read_other = if (stat.hasOtherRead()) r else dash; // & 0o4
 
-    return fmt.bufPrint(obuf, "{s}{s}{s}{s}{s}{s}{s}{s}{s}{s} ", .{
+    return fmt.bufPrint(buf, "{s}{s}{s}{s}{s}{s}{s}{s}{s}{s} ", .{
         itemType(stat),
         // User
         exec_user,
@@ -99,4 +104,35 @@ fn itemType(stat: Stat) []const u8 {
     }
 
     return " ";
+}
+
+pub fn time(stat: Stat, time_type: Stat.TimeType, buf: []u8) []u8 {
+    const sec = switch (time_type) {
+        .atime => stat.atime_sec,
+        .ctime => stat.ctime_sec,
+        .mtime => stat.mtime_sec,
+    };
+
+    const pre_format = "%d %b";
+    const suf_format = if (isCurrentYear(sec)) "%H:%M" else "%Y";
+
+    var ibuf: [32]u8 = undefined;
+    var islc = utils.strftime(pre_format, sec, &ibuf);
+    const pre_wlen = utils.lpad(islc, 6, ' ', buf).len;
+
+    buf[pre_wlen] = ' ';
+
+    islc = utils.strftime(suf_format, sec, &ibuf);
+    const suf_wlen = utils.lpad(islc, 5, ' ', buf[(pre_wlen + 1)..]).len;
+
+    return buf[0..(pre_wlen + 1 + suf_wlen)];
+}
+
+fn isCurrentYear(sec: isize) bool {
+    const now = libc.time(null);
+    return year(sec) == year(now);
+}
+
+fn year(sec: isize) isize {
+    return @divFloor(sec, 3600 * 24 * 365) + 1970;
 }
