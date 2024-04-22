@@ -15,44 +15,51 @@ const b = "\x1b[31;1ml\x1b[m"; // Red 'b' for block
 const c = "\x1b[33;1ml\x1b[m"; // Yellow 'c' for char
 
 // Item Perms
-const x = "\x1b[32mx\x1b[m"; // Green 'x' for exec
-const w = "\x1b[33mw\x1b[m"; // Yellow 'w' for write
-const r = "\x1b[31mr\x1b[m"; // Red 'r' for read
+const x = "\x1b[32;1mx\x1b[m"; // Green 'x' for exec
+const w = "\x1b[33;1mw\x1b[m"; // Yellow 'w' for write
+const r = "\x1b[31;1mr\x1b[m"; // Red 'r' for read
 const dash = "\x1b[2m-\x1b[m";
 
 pub fn size(stat: Stat, buf: []u8) ![]u8 {
-    var raw_size = stat.size;
-    var fmt_size = @max(@as(f64, @floatFromInt(raw_size)), 0);
-    if (fmt_size < 1000) {
-        return fmt.bufPrint(buf, "{d:7} ", .{fmt_size});
+    const suffix = getSizeSuffix(stat.size);
+    if (suffix == 'X') {
+        return try std.fmt.bufPrint(buf, "2LRG ", .{});
     }
 
-    if (fmt_size < 1_000_000) {
-        fmt_size /= 1_000;
-        return fmt.bufPrint(buf, "{d:6.1}k ", .{fmt_size});
+    const bytes_u: u64 = @intCast(@max(0, stat.size));
+    if (stat.size < 999) {
+        return try std.fmt.bufPrint(buf, "{d:4.0} ", .{bytes_u});
     }
 
-    if (fmt_size < 1_000_000_000) {
-        fmt_size /= 1_000_000;
-        return fmt.bufPrint(buf, "{d:6.1}M ", .{fmt_size});
+    const trunc = @round(getTruncated(stat.size) * 10) / 10;
+    if (trunc < 10) {
+        return try std.fmt.bufPrint(buf, "{d:3.1}{c} ", .{ trunc, suffix });
     }
 
-    if (fmt_size < 1_000_000_000_000) {
-        fmt_size /= 1_000_000_000;
-        return fmt.bufPrint(buf, "{d:6.1}G ", .{fmt_size});
-    }
+    return try std.fmt.bufPrint(buf, "{d:3.0}{c} ", .{ trunc, suffix });
+}
 
-    if (fmt_size < 1_000_000_000_000_000) {
-        fmt_size /= 1_000_000_000_000;
-        return fmt.bufPrint(buf, "{d:6.1}T ", .{fmt_size});
-    }
+fn getSizeSuffix(bytes: i64) u8 {
+    if (bytes < 1_000) return ' ';
+    if (bytes < 1_000_000) return 'k';
+    if (bytes < 1_000_000_000) return 'M';
+    if (bytes < 1_000_000_000_000) return 'G';
+    if (bytes < 1_000_000_000_000_000) return 'T';
+    if (bytes < 1_000_000_000_000_000_000) return 'P';
+    if (bytes < 1_000_000_000_000_000_000_000) return 'E';
+    return 'X';
+}
 
-    if (fmt_size < 1_000_000_000_000_000_000) {
-        fmt_size /= 1_000_000_000_000_000;
-        return fmt.bufPrint(buf, "{d:6.1}P ", .{fmt_size});
-    }
-
-    return fmt.bufPrint(buf, "{d:7} ", .{0});
+fn getTruncated(bytes: i64) f64 {
+    var bytes_f = @max(@as(f64, @floatFromInt(bytes)), 0);
+    if (bytes_f < 1_000) return bytes_f;
+    if (bytes_f < 1_000_000) return bytes_f / 1_000;
+    if (bytes_f < 1_000_000_000) return bytes_f / 1_000_000;
+    if (bytes_f < 1_000_000_000_000) return bytes_f / 1_000_000_000;
+    if (bytes_f < 1_000_000_000_000_000) return bytes_f / 1_000_000_000_000;
+    if (bytes_f < 1_000_000_000_000_000_000) return bytes_f / 1_000_000_000_000_000;
+    if (bytes_f < 1_000_000_000_000_000_000_000) return bytes_f / 1_000_000_000_000_000_000;
+    return bytes_f;
 }
 
 pub fn mode(stat: Stat, buf: []u8) ![]u8 {

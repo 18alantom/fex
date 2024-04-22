@@ -138,16 +138,19 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
 
+    // Print permission info
     if (self.info.show and self.info.mode) {
         var mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
         try draw.print(mode, .{ .no_style = true });
     }
 
+    // Print size
     if (self.info.show and self.info.size) {
         var size = try statfmt.size(try entry.item.stat(), &self.obuf);
         try draw.print(size, .{ .fg = .cyan });
     }
 
+    // Print time
     if (self.timeType()) |time_type| {
         var time = statfmt.time(try entry.item.stat(), time_type, &self.obuf);
         try draw.print(time, .{ .fg = .yellow });
@@ -157,14 +160,25 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     var branch = try self.getBranch(entry, &self.obuf);
     try draw.print(branch, .{ .faint = true });
 
+    // Print icons
+    if (self.info.icons) {
+        const icon = try getIcon(entry);
+        try draw.print(icon, .{ .fg = try getFg(entry, false) });
+    }
+
+    try draw.print(" ", .{ .no_style = true });
+
     // Print name
-    const icon = if (self.info.icons) try getIcon(entry) else "\u{0008}";
-    const out = try fmt.bufPrint(
-        &self.obuf,
-        "{s} {s}",
-        .{ icon, entry.item.name() },
+    try draw.print(
+        entry.item.name(),
+        .{ .fg = try getFg(entry, view.cursor == i) },
     );
-    try draw.println(out, .{ .fg = try getFg(entry, view.cursor == i) });
+
+    // Print cursor
+    if (view.cursor == i) {
+        try draw.print(" <", .{ .bold = true, .fg = .magenta });
+    }
+    try draw.println("", .{ .no_style = true });
 }
 
 fn timeType(self: *Self) ?Stat.TimeType {
@@ -177,7 +191,7 @@ fn timeType(self: *Self) ?Stat.TimeType {
 }
 
 fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {
-    if (is_selected) return .red;
+    if (is_selected) return .magenta;
     const s = try entry.item.stat();
 
     if (s.isDir()) return .blue;
