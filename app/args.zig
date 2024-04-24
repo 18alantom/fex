@@ -36,7 +36,7 @@ pub fn setConfig(config: *Config) !bool {
         } else if (eql(arg, "--time")) {
             config.time = getTime(args_iter.next());
         } else if (eql(arg, "--help")) {
-            printHelp();
+            try printHelp();
             return true;
         }
 
@@ -70,6 +70,46 @@ fn getRoot() []const u8 {
     return ".";
 }
 
-fn printHelp() void {
-    std.debug.print("help to be written\n", .{});
+const help =
+    \\Usage
+    \\  fex [path] [options]
+    \\
+    \\Example
+    \\  fex ~/Desktop --time accessed
+    \\
+    \\Meta
+    \\  --help              Print this help message
+    \\
+    \\Display Config
+    \\  --no-icons          Skip printing icons
+    \\  --no-size           Skip printing item sizes
+    \\  --no-time           Skip printing all times
+    \\  --no-mode           Skip printing permission info
+    \\  --time VALUE        Set which time is displayed
+    \\                      Valid VALUE: modified, accessed, changed
+    \\                      Default VALUE: modified
+    \\
+    \\Navigation Controls
+    \\  j, down_arrow       Cursor down
+    \\  k, up_arrow         Cursor up
+    \\  h, left_arrow       Up a dir
+    \\  l, right_arrow      Down a dir
+    \\  gg                  Jump to first item
+    \\  G                   Jump to last item
+    \\  {                   Jump to prev fold
+    \\  }                   Jump to next fold
+    \\  
+    \\Action Controls
+    \\  R                   Set current dir as root
+    \\  o                   Open item under cursor (only macOS)
+    \\  I                   Toggle item stat info
+    \\  E                   Expand all directories
+    \\  C                   Collapse all directories
+    \\  1..9                Expand to $NUM depth
+    \\  q, ctrl-d           Quit
+    \\
+;
+
+fn printHelp() !void {
+    _ = try std.io.getStdOut().writer().write(help);
 }
