@@ -174,9 +174,8 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     if (self.info.icons) {
         const icon = try getIcon(entry);
         try draw.print(icon, .{ .fg = try getFg(entry, false) });
+        try draw.print(" ", .{ .no_style = true });
     }
-
-    try draw.print(" ", .{ .no_style = true });
 
     // Print name
     try draw.print(
