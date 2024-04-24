@@ -159,12 +159,13 @@ pub fn toggleInfo(state: *State) void {
 }
 
 pub fn changeDir(state: *State) !void {
-    _ = state;
-    // TODO: Cant change calling shell cwd this way
-    // const item = state.itemUnderCursor();
-    // if (!(try item.isDir())) {
-    //     return;
-    // }
+    const item = state.itemUnderCursor();
+    if (!(try item.isDir())) {
+        return;
+    }
+
+    // TODO: Complete this
+    std.debug.print("cd into {s}\n", .{item.abspath()});
     // var argv = [_][]const u8{ "cd", item.abspath() };
     // try utils.os.run(&argv);
 }

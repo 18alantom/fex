@@ -147,23 +147,31 @@ fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
 fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
+    var has_prefix_info = false;
 
     // Print permission info
     if (self.info.show and self.info.mode) {
         var mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
         try draw.print(mode, .{ .no_style = true });
+        has_prefix_info = true;
     }
 
     // Print size
     if (self.info.show and self.info.size) {
         var size = try statfmt.size(try entry.item.stat(), &self.obuf);
         try draw.print(size, .{ .fg = .cyan });
+        has_prefix_info = true;
     }
 
     // Print time
     if (self.timeType()) |time_type| {
         var time = statfmt.time(try entry.item.stat(), time_type, &self.obuf);
         try draw.print(time, .{ .fg = .yellow });
+        has_prefix_info = true;
+    }
+
+    if (has_prefix_info) {
+        try draw.print(" ", .{ .no_style = true });
     }
 
     // Print tree branches
