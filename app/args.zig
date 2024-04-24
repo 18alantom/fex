@@ -86,8 +86,8 @@ const help =
     \\  --no-time           Skip printing all times
     \\  --no-mode           Skip printing permission info
     \\  --time VALUE        Set which time is displayed
-    \\                      Valid VALUE: modified, accessed, changed
-    \\                      Default VALUE: modified
+    \\                      valid: modified, accessed, changed
+    \\                      default: modified
     \\
     \\Navigation Controls
     \\  j, down_arrow       Cursor down
@@ -100,12 +100,12 @@ const help =
     \\  }                   Jump to next fold
     \\  
     \\Action Controls
-    \\  R                   Set current dir as root
+    \\  R                   Change root to item under cursor (if dir)
     \\  o                   Open item under cursor (only macOS)
     \\  I                   Toggle item stat info
     \\  E                   Expand all directories
     \\  C                   Collapse all directories
-    \\  1..9                Expand to $NUM depth
+    \\  1..9                Expand all directories upto $NUM depth
     \\  q, ctrl-d           Quit
     \\
 ;
