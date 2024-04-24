@@ -12,8 +12,10 @@ const TreeView = @import("./TreeView.zig");
 const Input = @import("./Input.zig");
 const Output = @import("./Output.zig");
 const actions = @import("./actions.zig");
+const args = @import("./args.zig");
 
 const AppAction = Input.AppAction;
+const Config = args.Config;
 
 viewport: *Viewport,
 view: *View,
@@ -29,7 +31,7 @@ allocator: mem.Allocator,
 
 const Self = @This();
 
-pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
+pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     var viewport = try allocator.create(Viewport);
     viewport.* = try Viewport.init();
 
@@ -37,13 +39,13 @@ pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
     view.* = View.init(allocator);
 
     var output = try allocator.create(Output);
-    output.* = try Output.init(allocator);
+    output.* = try Output.init(allocator, config);
 
     var input = try allocator.create(Input);
     input.* = Input.init();
 
     var manager = try allocator.create(Manager);
-    manager.* = try Manager.init(allocator, root);
+    manager.* = try Manager.init(allocator, config.root);
 
     return .{
         .viewport = viewport,

@@ -1,4 +1,5 @@
 const std = @import("std");
+const args = @import("./app/args.zig");
 const App = @import("./app/App.zig");
 
 const fs = std.fs;
@@ -6,32 +7,24 @@ const mem = std.mem;
 const heap = std.heap;
 const os = std.os;
 
-const print = std.debug.print;
-
 pub fn main() !void {
+    var config: args.Config = .{ .root = "." };
+    // Returns true if arg has --help
+    if (try args.setConfig(&config)) {
+        return;
+    }
+
     var gpa = heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
+
     try exe(
         allocator,
-        getRoot(),
+        &config,
     );
 }
 
-fn getRoot() []const u8 {
-    var args_iter = std.process.args();
-    if (!args_iter.skip()) {
-        return ".";
-    }
-
-    if (args_iter.next()) |r| {
-        return r;
-    }
-
-    return ".";
-}
-
-fn exe(allocator: mem.Allocator, root: []const u8) !void {
-    var app = try App.init(allocator, root);
+fn exe(allocator: mem.Allocator, config: *args.Config) !void {
+    var app = try App.init(allocator, config);
     defer app.deinit();
     try app.run();
 }

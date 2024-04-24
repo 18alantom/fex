@@ -1,5 +1,6 @@
 /// The main struct, App.run is used to run *fex*
 const std = @import("std");
+const args = @import("./args.zig");
 const tui = @import("../tui.zig");
 const utils = @import("../utils.zig");
 
@@ -12,6 +13,7 @@ const TreeView = @import("./TreeView.zig");
 const Input = @import("./Input.zig");
 const Output = @import("./Output.zig");
 const Entry = Manager.Iterator.Entry;
+const Config = args.Config;
 
 const fs = std.fs;
 const mem = std.mem;
@@ -28,9 +30,9 @@ state: *State,
 
 const Self = @This();
 
-pub fn init(allocator: mem.Allocator, root: []const u8) !Self {
+pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     var state = try allocator.create(State);
-    state.* = try State.init(allocator, root);
+    state.* = try State.init(allocator, config);
 
     return .{
         .allocator = allocator,

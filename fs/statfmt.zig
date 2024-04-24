@@ -115,9 +115,9 @@ fn itemType(stat: Stat) []const u8 {
 
 pub fn time(stat: Stat, time_type: Stat.TimeType, buf: []u8) []u8 {
     const sec = switch (time_type) {
-        .atime => stat.atime_sec,
-        .ctime => stat.ctime_sec,
-        .mtime => stat.mtime_sec,
+        .accessed => stat.atime_sec,
+        .changed => stat.ctime_sec,
+        .modified => stat.mtime_sec,
     };
 
     const pre_format = "%d %b";

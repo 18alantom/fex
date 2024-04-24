@@ -1,10 +1,12 @@
 /// Output is responsible for writing out values in View.buffer
 /// to stdout. It uses TreeView—which handles formatting—to do so.
 const std = @import("std");
+const args = @import("./args.zig");
 const tui = @import("../tui.zig");
 const View = @import("./View.zig");
 
 const TreeView = @import("./TreeView.zig");
+const Config = args.Config;
 
 const fs = std.fs;
 const mem = std.mem;
@@ -20,14 +22,14 @@ sbuf: [2048]u8, // Style Buffer
 
 const Self = @This();
 
-pub fn init(allocator: mem.Allocator) !Self {
+pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     var treeview = try allocator.create(TreeView);
     var writer = try allocator.create(tui.BufferedStdOut);
     var draw = try allocator.create(tui.Draw);
 
     writer.* = tui.BufferedStdOut.init();
     draw.* = tui.Draw{ .writer = writer };
-    treeview.* = TreeView.init(allocator);
+    treeview.* = TreeView.init(allocator, config);
 
     try draw.hideCursor();
     return .{

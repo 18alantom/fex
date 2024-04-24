@@ -1,4 +1,5 @@
 const std = @import("std");
+const utils = @import("../utils.zig");
 
 const Manager = @import("../fs/Manager.zig");
 
@@ -6,6 +7,7 @@ const path = std.fs.path;
 const mem = std.mem;
 
 const Entry = Manager.Iterator.Entry;
+const eql = utils.eql;
 
 pub fn getIcon(entry: Entry) ![]const u8 {
     const item = entry.item;
@@ -115,10 +117,6 @@ pub fn getIcon(entry: Entry) ![]const u8 {
 
     // TODO: Add fonts for audio, video, etc
     return icons.file;
-}
-
-fn eql(a: []const u8, b: []const u8) bool {
-    return mem.eql(u8, a, b);
 }
 
 // Unicode values sourced from the Nerd-fonts cheatsheet.

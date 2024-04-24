@@ -18,7 +18,7 @@ ctime_sec: isize, // Last Status Change
 
 const Self = @This();
 
-pub const TimeType = enum { mtime, atime, ctime };
+pub const TimeType = enum { modified, changed, accessed };
 
 pub fn stat(abspath: []const u8) !Self {
 

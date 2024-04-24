@@ -17,10 +17,12 @@ const Manager = @import("../fs/Manager.zig");
 const icons = @import("./icons.zig");
 const View = @import("./View.zig");
 const tui = @import("../tui.zig");
+const args = @import("./args.zig");
 const statfmt = @import("../fs/statfmt.zig");
 const Stat = @import("../fs/Stat.zig");
 
 const Entry = Manager.Iterator.Entry;
+const Config = args.Config;
 
 const fs = std.fs;
 const os = std.os;
@@ -50,14 +52,22 @@ indent_list: IndentList,
 info: Info,
 
 const Self = @This();
-pub fn init(allocator: mem.Allocator) Self {
+pub fn init(allocator: mem.Allocator, config: *Config) Self {
     var indent_list = IndentList.init(allocator);
     return .{
         .indent_list = indent_list,
         .allocator = allocator,
         .obuf = undefined,
         .sbuf = undefined,
-        .info = .{},
+        .info = .{
+            .icons = !config.no_icons,
+            .size = !config.no_size,
+            .mode = !config.no_mode,
+            .modified = !config.no_time and config.time == .modified,
+            .changed = !config.no_time and config.time == .changed,
+            .accessed = !config.no_time and config.time == .accessed,
+            .show = !(config.no_icons and config.no_size and config.no_mode and config.no_time),
+        },
     };
 }
 
@@ -184,9 +194,9 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
 fn timeType(self: *Self) ?Stat.TimeType {
     if (!self.info.show) return null;
 
-    if (self.info.modified) return .mtime;
-    if (self.info.accessed) return .atime;
-    if (self.info.changed) return .ctime;
+    if (self.info.modified) return .modified;
+    if (self.info.accessed) return .accessed;
+    if (self.info.changed) return .changed;
     return null;
 }
 

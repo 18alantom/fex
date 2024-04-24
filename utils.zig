@@ -3,6 +3,7 @@ const Tui = @import("tui.zig");
 
 const fs = std.fs;
 const fmt = std.fmt;
+const mem = std.mem;
 const unicode = std.unicode;
 
 const libc = @cImport({
@@ -81,4 +82,8 @@ pub fn lpad(str: []const u8, len: usize, pad: u8, buf: []u8) []u8 {
     @memset(buf[0..diff], pad);
     @memcpy(buf[diff..(diff + str.len)], str);
     return buf[0..(diff + str.len)];
+}
+
+pub fn eql(a: []const u8, b: []const u8) bool {
+    return mem.eql(u8, a, b);
 }
