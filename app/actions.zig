@@ -90,6 +90,7 @@ pub fn changeRoot(state: *State) !void {
     }
 
     state.manager.changeRoot(new_root);
+    state.view.cursor = 0;
     state.reiterate = true;
 }
 
