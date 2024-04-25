@@ -58,9 +58,14 @@ pub fn shiftIntoChild(state: *State) !void {
     state.view.cursor += 1;
 }
 
-pub fn toggleChildren(state: *State) !void {
+pub fn toggleChildrenOrOpenFile(state: *State) !void {
     const item = state.itemUnderCursor();
-    state.reiterate = try toggleItemChildren(item);
+    if (try item.isDir()) {
+        state.reiterate = try toggleItemChildren(item);
+        return;
+    }
+
+    try openItem(state);
 }
 
 pub fn expandAll(state: *State) void {

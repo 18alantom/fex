@@ -150,7 +150,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .bottom => try actions.goToBottom(self),
         .left => try actions.shiftIntoParent(self),
         .right => try actions.shiftIntoChild(self),
-        .select => try actions.toggleChildren(self),
+        .select => try actions.toggleChildrenOrOpenFile(self),
         .expand_all => actions.expandAll(self),
         .collapse_all => actions.collapseAll(self),
         .prev_fold => actions.toPrevFold(self),

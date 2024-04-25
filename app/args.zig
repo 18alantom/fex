@@ -90,21 +90,22 @@ const help =
     \\                      default: modified
     \\
     \\Navigation Controls
-    \\  j, down_arrow       Cursor down
-    \\  k, up_arrow         Cursor up
-    \\  h, left_arrow       Up a dir
-    \\  l, right_arrow      Down a dir
+    \\  j, down-arrow       Cursor down
+    \\  k, up-arrow         Cursor up
+    \\  h, left-arrow       Up a dir
+    \\  l, right-arrow      Down a dir
     \\  gg                  Jump to first item
     \\  G                   Jump to last item
     \\  {                   Jump to prev fold
     \\  }                   Jump to next fold
     \\  
     \\Action Controls
-    \\  R                   Change root to item under cursor (if dir)
-    \\  o                   Open item under cursor (only macOS)
-    \\  I                   Toggle item stat info
+    \\  return/enter        Toggle directory or open file (macOS)
+    \\  o                   Open item under cursor (macOS)
     \\  E                   Expand all directories
     \\  C                   Collapse all directories
+    \\  R                   Change root to item under cursor (if dir)
+    \\  I                   Toggle item stat info
     \\  1..9                Expand all directories upto $NUM depth
     \\  q, ctrl-d           Quit
     \\
