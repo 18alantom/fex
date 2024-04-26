@@ -79,17 +79,17 @@ pub fn mode(stat: Stat, buf: []u8) ![]u8 {
     return fmt.bufPrint(buf, "{s}{s}{s}{s}{s}{s}{s}{s}{s}{s} ", .{
         itemType(stat),
         // User
-        exec_user,
-        write_user,
         read_user,
+        write_user,
+        exec_user,
         // Group
-        exec_group,
-        write_group,
         read_group,
+        write_group,
+        exec_group,
         // Other
-        exec_other,
-        write_other,
         read_other,
+        write_other,
+        exec_other,
     });
 }
 
