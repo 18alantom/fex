@@ -53,7 +53,7 @@ info: Info,
 
 const Self = @This();
 pub fn init(allocator: mem.Allocator, config: *Config) Self {
-    var indent_list = IndentList.init(allocator);
+    const indent_list = IndentList.init(allocator);
     return .{
         .indent_list = indent_list,
         .allocator = allocator,
@@ -101,7 +101,7 @@ pub fn printLines(
         if (view.print_all) {
             try self.printLine(i, view, draw);
         } else if (i == view.cursor or i == view.prev_cursor) {
-            var row = start_row + (i - view.first);
+            const row = start_row + (i - view.first);
             try draw.moveCursor(row, 0);
             try self.printLine(i, view, draw);
         }
@@ -134,7 +134,7 @@ fn updateIndentList(self: *Self, entry: Manager.Iterator.Entry) !void {
 fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
     var e: usize = 0;
     for (0..entry.depth) |i| {
-        var ic = if (self.indent_list.items[i]) "│   " else "    ";
+        const ic = if (self.indent_list.items[i]) "│   " else "    ";
         @memcpy(
             obuf[e .. ic.len + e],
             ic,
@@ -151,21 +151,21 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
 
     // Print permission info
     if (self.info.show and self.info.mode) {
-        var mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
+        const mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
         try draw.print(mode, .{ .no_style = true });
         has_prefix_info = true;
     }
 
     // Print size
     if (self.info.show and self.info.size) {
-        var size = try statfmt.size(try entry.item.stat(), &self.obuf);
+        const size = try statfmt.size(try entry.item.stat(), &self.obuf);
         try draw.print(size, .{ .fg = .cyan });
         has_prefix_info = true;
     }
 
     // Print time
     if (self.timeType()) |time_type| {
-        var time = statfmt.time(try entry.item.stat(), time_type, &self.obuf);
+        const time = statfmt.time(try entry.item.stat(), time_type, &self.obuf);
         try draw.print(time, .{ .fg = .yellow });
         has_prefix_info = true;
     }
@@ -175,7 +175,7 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     }
 
     // Print tree branches
-    var branch = try self.getBranch(entry, &self.obuf);
+    const branch = try self.getBranch(entry, &self.obuf);
     try draw.print(branch, .{ .faint = true });
 
     // Print icons
@@ -219,7 +219,7 @@ fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {
 
 fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
     var e = self.setIndentLines(entry, obuf).len;
-    var ec = if (entry.last) "└── " else "├── ";
+    const ec = if (entry.last) "└── " else "├── ";
     @memcpy(obuf[e .. e + ec.len], ec);
     e = e + ec.len;
     return obuf[0..e];

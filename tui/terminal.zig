@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const os = std.os;
+const posix = std.posix;
 const fmt = std.fmt;
 
 pub const Size = struct {
@@ -15,8 +15,8 @@ pub const Position = struct {
 
 /// Gets number of rows and columns in the terminal
 pub fn getTerminalSize() Size {
-    var ws: os.system.winsize = undefined;
-    _ = os.system.ioctl(os.STDOUT_FILENO, os.system.T.IOCGWINSZ, &ws);
+    var ws: posix.winsize = undefined;
+    _ = posix.system.ioctl(posix.STDOUT_FILENO, posix.T.IOCGWINSZ, &ws);
     return .{ .cols = ws.ws_col, .rows = ws.ws_row };
 }
 
@@ -25,12 +25,12 @@ pub fn getCursorPosition() !Position {
     // control sequence will not be written without it.
     //
     // TODO: probably needs some kind of mutex?
-    _ = try os.write(os.STDOUT_FILENO, "\x1b[6n");
+    _ = try posix.write(posix.STDOUT_FILENO, "\x1b[6n");
 
     var buf: [64]u8 = undefined;
 
     // format: \x1b, "[", R1,..., Rn, ";", C1, ..., Cn, "R"
-    var len = try os.read(os.STDIN_FILENO, &buf);
+    const len = try posix.read(posix.STDIN_FILENO, &buf);
 
     if (len < 6 or buf[0] != 27 or buf[1] != '[') {
         return error.InvalidValueReturned;
@@ -44,7 +44,7 @@ pub fn getCursorPosition() !Position {
 
     var is_parsing_cols = false;
     for (2..(len - 1)) |i| {
-        var b = buf[i];
+        const b = buf[i];
         if (b == ';') {
             is_parsing_cols = true;
             continue;
@@ -79,24 +79,32 @@ pub fn getCursorPosition() !Position {
 ///
 /// `bak`: pointer to store termios struct backup before
 /// altering, this is used to disable raw mode.
-pub fn enableRawMode(bak: *os.system.termios) !void {
-    var termios = try os.tcgetattr(os.STDIN_FILENO);
+pub fn enableRawMode(bak: *posix.termios) !void {
+    var termios = try posix.tcgetattr(posix.STDIN_FILENO);
     bak.* = termios;
 
-    termios.iflag &= ~(os.system.IXON | os.system.ICRNL);
-    termios.lflag &= ~(os.system.ECHO | os.system.ICANON | os.system.IEXTEN) | os.system.ISIG;
-    try os.tcsetattr(
-        os.STDIN_FILENO,
-        os.TCSA.FLUSH,
+    termios.iflag.IXON = false;
+    termios.iflag.ICRNL = false;
+
+    termios.lflag.ECHO = false;
+    termios.lflag.ICANON = false;
+    termios.lflag.IEXTEN = false;
+    termios.lflag.ISIG = true;
+
+    // termios.iflag &= ~(posix.system.IXON | posix.system.ICRNL);
+    // termios.lflag &= ~(posix.system.ECHO | posix.system.ICANON | posix.system.IEXTEN) | posix.system.ISIG;
+    try posix.tcsetattr(
+        posix.STDIN_FILENO,
+        posix.TCSA.FLUSH,
         termios,
     );
 }
 
 /// Reverts `enableRawMode` to restore initial functionality.
-pub fn disableRawMode(bak: *os.system.termios) !void {
-    try os.tcsetattr(
-        os.STDIN_FILENO,
-        os.TCSA.FLUSH,
+pub fn disableRawMode(bak: *posix.termios) !void {
+    try posix.tcsetattr(
+        posix.STDIN_FILENO,
+        posix.TCSA.FLUSH,
         bak.*,
     );
     return;

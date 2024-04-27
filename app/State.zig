@@ -32,19 +32,19 @@ allocator: mem.Allocator,
 const Self = @This();
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {
-    var viewport = try allocator.create(Viewport);
+    const viewport = try allocator.create(Viewport);
     viewport.* = try Viewport.init();
 
-    var view = try allocator.create(View);
+    const view = try allocator.create(View);
     view.* = View.init(allocator);
 
-    var output = try allocator.create(Output);
+    const output = try allocator.create(Output);
     output.* = try Output.init(allocator, config);
 
-    var input = try allocator.create(Input);
+    const input = try allocator.create(Input);
     input.* = Input.init();
 
-    var manager = try allocator.create(Manager);
+    const manager = try allocator.create(Manager);
     manager.* = try Manager.init(allocator, config.root);
 
     return .{
@@ -98,7 +98,7 @@ pub fn fillBuffer(self: *Self) !void {
     defer self.reiterate = false;
     try self.initializeIterator();
 
-    var max_append = self.view.first + self.viewport.max_rows;
+    const max_append = self.view.first + self.viewport.max_rows;
     self.view.buffer.clearAndFree();
 
     while (self.iterator.?.next()) |e| {
@@ -117,7 +117,7 @@ fn initializeIterator(self: *Self) !void {
         self.allocator.destroy(iter);
     }
 
-    var iterator = try self.allocator.create(Manager.Iterator);
+    const iterator = try self.allocator.create(Manager.Iterator);
     iterator.* = try self.manager.iterate(self.itermode);
 
     self.iterator = iterator;
@@ -197,7 +197,7 @@ pub fn appendOne(self: *Self) !bool {
         return false;
     }
 
-    var entry = self.iterator.?.next();
+    const entry = self.iterator.?.next();
     if (entry == null) {
         return false;
     }

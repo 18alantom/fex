@@ -30,7 +30,8 @@ fn exe(allocator: mem.Allocator, config: *args.Config) !void {
 }
 
 test "app" {
-    std.debug.print("\n", .{});
     // TODO: run test on different thread, send inputs
-    try exe(std.testing.allocator, ".");
+    std.debug.print("\n", .{});
+    var config: args.Config = .{ .root = "." };
+    try exe(std.testing.allocator, &config);
 }

@@ -51,13 +51,13 @@ pub fn up(self: *Self) !?*Item {
 ///
 /// Returns new_root if child is found in tree else null.
 pub fn down(self: *Self, child: *Item) !?*Item {
-    var _parent = try _findParent(self.root, child);
+    const _parent = try _findParent(self.root, child);
     if (_parent == null) {
         return null;
     }
 
     var parent = _parent.?;
-    var is_root = parent == self.root;
+    const is_root = parent == self.root;
     parent.deinitSkipChild(child);
     if (!is_root) {
         self.root.deinit();
@@ -173,13 +173,13 @@ pub const Iterator = struct {
             return;
         }
 
-        var children = try entry.item.children();
+        const children = try entry.item.children();
         for (0..children.items.len) |index| {
             // TODO: Add ignore patterns
 
             // Required because Items are popped off the stack.
-            var reverse_index = children.items.len - 1 - index;
-            var child_entry = getEntry(reverse_index, entry.depth, children);
+            const reverse_index = children.items.len - 1 - index;
+            const child_entry = getEntry(reverse_index, entry.depth, children);
             try self.stack.append(child_entry);
         }
     }
@@ -199,7 +199,7 @@ pub fn getEntry(index: usize, parent_depth: usize, children: ItemList) Iterator.
 const testing = std.testing;
 test "leaks in Manager" {
     var m = try Self.init(testing.allocator, ".");
-    var r = m.root;
+    const r = m.root;
     _ = try m.up();
     try testing.expect(m.root != r);
     try testing.expectEqual(try m.findParent(r), m.root);

@@ -62,7 +62,7 @@ pub fn repeat(buf: []u8, str: []const u8, reps: usize) []u8 {
 }
 
 pub fn strftime(format: []const u8, sec: isize, buf: []u8) []u8 {
-    var time_info = libc.localtime(&sec);
+    const time_info = libc.localtime(&sec);
     const wlen = libc.strftime(
         buf.ptr,
         buf.len,

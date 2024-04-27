@@ -7,7 +7,7 @@ const utils = @import("../utils.zig");
 const fs = std.fs;
 const heap = std.heap;
 const mem = std.mem;
-const os = std.os;
+const posix = std.posix;
 
 // pub const Viewport = struct {
 // Terminal related fields
@@ -17,12 +17,12 @@ position: terminal.Position, // cursor position
 // Display related fields
 max_rows: u16 = 1, // max rows
 start_row: u16 = 1, // 1 based index
-termios_bak: os.termios,
+termios_bak: posix.termios,
 
 const Self = @This();
 
 pub fn init() !Self {
-    var bak: os.termios = undefined;
+    var bak: posix.termios = undefined;
     try terminal.enableRawMode(&bak);
     return .{
         .max_rows = 1,
@@ -41,7 +41,7 @@ pub fn setBounds(self: *Self) !void {
     // Note: terminal indices start from 1
     // Hence top left is 1,1
     self.size = terminal.getTerminalSize();
-    var cursor_position = try terminal.getCursorPosition();
+    const cursor_position = try terminal.getCursorPosition();
     self.position = try Self.getAdjustedPosition(self.size, cursor_position);
 
     // Max rows used for printing
@@ -63,18 +63,18 @@ fn getAdjustedPosition(size: terminal.Size, cursor_position: terminal.Position) 
     }
 
     // Adjust Position: shift prompt (and cursor) up with newlines
-    var scroll_up = min_rows - rows_below;
-    var row = size.rows - min_rows;
-    var col = cursor_position.col;
+    const scroll_up = min_rows - rows_below;
+    const row = size.rows - min_rows;
+    const col = cursor_position.col;
 
     // Scroll up and set cursor postion
     var obuf: [1024]u8 = undefined;
-    var slc = try std.fmt.bufPrint(
+    const slc = try std.fmt.bufPrint(
         &obuf,
         "\x1b[{d}S\x1b[{d},{d}H",
         .{ scroll_up, row, col },
     );
-    _ = try os.write(os.STDOUT_FILENO, slc);
+    _ = try posix.write(posix.STDOUT_FILENO, slc);
 
     return terminal.Position{ .row = row, .col = col };
 }

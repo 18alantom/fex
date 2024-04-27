@@ -23,8 +23,8 @@ sbuf: [2048]u8, // Style Buffer
 const Self = @This();
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {
-    var treeview = try allocator.create(TreeView);
-    var writer = try allocator.create(tui.BufferedStdOut);
+    const treeview = try allocator.create(TreeView);
+    const writer = try allocator.create(tui.BufferedStdOut);
     var draw = try allocator.create(tui.Draw);
 
     writer.* = tui.BufferedStdOut.init();

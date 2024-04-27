@@ -31,7 +31,7 @@ state: *State,
 const Self = @This();
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {
-    var state = try allocator.create(State);
+    const state = try allocator.create(State);
     state.* = try State.init(allocator, config);
 
     return .{

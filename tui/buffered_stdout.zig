@@ -86,7 +86,7 @@ pub fn BufferedStdOut(comptime buffer_size: usize) type {
         fn _print(self: *Self, comptime bytes: []const u8, args: anytype, is_use_buffer: bool) !usize {
             var fbs = std.io.fixedBufferStream(&self.fbuf);
             try fmt.format(fbs.writer(), bytes, args);
-            var fbytes = fbs.getWritten();
+            const fbytes = fbs.getWritten();
             if (is_use_buffer) {
                 return try self.writebf(fbytes);
             } else {

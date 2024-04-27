@@ -186,7 +186,7 @@ pub fn string(
 
 pub fn styled(buf: []u8, str: []const u8, config: SyleConfig) ![]u8 {
     var sbuf: [2048]u8 = undefined;
-    var style = try getStyle(&sbuf, config);
+    const style = try getStyle(&sbuf, config);
     return try fmt.bufPrint(buf, "\x1b[{s}{s}\x1b[m", .{ str, style });
 }
 
@@ -197,7 +197,7 @@ pub fn print(self: *Self, str: []const u8, config: SyleConfig) !void {
     }
 
     var sbuf: [2048]u8 = undefined;
-    var style = try getStyle(&sbuf, config);
+    const style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m", .{ style, str });
 }
 
@@ -208,7 +208,7 @@ pub fn println(self: *Self, str: []const u8, config: SyleConfig) !void {
     }
 
     var sbuf: [2048]u8 = undefined;
-    var style = try getStyle(&sbuf, config);
+    const style = try getStyle(&sbuf, config);
     _ = try self.writer.print("\x1b[{s}{s}\x1b[m\n", .{ style, str });
 }
 
@@ -241,14 +241,14 @@ pub fn clearScreen(self: *Self) !void {
 pub fn clearNLines(self: *Self, n: u16) !void {
     const size = terminal.getTerminalSize();
     var buf: [128]u8 = undefined;
-    var slc = try fmt.bufPrint(&buf, "\x1b[{d}H\x1b[{d}A\x1b[0J", .{ size.rows, n });
+    const slc = try fmt.bufPrint(&buf, "\x1b[{d}H\x1b[{d}A\x1b[0J", .{ size.rows, n });
     _ = try self.writer.write(slc);
 }
 
 /// Move cursor to {row=row, col=0} and erase from cursor to screen end.
 pub fn clearLinesBelow(self: *Self, row: u16) !void {
     var buf: [128]u8 = undefined;
-    var slc = try fmt.bufPrint(&buf, "\x1b[{d};0H\x1b[0J", .{row});
+    const slc = try fmt.bufPrint(&buf, "\x1b[{d};0H\x1b[0J", .{row});
     _ = try self.writer.write(slc);
 }
 

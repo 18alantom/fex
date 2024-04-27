@@ -35,7 +35,7 @@ pub fn init(allocator: mem.Allocator, root: []const u8) !*Self {
     }
 
     var item = try allocator.create(Self);
-    var abs_path = try dir.realpath(".", &item.abs_path_buf);
+    const abs_path = try dir.realpath(".", &item.abs_path_buf);
     item.allocator = allocator;
     item.abs_path_buf[abs_path.len] = 0; // sentinel termination
     item.abs_path_len = abs_path.len; // set len
@@ -170,14 +170,13 @@ pub fn children(self: *Self) !ItemList {
     const ap = self.abspath();
 
     var dir = try fs.openDirAbsolute(ap, .{});
-    var idir = try dir.openIterableDir(".", .{});
-    var iter = idir.iterate();
+    var iter = dir.iterateAssumeFirstIteration();
     var contents = ItemList.init(self.allocator);
 
     // Will not work on windows
-    var is_root = self.abs_path_len == 1 and self.abs_path_buf[0] == '/';
+    const is_root = self.abs_path_len == 1 and self.abs_path_buf[0] == '/';
     while (true) {
-        var entry: ?fs.IterableDir.Entry = iter.next() catch break;
+        const entry: ?fs.Dir.Entry = iter.next() catch break;
         if (entry == null) {
             break;
         }
@@ -250,7 +249,7 @@ test "leaks in Item" {
     var item = try Self.init(testing.allocator, ".");
 
     var prnt = try item.parent();
-    var chld = try item.children();
+    const chld = try item.children();
     defer {
         prnt.deinitSkipChild(item);
         item.deinit();

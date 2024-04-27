@@ -51,7 +51,7 @@ fn getSizeSuffix(bytes: i64) u8 {
 }
 
 fn getTruncated(bytes: i64) f64 {
-    var bytes_f = @max(@as(f64, @floatFromInt(bytes)), 0);
+    const bytes_f = @max(@as(f64, @floatFromInt(bytes)), 0);
     if (bytes_f < 1_000) return bytes_f;
     if (bytes_f < 1_000_000) return bytes_f / 1_000;
     if (bytes_f < 1_000_000_000) return bytes_f / 1_000_000;

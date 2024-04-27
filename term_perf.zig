@@ -5,9 +5,9 @@ const fs = std.fs;
 const fmt = std.fmt;
 const heap = std.heap;
 const mem = std.mem;
-const os = std.os;
 const io = std.io;
 const time = std.time;
+const posix = std.posix;
 const terminal = tui.terminal;
 
 const print = std.debug.print;
@@ -34,7 +34,7 @@ const RenderStats = struct {
 };
 const TimeLog = std.ArrayList(RenderStats);
 pub fn main() !void {
-    var bak: os.termios = undefined;
+    var bak: posix.termios = undefined;
     try terminal.enableRawMode(&bak);
     defer terminal.disableRawMode(&bak) catch {};
 
@@ -63,7 +63,7 @@ pub fn print_timelog(timelog: *TimeLog) void {
     };
 
     for (0..timelog.items.len) |i| {
-        var log = timelog.items[i];
+        const log = timelog.items[i];
         totals.bytes_per_row += log.bytes_per_row;
         totals.num_rows += log.num_rows;
         totals.num_cols += log.num_cols;

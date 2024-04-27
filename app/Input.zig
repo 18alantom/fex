@@ -46,7 +46,7 @@ const Self = @This();
 
 pub fn init() Self {
     const reader = io.getStdIn().reader();
-    var input = tui.Input{ .reader = reader };
+    const input = tui.Input{ .reader = reader };
     return .{
         .reader = reader,
         .input = input,

@@ -23,7 +23,7 @@ pub const TimeType = enum { modified, changed, accessed };
 pub fn stat(abspath: []const u8) !Self {
 
     // To sentinel terminated pointer
-    var abspath_w: [*:0]const u8 = @ptrCast(abspath.ptr);
+    const abspath_w: [*:0]const u8 = @ptrCast(abspath.ptr);
 
     var statbuf: libc.struct_stat = undefined;
     if (libc.lstat(abspath_w, &statbuf) != 0) {
