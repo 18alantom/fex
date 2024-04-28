@@ -3,6 +3,7 @@ const std = @import("std");
 const utils = @import("../utils.zig");
 const linux = std.os.linux;
 
+// Due to lazy eval not included if linux
 const libc = @cImport({
     @cInclude("sys/stat.h");
 });

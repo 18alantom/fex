@@ -2,10 +2,6 @@ const std = @import("std");
 const utils = @import("../utils.zig");
 const Stat = @import("./Stat.zig");
 
-const libc = @cImport({
-    @cInclude("sys/time.h");
-});
-
 const fmt = std.fmt;
 
 // Item Type
@@ -121,7 +117,7 @@ pub fn time(stat: Stat, time_type: Stat.TimeType, buf: []u8) []u8 {
     };
 
     const pre_format = "%d %b";
-    const suf_format = if (isCurrentYear(sec)) "%H:%M" else "%Y";
+    const suf_format = if (utils.isCurrentYear(sec)) "%H:%M" else "%Y";
 
     var ibuf: [32]u8 = undefined;
     var islc = utils.strftime(pre_format, sec, &ibuf);
@@ -133,13 +129,4 @@ pub fn time(stat: Stat, time_type: Stat.TimeType, buf: []u8) []u8 {
     const suf_wlen = utils.lpad(islc, 5, ' ', buf[(pre_wlen + 1)..]).len;
 
     return buf[0..(pre_wlen + 1 + suf_wlen)];
-}
-
-fn isCurrentYear(sec: isize) bool {
-    const now = libc.time(null);
-    return year(sec) == year(now);
-}
-
-fn year(sec: isize) isize {
-    return @divFloor(sec, 3600 * 24 * 365) + 1970;
 }

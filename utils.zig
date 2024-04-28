@@ -7,7 +7,7 @@ const mem = std.mem;
 const unicode = std.unicode;
 
 const libc = @cImport({
-    @cInclude("sys/time.h");
+    @cInclude("time.h");
 });
 
 const print = std.debug.print;
@@ -70,6 +70,15 @@ pub fn strftime(format: []const u8, sec: isize, buf: []u8) []u8 {
         time_info,
     );
     return buf[0..wlen];
+}
+
+pub fn isCurrentYear(sec: isize) bool {
+    const now = libc.time(null);
+    return year(sec) == year(now);
+}
+
+fn year(sec: isize) isize {
+    return @divFloor(sec, 3600 * 24 * 365) + 1970;
 }
 
 pub fn lpad(str: []const u8, len: usize, pad: u8, buf: []u8) []u8 {
