@@ -87,3 +87,14 @@ pub fn lpad(str: []const u8, len: usize, pad: u8, buf: []u8) []u8 {
 pub fn eql(a: []const u8, b: []const u8) bool {
     return mem.eql(u8, a, b);
 }
+
+pub fn FieldType(comptime T: type, comptime name: []const u8) type {
+    comptime std.debug.assert(@hasField(T, name));
+    inline for (@typeInfo(T).Struct.fields) |f| {
+        if (std.mem.eql(u8, f.name, name)) {
+            return f.type;
+        }
+    }
+
+    unreachable;
+}

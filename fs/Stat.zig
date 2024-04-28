@@ -1,14 +1,22 @@
 const builtin = @import("builtin");
 const std = @import("std");
+const utils = @import("../utils.zig");
+const linux = std.os.linux;
+
 const libc = @cImport({
     @cInclude("sys/stat.h");
 });
 
+const is_linux = builtin.os.tag == .linux;
+const Mode = if (is_linux)
+    utils.FieldType(linux.Stat, "mode") // u32
+else
+    utils.FieldType(libc.struct_stat, "st_mode"); // c_int, i32
+
 const fs = std.fs;
 const mem = std.mem;
-const os = std.os;
 
-mode: u16,
+mode: Mode,
 size: i64,
 
 // Seconds since epoch
@@ -21,17 +29,32 @@ const Self = @This();
 pub const TimeType = enum { modified, changed, accessed };
 
 pub fn stat(abspath: []const u8) !Self {
-
     // To sentinel terminated pointer
     const abspath_w: [*:0]const u8 = @ptrCast(abspath.ptr);
 
-    var statbuf: libc.struct_stat = undefined;
-    if (libc.lstat(abspath_w, &statbuf) != 0) {
-        return error.StatError;
+    // if linux, can use Zig impl of lstat
+    if (is_linux) {
+        var statbuf: linux.Stat = undefined;
+        if (linux.lstat(abspath_w, &statbuf) != 0) {
+            return error.StatError;
+        }
+
+        return .{
+            .mode = statbuf.mode,
+            .size = statbuf.size,
+            .mtime_sec = statbuf.mtim.tv_sec,
+            .atime_sec = statbuf.atim.tv_sec,
+            .ctime_sec = statbuf.ctim.tv_sec,
+        };
     }
 
-    // macOS
-    if (@hasField(libc.struct_stat, "st_mtimespec")) {
+    // if not linux, defaul to libc impl of lstat
+    else {
+        var statbuf: libc.struct_stat = undefined;
+        if (libc.lstat(abspath_w, &statbuf) != 0) {
+            return error.StatError;
+        }
+
         return .{
             .mode = statbuf.st_mode,
             .size = statbuf.st_size,
@@ -40,19 +63,6 @@ pub fn stat(abspath: []const u8) !Self {
             .ctime_sec = statbuf.st_ctimespec.tv_sec,
         };
     }
-
-    // Linux
-    else if ((@hasField(libc.struct_stat, "st_mtim"))) {
-        return .{
-            .mode = statbuf.st_mode,
-            .size = statbuf.st_size,
-            .mtime_sec = statbuf.st_mtim.tv_sec,
-            .atime_sec = statbuf.st_atim.tv_sec,
-            .ctime_sec = statbuf.st_ctim.tv_sec,
-        };
-    }
-
-    return error.NotImplemented;
 }
 
 // File type checks
@@ -91,39 +101,48 @@ pub fn isSock(self: *const Self) bool {
 
 // User permissions
 pub fn hasUserExec(self: *const Self) bool {
-    return (libc.S_IXUSR & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IXUSR else libc.S_IXUSR;
+    return (mask & self.mode) > 0;
 }
 
 pub fn hasUserWrite(self: *const Self) bool {
-    return (libc.S_IWUSR & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IWUSR else libc.S_IWUSR;
+    return (mask & self.mode) > 0;
 }
 
 pub fn hasUserRead(self: *const Self) bool {
-    return (libc.S_IRUSR & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IRUSR else libc.S_IRUSR;
+    return (mask & self.mode) > 0;
 }
 
 // Group permissions
 pub fn hasGroupExec(self: *const Self) bool {
-    return (libc.S_IXGRP & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IXGRP else libc.S_IXGRP;
+    return (mask & self.mode) > 0;
 }
 
 pub fn hasGroupWrite(self: *const Self) bool {
-    return (libc.S_IWGRP & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IWGRP else libc.S_IWGRP;
+    return (mask & self.mode) > 0;
 }
 
 pub fn hasGroupRead(self: *const Self) bool {
-    return (libc.S_IRGRP & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IRGRP else libc.S_IRGRP;
+    return (mask & self.mode) > 0;
 }
 
 // Other permissions
 pub fn hasOtherExec(self: *const Self) bool {
-    return (libc.S_IXOTH & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IXOTH else libc.S_IXOTH;
+    return (mask & self.mode) > 0;
 }
 
 pub fn hasOtherWrite(self: *const Self) bool {
-    return (libc.S_IWOTH & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IWOTH else libc.S_IWOTH;
+    return (mask & self.mode) > 0;
 }
 
 pub fn hasOtherRead(self: *const Self) bool {
-    return (libc.S_IROTH & self.mode) > 0;
+    const mask = if (is_linux) linux.S.IROTH else libc.S_IROTH;
+    return (mask & self.mode) > 0;
 }
