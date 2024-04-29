@@ -169,7 +169,7 @@ pub fn children(self: *Self) !ItemList {
 
     const ap = self.abspath();
 
-    var dir = try fs.openDirAbsolute(ap, .{});
+    var dir = try fs.openDirAbsolute(ap, .{ .iterate = true });
     var iter = dir.iterateAssumeFirstIteration();
     var contents = ItemList.init(self.allocator);
 
