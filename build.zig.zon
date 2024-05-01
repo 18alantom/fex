@@ -1,0 +1,22 @@
+.{
+    .name = "fex",
+    .version = "0.1.0-alpha",
+    .minimum_zig_version = "0.12.0",
+    .dependencies = .{
+        // libc
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "LICENSE",
+        "README.md",
+        "app",
+        "fs",
+        "app",
+        "tui",
+        "tui.zig",
+        "utils",
+        "utils.zig",
+        "main.zig",
+    },
+}

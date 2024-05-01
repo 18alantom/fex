@@ -5,3 +5,5 @@ temp*
 *.o
 notes.md
 .DS_Store
+zig-cache
+zig-out
