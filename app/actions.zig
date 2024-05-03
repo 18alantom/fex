@@ -86,14 +86,15 @@ pub fn expandToDepth(state: *State, itermode: i32) void {
 
 pub fn changeRoot(state: *State) !void {
     var new_root = state.itemUnderCursor();
-    if (new_root == state.manager.root) {
-        return;
-    }
-
     if (!try new_root.isDir()) {
         new_root = try new_root.parent();
     }
 
+    if (new_root == state.manager.root) {
+        return;
+    }
+
+    _ = try new_root.children();
     state.manager.changeRoot(new_root);
     state.view.cursor = 0;
     state.reiterate = true;
