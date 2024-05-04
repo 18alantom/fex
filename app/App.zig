@@ -57,5 +57,7 @@ pub fn run(self: *Self) !void {
             error.QuitApp => return,
             else => return err,
         };
+
+        if (try self.state.dumpStdout()) return;
     }
 }

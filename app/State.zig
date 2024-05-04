@@ -14,6 +14,7 @@ const Output = @import("./Output.zig");
 const actions = @import("./actions.zig");
 const args = @import("./args.zig");
 
+const CharArray = std.ArrayList(u8);
 const AppAction = Input.AppAction;
 const Config = args.Config;
 
@@ -22,6 +23,13 @@ view: *View,
 output: *Output,
 input: *Input,
 manager: *Manager,
+
+// If `stdout` is not empty, screen is cleared (stderr)
+// and contents of `stdout` are written to stdout and
+// fex exits.
+//
+// This is used to set prompt to a command.
+stdout: *CharArray,
 
 reiterate: bool,
 itermode: i32,
@@ -47,12 +55,16 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     const manager = try allocator.create(Manager);
     manager.* = try Manager.init(allocator, config.root);
 
+    const stdout = try allocator.create(CharArray);
+    stdout.* = CharArray.init(allocator);
+
     return .{
         .viewport = viewport,
         .view = view,
         .output = output,
         .input = input,
         .manager = manager,
+        .stdout = stdout,
 
         .reiterate = false,
         .itermode = -2,
@@ -74,6 +86,9 @@ pub fn deinit(self: *Self) void {
 
     self.input.deinit();
     self.allocator.destroy(self.input);
+
+    self.stdout.deinit();
+    self.allocator.destroy(self.stdout);
 
     if (self.iterator) |iter| {
         iter.deinit();
@@ -203,5 +218,14 @@ pub fn appendOne(self: *Self) !bool {
     }
 
     try self.view.buffer.append(entry.?);
+    return true;
+}
+
+pub fn dumpStdout(self: *Self) !bool {
+    if (self.stdout.items.len == 0) return false;
+    self.output.writer.unbuffered();
+    try self.output.draw.clearLinesBelow(self.viewport.start_row);
+
+    _ = try std.io.getStdOut().writer().write(self.stdout.items);
     return true;
 }

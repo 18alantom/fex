@@ -171,8 +171,7 @@ pub fn changeDir(state: *State) !void {
         return;
     }
 
-    // TODO: Complete this
-    std.debug.print("cd into {s}\n", .{item.abspath()});
-    // var argv = [_][]const u8{ "cd", item.abspath() };
-    // try utils.os.run(&argv);
+    try state.stdout.appendSlice("cd ");
+    try state.stdout.appendSlice(item.abspath());
+    try state.stdout.appendSlice("\n");
 }
