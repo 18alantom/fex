@@ -171,7 +171,7 @@ pub fn changeDir(state: *State) !void {
         return;
     }
 
-    try state.stdout.appendSlice("cd ");
+    try state.stdout.appendSlice("cd\n");
     try state.stdout.appendSlice(item.abspath());
     try state.stdout.appendSlice("\n");
 }
