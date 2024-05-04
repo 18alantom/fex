@@ -74,7 +74,7 @@ fn getAdjustedPosition(size: terminal.Size, cursor_position: terminal.Position) 
         "\x1b[{d}S\x1b[{d},{d}H",
         .{ scroll_up, row, col },
     );
-    _ = try posix.write(posix.STDOUT_FILENO, slc);
+    _ = try posix.write(posix.STDERR_FILENO, slc);
 
     return terminal.Position{ .row = row, .col = col };
 }

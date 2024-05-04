@@ -16,7 +16,7 @@ pub const Position = struct {
 /// Gets number of rows and columns in the terminal
 pub fn getTerminalSize() Size {
     var ws: posix.winsize = undefined;
-    _ = posix.system.ioctl(posix.STDOUT_FILENO, posix.T.IOCGWINSZ, &ws);
+    _ = posix.system.ioctl(posix.STDERR_FILENO, posix.T.IOCGWINSZ, &ws);
     return .{ .cols = ws.ws_col, .rows = ws.ws_row };
 }
 
@@ -25,7 +25,7 @@ pub fn getCursorPosition() !Position {
     // control sequence will not be written without it.
     //
     // TODO: probably needs some kind of mutex?
-    _ = try posix.write(posix.STDOUT_FILENO, "\x1b[6n");
+    _ = try posix.write(posix.STDERR_FILENO, "\x1b[6n");
 
     var buf: [64]u8 = undefined;
 
