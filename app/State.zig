@@ -12,10 +12,13 @@ const TreeView = @import("./TreeView.zig");
 const Input = @import("./Input.zig");
 const Output = @import("./Output.zig");
 const App = @import("./App.zig");
+const Capture = @import("./Capture.zig");
+
 const actions = @import("./actions.zig");
+const utils = @import("../utils.zig");
 const args = @import("./args.zig");
 
-const CharArray = std.ArrayList(u8);
+const CharArray = utils.CharArray;
 const AppAction = Input.AppAction;
 const Config = App.Config;
 
@@ -24,6 +27,7 @@ view: *View,
 output: *Output,
 input: *Input,
 manager: *Manager,
+search: *Capture,
 
 // If `stdout` is not empty, screen is cleared (stderr)
 // and contents of `stdout` are written to stdout and
@@ -59,6 +63,9 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     const stdout = try allocator.create(CharArray);
     stdout.* = CharArray.init(allocator);
 
+    const search = try allocator.create(Capture);
+    search.* = try Capture.init(allocator);
+
     return .{
         .viewport = viewport,
         .view = view,
@@ -66,6 +73,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .input = input,
         .manager = manager,
         .stdout = stdout,
+        .search = search,
 
         .reiterate = false,
         .itermode = -2,
@@ -90,6 +98,9 @@ pub fn deinit(self: *Self) void {
 
     self.stdout.deinit();
     self.allocator.destroy(self.stdout);
+
+    self.search.deinit();
+    self.allocator.destroy(self.search);
 
     if (self.iterator) |iter| {
         iter.deinit();
@@ -154,7 +165,26 @@ pub fn printContents(self: *Self) !void {
 }
 
 pub fn waitForAction(self: *Self) !Input.AppAction {
+    if (self.search.is_capturing) {
+        try self.captureSearchQuery();
+        return .no_action;
+    }
+
     return try self.input.getAppAction();
+}
+
+fn captureSearchQuery(self: *Self) !void {
+    var buf: [256]u8 = undefined;
+    const slc = self.input.read(&buf) catch |err| switch (err) {
+        error.EndOfStream => return,
+        else => return err,
+    };
+
+    if (slc.len == 1 and slc[0] == 27) {
+        self.search.stop();
+    }
+
+    try self.search.capture(slc);
 }
 
 pub fn executeAction(self: *Self, action: AppAction) !void {
@@ -184,6 +214,8 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_eight => actions.expandToDepth(self, 7),
         .depth_nine => actions.expandToDepth(self, 8),
         .toggle_info => actions.toggleInfo(self),
+        .search => actions.search(self),
+        .no_action => return,
         .quit => return error.QuitApp,
     }
 }

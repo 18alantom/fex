@@ -175,3 +175,7 @@ pub fn changeDir(state: *State) !void {
     try state.stdout.appendSlice(item.abspath());
     try state.stdout.appendSlice("\n");
 }
+
+pub fn search(state: *State) void {
+    state.search.start();
+}

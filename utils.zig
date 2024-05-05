@@ -10,6 +10,8 @@ const libc = @cImport({
     @cInclude("time.h");
 });
 
+pub const CharArray = std.ArrayList(u8);
+
 const print = std.debug.print;
 
 pub const os = @import("./utils/os.zig");

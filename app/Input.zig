@@ -8,8 +8,6 @@ const TreeView = @import("./TreeView.zig");
 const fs = std.fs;
 const io = std.io;
 
-const print = std.debug.print;
-
 pub const AppAction = enum {
     up,
     down,
@@ -36,6 +34,8 @@ pub const AppAction = enum {
     open_item,
     change_dir,
     toggle_info,
+    search,
+    no_action,
 };
 
 reader: fs.File.Reader,
@@ -55,6 +55,10 @@ pub fn init() Self {
 }
 
 pub fn deinit(_: *Self) void {}
+
+pub fn read(self: *Self, buf: []u8) ![]u8 {
+    return try self.input.read(buf);
+}
 
 pub fn getAppAction(self: *Self) !AppAction {
     while (true) {
@@ -93,6 +97,8 @@ pub fn getAppAction(self: *Self) !AppAction {
             .seven => AppAction.depth_seven,
             .eight => AppAction.depth_eight,
             .nine => AppAction.depth_nine,
+            // Other actions
+            .fslash => AppAction.search,
             // Quit
             .q => AppAction.quit,
             .ctrl_c => AppAction.quit,
