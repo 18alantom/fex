@@ -1,9 +1,36 @@
+# Sets up ZSH widget for fex, this is needed for
+# - launching fex with a shortcut
+# - executing commands such as `cd` from fex
+
+# Stores ZSH before initialization options in `__fex_pre_init_options`
+# such that evaluating the variable will restore the options.
+# 
+# The variable is evaluated in the `always` block after setting up
+# the fex ZSH widget.
+#
+# Taken, mostly verbatim, from:
+# - https://github.com/junegunn/fzf/blob/master/shell/completion.zsh
+if 'zmodload' 'zsh/parameter' 2>'/dev/null' && (( ${+options} )); then
+  __fex_pre_init_options="options=(${(j: :)${(kv)options[@]}})"
+else
+  () {
+    __fex_pre_init_options="setopt"
+    'local' '__fex_opt'
+    for __fex_opt in "${(@)${(@f)$(set -o)}%% *}"; do
+      if [[ -o "$__fex_opt" ]]; then
+        __fex_pre_init_options+=" -o $__fex_opt"
+      else
+        __fex_pre_init_options+=" +o $__fex_opt"
+      fi
+    done
+  }
+fi
+
 'emulate' 'zsh' '-o' no_aliases
 
-function __fex_cmd {
-  # Use default command, else fallback to just 'fex'
-  echo ${FEX_DEFAULT_COMMAND:-fex}
-}
+{
+  
+FEX_COMMAND=${FEX_DEFAULT_COMMAND:-fex}
 
 function __fex_exec {
   setopt localoptions pipefail no_aliases 2> /dev/null
@@ -12,7 +39,7 @@ function __fex_exec {
   # Echo every '\n' delimited item written to stdout
   # the (q) ensures `item` is treated as a single word
   # even if spaces.
-  $(__fex_cmd) "$@" < /dev/tty | while read item; do
+  $(echo $FEX_COMMAND) "$@" < /dev/tty | while read item; do
     echo -n "${(q)item} "
   done
 
@@ -54,7 +81,13 @@ zle -N fex-widget
 # Bind CTRL-F to run fex-widget
 bindkey '^f' fex-widget
 
+} always {
+  # Restore the original options.
+  eval $__fex_pre_init_options
+  'unset' '__fex_pre_init_options'
+}
 
 # References:
-# - https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html
 # - https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh
+# - https://github.com/junegunn/fzf/blob/master/shell/completion.zsh
+# - https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html
