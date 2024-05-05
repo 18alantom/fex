@@ -4,9 +4,10 @@ const std = @import("std");
 const args = @import("./args.zig");
 const tui = @import("../tui.zig");
 const View = @import("./View.zig");
+const App = @import("./App.zig");
 
 const TreeView = @import("./TreeView.zig");
-const Config = args.Config;
+const Config = App.Config;
 
 const fs = std.fs;
 const mem = std.mem;

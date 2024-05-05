@@ -8,7 +8,9 @@ const heap = std.heap;
 const os = std.os;
 
 pub fn main() !void {
-    var config: args.Config = .{ .root = "." };
+    var config: App.Config = .{ .root = "." };
+    try args.setConfigFromEnv(&config);
+
     // Returns true if arg has --help
     if (try args.setConfig(&config)) {
         return;
@@ -23,7 +25,7 @@ pub fn main() !void {
     );
 }
 
-fn exe(allocator: mem.Allocator, config: *args.Config) !void {
+fn exe(allocator: mem.Allocator, config: *App.Config) !void {
     var app = try App.init(allocator, config);
     defer app.deinit();
     try app.run();

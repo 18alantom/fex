@@ -97,6 +97,10 @@ pub fn eql(a: []const u8, b: []const u8) bool {
     return mem.eql(u8, a, b);
 }
 
+pub fn split(buffer: []const u8, delimiter: []const u8) std.mem.SplitIterator(u8, .sequence) {
+    return mem.splitSequence(u8, buffer, delimiter);
+}
+
 pub fn FieldType(comptime T: type, comptime name: []const u8) type {
     comptime std.debug.assert(@hasField(T, name));
     inline for (@typeInfo(T).Struct.fields) |f| {

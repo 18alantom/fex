@@ -11,12 +11,13 @@ const Viewport = @import("./Viewport.zig");
 const TreeView = @import("./TreeView.zig");
 const Input = @import("./Input.zig");
 const Output = @import("./Output.zig");
+const App = @import("./App.zig");
 const actions = @import("./actions.zig");
 const args = @import("./args.zig");
 
 const CharArray = std.ArrayList(u8);
 const AppAction = Input.AppAction;
-const Config = args.Config;
+const Config = App.Config;
 
 viewport: *Viewport,
 view: *View,

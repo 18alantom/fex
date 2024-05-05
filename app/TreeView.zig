@@ -19,10 +19,11 @@ const View = @import("./View.zig");
 const tui = @import("../tui.zig");
 const args = @import("./args.zig");
 const statfmt = @import("../fs/statfmt.zig");
+const App = @import("./App.zig");
 const Stat = @import("../fs/Stat.zig");
 
 const Entry = Manager.Iterator.Entry;
-const Config = args.Config;
+const Config = App.Config;
 
 const fs = std.fs;
 const os = std.os;

@@ -12,8 +12,8 @@ const Viewport = @import("./Viewport.zig");
 const TreeView = @import("./TreeView.zig");
 const Input = @import("./Input.zig");
 const Output = @import("./Output.zig");
+const Stat = @import("../fs/Stat.zig");
 const Entry = Manager.Iterator.Entry;
-const Config = args.Config;
 
 const fs = std.fs;
 const mem = std.mem;
@@ -24,11 +24,21 @@ const bS = tui.style.style;
 const terminal = tui.terminal;
 
 const ItemError = Item.ItemError;
+const TimeType = Stat.TimeType;
 
 allocator: mem.Allocator,
 state: *State,
 
 const Self = @This();
+
+pub const Config = struct {
+    no_icons: bool = false,
+    no_size: bool = false,
+    no_mode: bool = false,
+    no_time: bool = false,
+    time: TimeType = .modified,
+    root: []const u8,
+};
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     const state = try allocator.create(State);
