@@ -26,6 +26,8 @@ const terminal = tui.terminal;
 const ItemError = Item.ItemError;
 const TimeType = Stat.TimeType;
 
+const log = std.log.scoped(.app);
+
 allocator: mem.Allocator,
 state: *State,
 

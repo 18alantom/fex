@@ -38,6 +38,13 @@ pub fn stop(self: *Self) void {
 }
 
 pub fn capture(self: *Self, str: []const u8) !void {
+    // 127 is Backspace
+    if (str.len == 1 and str[0] == 127) {
+        const new_len = self.buffer.items.len -| 1;
+        self.buffer.shrinkRetainingCapacity(new_len);
+        return;
+    }
+
     _ = try self.buffer.appendSlice(str);
 }
 

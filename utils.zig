@@ -15,6 +15,7 @@ pub const CharArray = std.ArrayList(u8);
 const print = std.debug.print;
 
 pub const os = @import("./utils/os.zig");
+pub const log = @import("./utils/log.zig");
 
 /// Returns width of a grapheme in terms of number of characters required to display it
 /// assuming a monospace font.

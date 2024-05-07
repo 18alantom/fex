@@ -6,6 +6,8 @@ const mem = std.mem;
 const io = std.io;
 const os = std.os;
 
+const log = std.log.scoped(.tui_input);
+
 pub const Key = enum {
     up_arrow,
     down_arrow,
@@ -80,6 +82,7 @@ pub fn readKeys(self: *Self) !Key {
     var prev: ?u8 = null;
     while (true) {
         const value = try self.read(&buf);
+        log.debug("input_bytes: {any}", .{value});
         if (value.len == 3) {
             return getTripleCharMappedAction(value);
         }

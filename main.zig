@@ -1,11 +1,19 @@
 const std = @import("std");
-const args = @import("./app/args.zig");
+const builtin = @import("builtin");
+
 const App = @import("./app/App.zig");
+const args = @import("./app/args.zig");
+const utils = @import("./utils.zig");
 
 const fs = std.fs;
 const mem = std.mem;
 const heap = std.heap;
 const os = std.os;
+
+pub const std_options = .{
+    .log_level = if (builtin.mode == .Debug) .debug else .err,
+    .logFn = utils.log.logFn,
+};
 
 pub fn main() !void {
     var config: App.Config = .{ .root = "." };

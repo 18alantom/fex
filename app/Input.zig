@@ -8,6 +8,8 @@ const TreeView = @import("./TreeView.zig");
 const fs = std.fs;
 const io = std.io;
 
+const log = std.log.scoped(.app_input);
+
 pub const AppAction = enum {
     up,
     down,
@@ -63,6 +65,7 @@ pub fn read(self: *Self, buf: []u8) ![]u8 {
 pub fn getAppAction(self: *Self) !AppAction {
     while (true) {
         const key = try self.input.readKeys();
+        log.debug("key: {s}", .{@tagName(key)});
         return switch (key) {
             .enter => AppAction.select,
             // Navigation

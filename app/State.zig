@@ -22,6 +22,8 @@ const CharArray = utils.CharArray;
 const AppAction = Input.AppAction;
 const Config = App.Config;
 
+const log = std.log.scoped(.state);
+
 viewport: *Viewport,
 view: *View,
 output: *Output,
@@ -182,9 +184,11 @@ fn captureSearchQuery(self: *Self) !void {
 
     if (slc.len == 1 and slc[0] == 27) {
         self.search.stop();
+        return;
     }
 
     try self.search.capture(slc);
+    log.debug("search_query: \"{s}\"", .{self.search.string()});
 }
 
 pub fn executeAction(self: *Self, action: AppAction) !void {
