@@ -39,8 +39,12 @@ pub const AppAction = enum {
     open_item,
     change_dir,
     toggle_info,
+
     search,
+    exec_search,
     command,
+    exec_command,
+
     no_action,
 };
 
@@ -151,10 +155,6 @@ pub fn read(self: *Self, buf: []u8) ![]u8 {
     return buf[0..size];
 }
 
-pub fn readByte(self: *Self) !u8 {
-    return self.reader.readByte();
-}
-
 pub fn readUntil(self: *Self, buf: []u8, delimiter: u8, max: usize) []u8 {
     var fbs = io.fixedBufferStream(buf);
     try self.reader.streamUntilDelimiter(
@@ -168,26 +168,51 @@ pub fn readUntil(self: *Self, buf: []u8, delimiter: u8, max: usize) []u8 {
 pub fn getAppAction(self: *Self) !AppAction {
     // Capture search
     if (self.search.is_capturing) {
-        try self.capture(self.search);
-        return .no_action;
+        return try self.capture(self.search);
     }
 
     // Capture command
     else if (self.command.is_capturing) {
-        try self.capture(self.command);
+        return try self.capture(self.command);
+    }
+
+    return self.readAppAction();
+}
+
+fn capture(self: *Self, c: *Capture) !AppAction {
+    const slc = self.read(&self.buf) catch |err| switch (err) {
+        error.EndOfStream => return .no_action,
+        else => return err,
+    };
+    log.debug("slc: {any}", .{slc});
+
+    if (slc[0] == 27) {
+        c.stop(true);
         return .no_action;
     }
 
-    return self._getAppAction();
+    const is_search = c == self.search;
+    if (slc[0] == 13) {
+        c.stop(false);
+        return if (is_search) .exec_search else .exec_command;
+    }
+
+    try c.capture(slc);
+    log.info("{s}: \"{s}\"", .{
+        if (is_search) "search" else "command",
+        c.string(),
+    });
+
+    return .no_action;
 }
 
-fn _getAppAction(self: *Self) !AppAction {
+fn readAppAction(self: *Self) !AppAction {
     var len = try self.reader.read(&self.buf);
     var slc = self.buf[0..len];
     var ibuf: [128]u8 = undefined;
 
     while (true) {
-        log.debug("seq: {any}", .{slc});
+        log.debug("slc: {any}", .{slc});
         inline for (capture_list) |ca| {
             if (utils.eql(ca.seq, slc)) {
                 return ca.action;
@@ -208,22 +233,4 @@ fn _getAppAction(self: *Self) !AppAction {
         }
     }
     unreachable;
-}
-
-fn capture(self: *Self, c: *Capture) !void {
-    const slc = self.read(&self.buf) catch |err| switch (err) {
-        error.EndOfStream => return,
-        else => return err,
-    };
-
-    if (slc.len == 1 and slc[0] == 27 or slc[0] == 13) {
-        c.stop(slc[0] == 27);
-        return;
-    }
-
-    try c.capture(slc);
-    log.debug("{s}: \"{s}\"", .{
-        if (c == self.search) "search" else "command",
-        c.string(),
-    });
 }

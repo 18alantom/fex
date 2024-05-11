@@ -158,7 +158,7 @@ pub fn printContents(self: *Self) !void {
     );
 }
 
-pub fn waitForAction(self: *Self) !Input.AppAction {
+pub fn getAppAction(self: *Self) !Input.AppAction {
     return try self.input.getAppAction();
 }
 
@@ -190,7 +190,9 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_nine => actions.expandToDepth(self, 8),
         .toggle_info => actions.toggleInfo(self),
         .search => actions.search(self),
+        .exec_search => actions.execSearch(self),
         .command => actions.command(self),
+        .exec_command => actions.execCommand(self),
 
         // no-op, handled by the caller
         .quit => unreachable,

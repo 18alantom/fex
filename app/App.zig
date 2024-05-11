@@ -64,7 +64,7 @@ pub fn run(self: *Self) !void {
         try self.state.updateView();
         try self.state.printContents();
 
-        const action = try self.state.waitForAction();
+        const action = try self.state.getAppAction();
         switch (action) {
             .quit => return,
             .no_action => continue,

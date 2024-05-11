@@ -6,6 +6,7 @@ const State = @import("./State.zig");
 const Item = @import("../fs/Item.zig");
 
 const ItemError = Item.ItemError;
+const log = std.log.scoped(.actions);
 
 pub fn moveCursorUp(state: *State) void {
     state.view.cursor -|= 1;
@@ -180,6 +181,14 @@ pub fn search(state: *State) void {
     state.input.search.start();
 }
 
+pub fn execSearch(state: *State) void {
+    log.info("execSearch: \"{s}\"", .{state.input.search.string()});
+}
+
 pub fn command(state: *State) void {
     state.input.command.start();
+}
+
+pub fn execCommand(state: *State) void {
+    log.info("execCommand: \"{s}\"", .{state.input.command.string()});
 }
