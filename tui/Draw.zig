@@ -108,7 +108,6 @@ pub fn hline(self: *Self, config: HLineConfig) !void {
         _ = try self.writer.print("{s}", .{config.style});
     }
 
-    // TODO: Execute using a single write
     for (0..config.len) |i| {
         _ = try self.writer.print("\x1b[{d};{d}H{s}", .{
             config.row,

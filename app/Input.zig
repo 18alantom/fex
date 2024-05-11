@@ -9,7 +9,7 @@ const TreeView = @import("./TreeView.zig");
 const fs = std.fs;
 const io = std.io;
 
-const log = std.log.scoped(.app_input);
+const log = std.log.scoped(.input);
 
 pub const AppAction = enum {
     up,

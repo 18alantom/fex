@@ -23,8 +23,6 @@ pub fn getTerminalSize() Size {
 pub fn getCursorPosition() !Position {
     // Needs Raw mode (no wait for \n) to work properly cause
     // control sequence will not be written without it.
-    //
-    // TODO: probably needs some kind of mutex?
     _ = try posix.write(posix.STDERR_FILENO, "\x1b[6n");
 
     var buf: [64]u8 = undefined;

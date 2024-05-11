@@ -22,7 +22,10 @@ pub fn logFn(
 
     const scope_text = switch (scope) {
         std.log.default_log_scope => "",
-        else => "\x1b[35m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .app => "\x1b[39m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .input => "\x1b[35m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .state => "\x1b[32m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        else => "\x1b[1m(" ++ @tagName(scope) ++ ")\x1b[m ",
     };
 
     const prefix = level_text ++ "\x1b[m " ++ scope_text;
