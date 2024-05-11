@@ -177,5 +177,9 @@ pub fn changeDir(state: *State) !void {
 }
 
 pub fn search(state: *State) void {
-    state.search.start();
+    state.input.search.start();
+}
+
+pub fn command(state: *State) void {
+    state.input.command.start();
 }

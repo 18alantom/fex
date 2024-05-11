@@ -3,11 +3,13 @@
 const std = @import("std");
 const tui = @import("../tui.zig");
 const utils = @import("../utils.zig");
+const Capture = @import("./Capture.zig");
 const View = @import("./View.zig");
 const TreeView = @import("./TreeView.zig");
 
 const fs = std.fs;
 const io = std.io;
+const mem = std.mem;
 
 const log = std.log.scoped(.input);
 
@@ -38,15 +40,16 @@ pub const AppAction = enum {
     change_dir,
     toggle_info,
     search,
+    command,
     no_action,
 };
 
-const CaptureAction = struct {
+const ActionSequence = struct {
     seq: []const u8,
     action: AppAction,
 };
 
-const capture_list = [_]CaptureAction{
+const capture_list = [_]ActionSequence{
     // UDLR, navigation inputs
     .{ .seq = "k", .action = .up },
     .{ .seq = "\x1b\x5b\x41", .action = .up }, // Up Arrow
@@ -61,8 +64,7 @@ const capture_list = [_]CaptureAction{
     .{ .seq = "\x1b\x5b\x43", .action = .right }, // Right Arrow
 
     // Toggle expansion or open
-    .{ .seq = "\x0a", .action = .select }, // Enter if  ICRNL
-    .{ .seq = "\x0d", .action = .select }, // Enter if ~ICRNL
+    .{ .seq = "\x0d", .action = .select }, // Enter if ~ICRNL else \x0a
 
     // Quit
     .{ .seq = "q", .action = .quit },
@@ -97,23 +99,48 @@ const capture_list = [_]CaptureAction{
     .{ .seq = "o", .action = .open_item },
     .{ .seq = "cd", .action = .change_dir },
     .{ .seq = "I", .action = .toggle_info },
+
+    // Capture actions
     .{ .seq = "/", .action = .search },
+    .{ .seq = "$", .action = .command },
+    .{ .seq = ":", .action = .command },
 };
 
 reader: fs.File.Reader,
 buf: [128]u8,
+allocator: mem.Allocator,
+
+// Capture groups
+search: *Capture,
+command: *Capture,
 
 const Self = @This();
 
-pub fn init() Self {
+pub fn init(allocator: mem.Allocator) !Self {
     const reader = io.getStdIn().reader();
+
+    const search = try allocator.create(Capture);
+    search.* = try Capture.init(allocator);
+
+    const command = try allocator.create(Capture);
+    command.* = try Capture.init(allocator);
+
     return .{
         .reader = reader,
         .buf = undefined,
+        .allocator = allocator,
+        .search = search,
+        .command = command,
     };
 }
 
-pub fn deinit(_: *Self) void {}
+pub fn deinit(self: *Self) void {
+    self.search.deinit();
+    self.allocator.destroy(self.search);
+
+    self.command.deinit();
+    self.allocator.destroy(self.command);
+}
 
 pub fn read(self: *Self, buf: []u8) ![]u8 {
     const size = try self.reader.read(buf);
@@ -139,6 +166,22 @@ pub fn readUntil(self: *Self, buf: []u8, delimiter: u8, max: usize) []u8 {
 }
 
 pub fn getAppAction(self: *Self) !AppAction {
+    // Capture search
+    if (self.search.is_capturing) {
+        try self.capture(self.search);
+        return .no_action;
+    }
+
+    // Capture command
+    else if (self.command.is_capturing) {
+        try self.capture(self.command);
+        return .no_action;
+    }
+
+    return self._getAppAction();
+}
+
+fn _getAppAction(self: *Self) !AppAction {
     var len = try self.reader.read(&self.buf);
     var slc = self.buf[0..len];
     var ibuf: [128]u8 = undefined;
@@ -164,6 +207,23 @@ pub fn getAppAction(self: *Self) !AppAction {
             return .no_action;
         }
     }
-
     unreachable;
+}
+
+fn capture(self: *Self, c: *Capture) !void {
+    const slc = self.read(&self.buf) catch |err| switch (err) {
+        error.EndOfStream => return,
+        else => return err,
+    };
+
+    if (slc.len == 1 and slc[0] == 27 or slc[0] == 13) {
+        c.stop(slc[0] == 27);
+        return;
+    }
+
+    try c.capture(slc);
+    log.debug("{s}: \"{s}\"", .{
+        if (c == self.search) "search" else "command",
+        c.string(),
+    });
 }

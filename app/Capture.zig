@@ -32,8 +32,8 @@ pub fn start(self: *Self) void {
     self.is_capturing = true;
 }
 
-pub fn stop(self: *Self) void {
-    self.buffer.clearAndFree();
+pub fn stop(self: *Self, clear: bool) void {
+    if (clear) self.buffer.clearAndFree();
     self.is_capturing = false;
 }
 

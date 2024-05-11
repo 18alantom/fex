@@ -29,7 +29,6 @@ view: *View,
 output: *Output,
 input: *Input,
 manager: *Manager,
-search: *Capture,
 
 // If `stdout` is not empty, screen is cleared (stderr)
 // and contents of `stdout` are written to stdout and
@@ -57,16 +56,13 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     output.* = try Output.init(allocator, config);
 
     const input = try allocator.create(Input);
-    input.* = Input.init();
+    input.* = try Input.init(allocator);
 
     const manager = try allocator.create(Manager);
     manager.* = try Manager.init(allocator, config.root);
 
     const stdout = try allocator.create(CharArray);
     stdout.* = CharArray.init(allocator);
-
-    const search = try allocator.create(Capture);
-    search.* = try Capture.init(allocator);
 
     return .{
         .viewport = viewport,
@@ -75,7 +71,6 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .input = input,
         .manager = manager,
         .stdout = stdout,
-        .search = search,
 
         .reiterate = false,
         .itermode = -2,
@@ -100,9 +95,6 @@ pub fn deinit(self: *Self) void {
 
     self.stdout.deinit();
     self.allocator.destroy(self.stdout);
-
-    self.search.deinit();
-    self.allocator.destroy(self.search);
 
     if (self.iterator) |iter| {
         iter.deinit();
@@ -167,28 +159,7 @@ pub fn printContents(self: *Self) !void {
 }
 
 pub fn waitForAction(self: *Self) !Input.AppAction {
-    if (self.search.is_capturing) {
-        try self.captureSearchQuery();
-        return .no_action;
-    }
-
     return try self.input.getAppAction();
-}
-
-fn captureSearchQuery(self: *Self) !void {
-    var buf: [256]u8 = undefined;
-    const slc = self.input.read(&buf) catch |err| switch (err) {
-        error.EndOfStream => return,
-        else => return err,
-    };
-
-    if (slc.len == 1 and slc[0] == 27) {
-        self.search.stop();
-        return;
-    }
-
-    try self.search.capture(slc);
-    log.debug("search_query: \"{s}\"", .{self.search.string()});
 }
 
 pub fn executeAction(self: *Self, action: AppAction) !void {
@@ -219,6 +190,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_nine => actions.expandToDepth(self, 8),
         .toggle_info => actions.toggleInfo(self),
         .search => actions.search(self),
+        .command => actions.command(self),
 
         // no-op, handled by the caller
         .quit => unreachable,
