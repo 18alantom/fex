@@ -192,7 +192,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .search => actions.search(self),
         .exec_search => actions.execSearch(self),
         .command => actions.command(self),
-        .exec_command => actions.execCommand(self),
+        .exec_command => try actions.execCommand(self),
 
         // no-op, handled by the caller
         .quit => unreachable,

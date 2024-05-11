@@ -167,6 +167,7 @@ pub fn toggleInfo(state: *State) void {
 }
 
 pub fn changeDir(state: *State) !void {
+    // Handled by shell line editing widget
     const item = state.itemUnderCursor();
     if (!(try item.isDir())) {
         return;
@@ -189,6 +190,16 @@ pub fn command(state: *State) void {
     state.input.command.start();
 }
 
-pub fn execCommand(state: *State) void {
+pub fn execCommand(state: *State) !void {
+    // Handled by shell line editing widget
+    for (state.input.command.string()) |c| {
+        const char = if (c == ' ') '\n' else c;
+        try state.stdout.append(char);
+    }
+
+    try state.stdout.appendSlice("\n");
+    const item = state.itemUnderCursor();
+    try state.stdout.appendSlice(item.abspath());
+    try state.stdout.appendSlice("\n");
     log.info("execCommand: \"{s}\"", .{state.input.command.string()});
 }
