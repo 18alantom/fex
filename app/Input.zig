@@ -2,6 +2,7 @@
 /// into AppAction values which are carried out by App.
 const std = @import("std");
 const tui = @import("../tui.zig");
+const utils = @import("../utils.zig");
 const View = @import("./View.zig");
 const TreeView = @import("./TreeView.zig");
 
@@ -40,73 +41,129 @@ pub const AppAction = enum {
     no_action,
 };
 
+const CaptureAction = struct {
+    seq: []const u8,
+    action: AppAction,
+};
+
+const capture_list = [_]CaptureAction{
+    // UDLR, navigation inputs
+    .{ .seq = "k", .action = .up },
+    .{ .seq = "\x1b\x5b\x41", .action = .up }, // Up Arrow
+
+    .{ .seq = "j", .action = .down },
+    .{ .seq = "\x1b\x5b\x42", .action = .down }, // Down Arrow
+
+    .{ .seq = "h", .action = .left },
+    .{ .seq = "\x1b\x5b\x44", .action = .left }, // Left Arrow
+
+    .{ .seq = "l", .action = .right },
+    .{ .seq = "\x1b\x5b\x43", .action = .right }, // Right Arrow
+
+    // Toggle expansion or open
+    .{ .seq = "\x0a", .action = .select }, // Enter if  ICRNL
+    .{ .seq = "\x0d", .action = .select }, // Enter if ~ICRNL
+
+    // Quit
+    .{ .seq = "q", .action = .quit },
+    .{ .seq = "\x03", .action = .quit }, // Ctrl-C
+    .{ .seq = "\x04", .action = .quit }, // Ctrl-D
+
+    // Expand to depth
+    .{ .seq = "1", .action = .depth_one },
+    .{ .seq = "2", .action = .depth_two },
+    .{ .seq = "3", .action = .depth_three },
+    .{ .seq = "4", .action = .depth_four },
+    .{ .seq = "5", .action = .depth_five },
+    .{ .seq = "6", .action = .depth_six },
+    .{ .seq = "7", .action = .depth_seven },
+    .{ .seq = "8", .action = .depth_eight },
+    .{ .seq = "9", .action = .depth_nine },
+
+    // Expansion toggles
+    .{ .seq = "E", .action = .expand_all },
+    .{ .seq = "C", .action = .collapse_all },
+
+    // Fold jumps
+    .{ .seq = "{", .action = .prev_fold },
+    .{ .seq = "}", .action = .next_fold },
+
+    // End jumps
+    .{ .seq = "gg", .action = .top },
+    .{ .seq = "G", .action = .bottom },
+
+    // Misc
+    .{ .seq = "R", .action = .change_root },
+    .{ .seq = "o", .action = .open_item },
+    .{ .seq = "cd", .action = .change_dir },
+    .{ .seq = "I", .action = .toggle_info },
+    .{ .seq = "/", .action = .search },
+};
+
 reader: fs.File.Reader,
-rbuf: [2048]u8,
-input: tui.Input,
+buf: [128]u8,
 
 const Self = @This();
 
 pub fn init() Self {
     const reader = io.getStdIn().reader();
-    const input = tui.Input{ .reader = reader };
     return .{
         .reader = reader,
-        .input = input,
-        .rbuf = undefined,
+        .buf = undefined,
     };
 }
 
 pub fn deinit(_: *Self) void {}
 
 pub fn read(self: *Self, buf: []u8) ![]u8 {
-    return try self.input.read(buf);
+    const size = try self.reader.read(buf);
+    if (size == 0) {
+        return error.EndOfStream;
+    }
+
+    return buf[0..size];
+}
+
+pub fn readByte(self: *Self) !u8 {
+    return self.reader.readByte();
+}
+
+pub fn readUntil(self: *Self, buf: []u8, delimiter: u8, max: usize) []u8 {
+    var fbs = io.fixedBufferStream(buf);
+    try self.reader.streamUntilDelimiter(
+        fbs.writer(),
+        delimiter,
+        max,
+    );
+    return fbs.getWritten();
 }
 
 pub fn getAppAction(self: *Self) !AppAction {
+    var len = try self.reader.read(&self.buf);
+    var slc = self.buf[0..len];
+    var ibuf: [128]u8 = undefined;
+
     while (true) {
-        const key = try self.input.readKeys();
-        log.debug("key: {s}", .{@tagName(key)});
-        return switch (key) {
-            .enter => AppAction.select,
-            // Navigation
-            .up_arrow => AppAction.up,
-            .k => AppAction.up,
-            .down_arrow => AppAction.down,
-            .j => AppAction.down,
-            .left_arrow => AppAction.left,
-            .h => AppAction.left,
-            .right_arrow => AppAction.right,
-            .l => AppAction.right,
-            .gg => AppAction.top,
-            .G => AppAction.bottom,
-            .curly_open => AppAction.prev_fold,
-            .curly_close => AppAction.next_fold,
-            // External actions
-            .o => AppAction.open_item,
-            .cd => AppAction.change_dir,
-            // Tree actions
-            .R => AppAction.change_root,
-            // Toggle fold
-            .C => AppAction.collapse_all,
-            .E => AppAction.expand_all,
-            .I => AppAction.toggle_info,
-            // Expand to depth
-            .one => AppAction.depth_one,
-            .two => AppAction.depth_two,
-            .three => AppAction.depth_three,
-            .four => AppAction.depth_four,
-            .five => AppAction.depth_five,
-            .six => AppAction.depth_six,
-            .seven => AppAction.depth_seven,
-            .eight => AppAction.depth_eight,
-            .nine => AppAction.depth_nine,
-            // Other actions
-            .fslash => AppAction.search,
-            // Quit
-            .q => AppAction.quit,
-            .ctrl_c => AppAction.quit,
-            .ctrl_d => AppAction.quit,
-            else => continue,
-        };
+        log.debug("seq: {any}", .{slc});
+        inline for (capture_list) |ca| {
+            if (utils.eql(ca.seq, slc)) {
+                return ca.action;
+            }
+
+            if (len < ca.seq.len and utils.eql(slc, ca.seq[0..len])) {
+                len += try self.reader.read(self.buf[slc.len..]);
+                slc = self.buf[0..len];
+                break;
+            }
+        } else if (slc.len > 1) {
+            len -= 1;
+            @memcpy(ibuf[0..len], self.buf[1..(len + 1)]);
+            @memcpy(self.buf[0..len], ibuf[0..len]);
+            slc = self.buf[0..len];
+        } else {
+            return .no_action;
+        }
     }
+
+    unreachable;
 }

@@ -219,8 +219,10 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_nine => actions.expandToDepth(self, 8),
         .toggle_info => actions.toggleInfo(self),
         .search => actions.search(self),
-        .no_action => return,
-        .quit => return error.QuitApp,
+
+        // no-op, handled by the caller
+        .quit => unreachable,
+        .no_action => unreachable,
     }
 }
 

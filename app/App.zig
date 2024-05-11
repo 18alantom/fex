@@ -65,10 +65,11 @@ pub fn run(self: *Self) !void {
         try self.state.printContents();
 
         const action = try self.state.waitForAction();
-        self.state.executeAction(action) catch |err| switch (err) {
-            error.QuitApp => return,
-            else => return err,
-        };
+        switch (action) {
+            .quit => return,
+            .no_action => continue,
+            else => try self.state.executeAction(action),
+        }
 
         if (try self.state.dumpStdout()) return;
     }
