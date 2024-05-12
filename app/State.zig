@@ -19,6 +19,7 @@ const utils = @import("../utils.zig");
 const args = @import("./args.zig");
 
 const CharArray = utils.CharArray;
+const SearchQuery = utils.string.SearchQuery;
 const AppAction = Input.AppAction;
 const Config = App.Config;
 
@@ -47,12 +48,6 @@ fuzzy_search: bool,
 ignore_case: bool,
 
 allocator: mem.Allocator,
-
-pub const SearchQuery = struct {
-    fuzzy_search: bool,
-    ignore_case: bool,
-    query: []const u8,
-};
 
 const Self = @This();
 

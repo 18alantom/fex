@@ -3,14 +3,14 @@
 const std = @import("std");
 const args = @import("./args.zig");
 const tui = @import("../tui.zig");
+const string = @import("../utils/string.zig");
+
 const View = @import("./View.zig");
 const App = @import("./App.zig");
-const State = @import("./State.zig");
-
 const TreeView = @import("./TreeView.zig");
 
 const Config = App.Config;
-const SearchQuery = State.SearchQuery;
+const SearchQuery = string.SearchQuery;
 
 const fs = std.fs;
 const mem = std.mem;

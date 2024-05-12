@@ -21,15 +21,12 @@ pub fn isMatch(state: *State, index: usize) bool {
 
     if (query.len > candidate.len) return false;
 
-    var match: bool = false;
-    if (state.fuzzy_search) {
-        match = string.fuzzySearch(query, candidate, state.ignore_case);
-    } else {
-        match = string.search(query, candidate, state.ignore_case);
-    }
-
-    log.debug("isMatch: {any}, query: {s}, candidate: {s}", .{ match, query, candidate });
-    return match;
+    return string.search(
+        query,
+        candidate,
+        state.ignore_case,
+        state.fuzzy_search,
+    );
 }
 
 pub fn toggleItemChildren(item: *Item) !bool {

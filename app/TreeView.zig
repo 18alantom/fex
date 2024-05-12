@@ -13,25 +13,25 @@
 /// list.
 const std = @import("std");
 
-const Manager = @import("../fs/Manager.zig");
-const icons = @import("./icons.zig");
-const View = @import("./View.zig");
 const tui = @import("../tui.zig");
 const args = @import("./args.zig");
+const icons = @import("./icons.zig");
+const string = @import("../utils/string.zig");
 const statfmt = @import("../fs/statfmt.zig");
+
 const App = @import("./App.zig");
 const Stat = @import("../fs/Stat.zig");
-const State = @import("./State.zig");
+const View = @import("./View.zig");
+const Manager = @import("../fs/Manager.zig");
 
 const Entry = Manager.Iterator.Entry;
+const SearchQuery = string.SearchQuery;
 const Config = App.Config;
 
 const fs = std.fs;
 const os = std.os;
 const fmt = std.fmt;
 const mem = std.mem;
-
-const SearchQuery = State.SearchQuery;
 
 const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
@@ -154,7 +154,7 @@ fn printLine(
     i: usize,
     view: *const View,
     draw: *Draw,
-    search_query: ?*const SearchQuery,
+    search_query_or_null: ?*const SearchQuery,
 ) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
@@ -197,7 +197,10 @@ fn printLine(
     }
 
     // Print name
-    const name = if (search_query) |q| q.query else entry.item.name();
+    const name = if (search_query_or_null) |search_query|
+        string.searchHighlight(&self.obuf, entry.item.name(), search_query)
+    else
+        entry.item.name();
     try draw.print(
         name,
         .{ .fg = try getFg(entry, view.cursor == i) },

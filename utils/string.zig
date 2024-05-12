@@ -3,7 +3,21 @@ const std = @import("std");
 const mem = std.mem;
 const ascii = std.ascii;
 
-pub fn search(query: []const u8, candidate: []const u8, ignore_case: bool) bool {
+pub const SearchQuery = struct {
+    fuzzy_search: bool,
+    ignore_case: bool,
+    query: []const u8,
+};
+
+pub fn search(query: []const u8, candidate: []const u8, ignore_case: bool, fuzzy_search: bool) bool {
+    if (fuzzy_search) {
+        return fuzzySearch(query, candidate, ignore_case);
+    }
+
+    return regularSearch(query, candidate, ignore_case);
+}
+
+pub fn regularSearch(query: []const u8, candidate: []const u8, ignore_case: bool) bool {
     var i: usize = 0;
     while (i < query.len) : (i += 1) {
         const should_ignore_case = ignore_case and !ascii.isUpper(query[i]);
@@ -37,6 +51,13 @@ pub fn fuzzySearch(query: []const u8, candidate: []const u8, ignore_case: bool) 
     }
 
     return false;
+}
+
+pub fn searchHighlight(buffer: []u8, string: []const u8, search_query: *const SearchQuery) []u8 {
+    _ = string;
+    _ = search_query;
+    @memcpy(buffer[0..4], "abcd");
+    return buffer[0..4];
 }
 
 pub fn eql(a: []const u8, b: []const u8) bool {
