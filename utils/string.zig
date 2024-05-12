@@ -6,8 +6,9 @@ const ascii = std.ascii;
 pub fn search(query: []const u8, candidate: []const u8, ignore_case: bool) bool {
     var i: usize = 0;
     while (i < query.len) : (i += 1) {
-        const c = if (ignore_case) ascii.toLower(candidate[i]) else candidate[i];
-        const q = if (ignore_case) ascii.toLower(query[i]) else query[i];
+        const should_ignore_case = ignore_case and !ascii.isUpper(query[i]);
+        const c = if (should_ignore_case) ascii.toLower(candidate[i]) else candidate[i];
+        const q = if (should_ignore_case) ascii.toLower(query[i]) else query[i];
         if (c != q) return false;
     }
 
@@ -22,8 +23,9 @@ pub fn fuzzySearch(query: []const u8, candidate: []const u8, ignore_case: bool) 
         if (q_i >= query.len) return true;
         if (c_i >= candidate.len) return false;
 
-        const c = if (ignore_case) ascii.toLower(candidate[c_i]) else candidate[c_i];
-        const q = if (ignore_case) ascii.toLower(query[q_i]) else query[q_i];
+        const should_ignore_case = ignore_case and !ascii.isUpper(query[q_i]);
+        const c = if (should_ignore_case) ascii.toLower(candidate[c_i]) else candidate[c_i];
+        const q = if (should_ignore_case) ascii.toLower(query[q_i]) else query[q_i];
 
         if (c != q) {
             c_i += 1;

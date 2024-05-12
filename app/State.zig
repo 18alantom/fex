@@ -42,6 +42,7 @@ itermode: i32,
 iterator: ?*Manager.Iterator,
 
 // Search config
+pre_search_cursor: usize,
 fuzzy_search: bool,
 ignore_case: bool,
 match_path: bool,
@@ -81,6 +82,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .itermode = -2,
         .iterator = null,
 
+        .pre_search_cursor = 0,
         .fuzzy_search = config.fuzzy_search,
         .ignore_case = config.ignore_case,
         .match_path = config.match_path,
@@ -200,6 +202,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .toggle_info => actions.toggleInfo(self),
         .search => actions.search(self),
         .exec_search => try actions.execSearch(self),
+        .dismiss_search => actions.dismissSearch(self),
         .command => actions.command(self),
         .exec_command => try actions.execCommand(self),
 

@@ -164,6 +164,7 @@ pub fn changeDir(state: *State) !void {
 }
 
 pub fn search(state: *State) void {
+    state.pre_search_cursor = state.view.cursor;
     state.input.search.start();
 }
 
@@ -184,6 +185,10 @@ pub fn execSearch(state: *State) !void {
         state.view.cursor = index;
         return;
     }
+}
+
+pub fn dismissSearch(state: *State) void {
+    state.view.cursor = state.pre_search_cursor;
 }
 
 pub fn command(state: *State) void {

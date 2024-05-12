@@ -46,6 +46,7 @@ pub const AppAction = enum {
     exec_command,
 
     no_action,
+    dismiss_search,
 };
 
 const ActionSequence = struct {
@@ -168,18 +169,18 @@ pub fn readUntil(self: *Self, buf: []u8, delimiter: u8, max: usize) []u8 {
 pub fn getAppAction(self: *Self) !AppAction {
     // Capture search
     if (self.search.is_capturing) {
-        return try self.capture(self.search);
+        return try self.captureSearch();
     }
 
     // Capture command
     else if (self.command.is_capturing) {
-        return try self.capture(self.command);
+        return try self.captureCommand();
     }
 
     return self.readAppAction();
 }
 
-fn capture(self: *Self, c: *Capture) !AppAction {
+fn captureSearch(self: *Self) !AppAction {
     const slc = self.read(&self.buf) catch |err| switch (err) {
         error.EndOfStream => return .no_action,
         else => return err,
@@ -187,23 +188,41 @@ fn capture(self: *Self, c: *Capture) !AppAction {
     log.debug("slc: {any}", .{slc});
 
     if (slc[0] == 27) {
-        c.stop(true);
+        self.search.stop(true);
+        return .dismiss_search;
+    }
+
+    if (slc[0] == 13) {
+        self.search.stop(true);
+        return .select;
+    }
+
+    try self.search.capture(slc);
+    log.info("search: \"{s}\"", .{self.search.string()});
+    return .exec_search;
+}
+
+fn captureCommand(self: *Self) !AppAction {
+    const slc = self.read(&self.buf) catch |err| switch (err) {
+        error.EndOfStream => return .no_action,
+        else => return err,
+    };
+    log.debug("slc: {any}", .{slc});
+
+    if (slc[0] == 27) {
+        self.command.stop(true);
         return .no_action;
     }
 
-    const is_search = c == self.search;
     if (slc[0] == 13) {
-        c.stop(false);
-        return if (is_search) .no_action else .exec_command;
+        self.command.stop(false);
+        return .exec_command;
     }
 
-    try c.capture(slc);
-    log.info("{s}: \"{s}\"", .{
-        if (is_search) "search" else "command",
-        c.string(),
-    });
+    try self.command.capture(slc);
+    log.info("command: \"{s}\"", .{self.command.string()});
 
-    return if (is_search) .exec_search else .no_action;
+    return .no_action;
 }
 
 fn readAppAction(self: *Self) !AppAction {
