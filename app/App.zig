@@ -34,12 +34,18 @@ state: *State,
 const Self = @This();
 
 pub const Config = struct {
+    root: []const u8,
+    // Display config
     no_icons: bool = false,
     no_size: bool = false,
     no_mode: bool = false,
     no_time: bool = false,
     time: TimeType = .modified,
-    root: []const u8,
+
+    // Search config
+    fuzzy_search: bool = true,
+    ignore_case: bool = true,
+    match_path: bool = false,
 };
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {

@@ -2,10 +2,11 @@ const builtin = @import("builtin");
 
 const std = @import("std");
 const utils = @import("../utils.zig");
+const apputils = @import("./utils.zig");
+
 const State = @import("./State.zig");
 const Item = @import("../fs/Item.zig");
 
-const ItemError = Item.ItemError;
 const log = std.log.scoped(.actions);
 
 pub fn moveCursorUp(state: *State) void {
@@ -29,7 +30,7 @@ pub fn goToBottom(state: *State) !void {
 }
 
 pub fn shiftIntoParent(state: *State) !void {
-    const item = state.itemUnderCursor();
+    const item = state.getItemUnderCursor();
     if (item._parent) |parent| {
         state.view.cursor = state.getItemIndex(parent) catch |err| switch (err) {
             error.NotFound => state.view.cursor,
@@ -45,11 +46,11 @@ pub fn shiftIntoParent(state: *State) !void {
 }
 
 pub fn shiftIntoChild(state: *State) !void {
-    const item = state.itemUnderCursor();
+    const item = state.getItemUnderCursor();
     if (item.hasChildren()) {
         state.reiterate = true;
     } else {
-        state.reiterate = try toggleItemChildren(item);
+        state.reiterate = try apputils.toggleItemChildren(item);
     }
 
     if (!state.reiterate) {
@@ -60,9 +61,9 @@ pub fn shiftIntoChild(state: *State) !void {
 }
 
 pub fn toggleChildrenOrOpenFile(state: *State) !void {
-    const item = state.itemUnderCursor();
+    const item = state.getItemUnderCursor();
     if (try item.isDir()) {
-        state.reiterate = try toggleItemChildren(item);
+        state.reiterate = try apputils.toggleItemChildren(item);
         return;
     }
 
@@ -86,7 +87,7 @@ pub fn expandToDepth(state: *State, itermode: i32) void {
 }
 
 pub fn changeRoot(state: *State) !void {
-    var new_root = state.itemUnderCursor();
+    var new_root = state.getItemUnderCursor();
     if (!try new_root.isDir()) {
         new_root = try new_root.parent();
     }
@@ -102,7 +103,7 @@ pub fn changeRoot(state: *State) !void {
 }
 
 pub fn toPrevFold(state: *State) void {
-    const entry = state.entryUnderCursor();
+    const entry = state.getEntryUnderCursor();
     const item = entry.item;
     var i: usize = (state.getItemIndex(item) catch return) -| 1;
     while (i > 0) : (i = i - 1) {
@@ -119,7 +120,7 @@ pub fn toPrevFold(state: *State) void {
 }
 
 pub fn toNextFold(state: *State) !void {
-    const entry = state.entryUnderCursor();
+    const entry = state.getEntryUnderCursor();
     const item = entry.item;
 
     var i: usize = (state.getItemIndex(item) catch return) + 1;
@@ -140,24 +141,8 @@ pub fn toNextFold(state: *State) !void {
     state.view.cursor +|= 1;
 }
 
-fn toggleItemChildren(item: *Item) !bool {
-    if (item.hasChildren()) {
-        item.freeChildren(null);
-        return true;
-    }
-
-    _ = item.children() catch |e| {
-        switch (e) {
-            ItemError.IsNotDirectory => return false,
-            else => return e,
-        }
-    };
-
-    return true;
-}
-
 pub fn openItem(state: *State) !void {
-    const item = state.itemUnderCursor();
+    const item = state.getItemUnderCursor();
     try utils.os.open(item.abspath());
 }
 
@@ -168,7 +153,7 @@ pub fn toggleInfo(state: *State) void {
 
 pub fn changeDir(state: *State) !void {
     // Handled by shell line editing widget
-    const item = state.itemUnderCursor();
+    const item = state.getItemUnderCursor();
     if (!(try item.isDir())) {
         return;
     }
@@ -182,8 +167,23 @@ pub fn search(state: *State) void {
     state.input.search.start();
 }
 
-pub fn execSearch(state: *State) void {
-    log.info("execSearch: \"{s}\"", .{state.input.search.string()});
+pub fn execSearch(state: *State) !void {
+    // Updates cursor w.r.t search query.
+    var index: usize = 0;
+    while (true) {
+        defer index += 1;
+
+        if (!(try state.appendUntil(index + 1))) {
+            return;
+        }
+
+        if (!apputils.isMatch(state, index)) {
+            continue;
+        }
+
+        state.view.cursor = index;
+        return;
+    }
 }
 
 pub fn command(state: *State) void {
@@ -198,7 +198,7 @@ pub fn execCommand(state: *State) !void {
     }
 
     try state.stdout.appendSlice("\n");
-    const item = state.itemUnderCursor();
+    const item = state.getItemUnderCursor();
     try state.stdout.appendSlice(item.abspath());
     try state.stdout.appendSlice("\n");
     log.info("execCommand: \"{s}\"", .{state.input.command.string()});

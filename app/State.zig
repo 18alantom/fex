@@ -41,6 +41,11 @@ reiterate: bool,
 itermode: i32,
 iterator: ?*Manager.Iterator,
 
+// Search config
+fuzzy_search: bool,
+ignore_case: bool,
+match_path: bool,
+
 allocator: mem.Allocator,
 
 const Self = @This();
@@ -75,6 +80,10 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .reiterate = false,
         .itermode = -2,
         .iterator = null,
+
+        .fuzzy_search = config.fuzzy_search,
+        .ignore_case = config.ignore_case,
+        .match_path = config.match_path,
 
         .allocator = allocator,
     };
@@ -190,7 +199,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_nine => actions.expandToDepth(self, 8),
         .toggle_info => actions.toggleInfo(self),
         .search => actions.search(self),
-        .exec_search => actions.execSearch(self),
+        .exec_search => try actions.execSearch(self),
         .command => actions.command(self),
         .exec_command => try actions.execCommand(self),
 
@@ -200,12 +209,26 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
     }
 }
 
-pub fn entryUnderCursor(self: *Self) *Manager.Iterator.Entry {
+pub fn getEntry(self: *Self, index: usize) ?*Manager.Iterator.Entry {
+    if (self.view.buffer.items.len <= index) return null;
+
+    return &self.view.buffer.items[index];
+}
+
+pub fn getEntryUnderCursor(self: *Self) *Manager.Iterator.Entry {
     return &self.view.buffer.items[self.view.cursor];
 }
 
-pub fn itemUnderCursor(self: *Self) *Item {
-    return self.entryUnderCursor().item;
+pub fn getItem(self: *Self, index: usize) ?*Item {
+    if (self.getEntry(index)) |entry| {
+        return entry.item;
+    }
+
+    return null;
+}
+
+pub fn getItemUnderCursor(self: *Self) *Item {
+    return self.getEntryUnderCursor().item;
 }
 
 pub fn getItemIndex(self: *Self, item: *Item) !usize {
@@ -218,6 +241,20 @@ pub fn getItemIndex(self: *Self, item: *Item) !usize {
     }
 
     return error.NotFound;
+}
+
+pub fn appendUntil(self: *Self, new_len: usize) !bool {
+    while (true) {
+        if (self.view.buffer.items.len >= new_len) {
+            break;
+        }
+
+        if (!try self.appendOne()) {
+            return false;
+        }
+    }
+
+    return self.view.buffer.items.len >= new_len;
 }
 
 pub fn appendOne(self: *Self) !bool {

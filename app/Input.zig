@@ -194,7 +194,7 @@ fn capture(self: *Self, c: *Capture) !AppAction {
     const is_search = c == self.search;
     if (slc[0] == 13) {
         c.stop(false);
-        return if (is_search) .exec_search else .exec_command;
+        return if (is_search) .no_action else .exec_command;
     }
 
     try c.capture(slc);
@@ -203,7 +203,7 @@ fn capture(self: *Self, c: *Capture) !AppAction {
         c.string(),
     });
 
-    return .no_action;
+    return if (is_search) .exec_search else .no_action;
 }
 
 fn readAppAction(self: *Self) !AppAction {
