@@ -45,7 +45,6 @@ pub const Config = struct {
     // Search config
     fuzzy_search: bool = true,
     ignore_case: bool = true,
-    match_path: bool = false,
 };
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {

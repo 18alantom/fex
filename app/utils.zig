@@ -17,10 +17,7 @@ pub fn isMatch(state: *State, index: usize) bool {
     if (item_or_null == null) return false;
 
     const query = state.input.search.string();
-    const candidate = if (state.match_path)
-        item_or_null.?.abspath()
-    else
-        item_or_null.?.name();
+    const candidate = item_or_null.?.name();
 
     if (query.len > candidate.len) return false;
 

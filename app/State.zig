@@ -45,7 +45,6 @@ iterator: ?*Manager.Iterator,
 pre_search_cursor: usize,
 fuzzy_search: bool,
 ignore_case: bool,
-match_path: bool,
 
 allocator: mem.Allocator,
 
@@ -85,7 +84,6 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .pre_search_cursor = 0,
         .fuzzy_search = config.fuzzy_search,
         .ignore_case = config.ignore_case,
-        .match_path = config.match_path,
 
         .allocator = allocator,
     };
