@@ -48,6 +48,12 @@ ignore_case: bool,
 
 allocator: mem.Allocator,
 
+pub const SearchQuery = struct {
+    fuzzy_search: bool,
+    ignore_case: bool,
+    query: []const u8,
+};
+
 const Self = @This();
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {
@@ -161,9 +167,19 @@ pub fn updateView(self: *Self) !void {
 }
 
 pub fn printContents(self: *Self) !void {
+    var search_query: ?*const SearchQuery = null;
+    if (self.input.search.is_capturing) {
+        search_query = &.{
+            .fuzzy_search = self.fuzzy_search,
+            .ignore_case = self.ignore_case,
+            .query = self.input.search.string(),
+        };
+    }
+
     try self.output.printContents(
         self.viewport.start_row,
         self.view,
+        search_query,
     );
 }
 
@@ -199,7 +215,8 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_nine => actions.expandToDepth(self, 8),
         .toggle_info => actions.toggleInfo(self),
         .search => actions.search(self),
-        .exec_search => try actions.execSearch(self),
+        .update_search => try actions.execSearch(self),
+        .accept_search => try actions.acceptSearch(self),
         .dismiss_search => actions.dismissSearch(self),
         .command => actions.command(self),
         .exec_command => try actions.execCommand(self),

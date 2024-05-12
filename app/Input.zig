@@ -41,12 +41,14 @@ pub const AppAction = enum {
     toggle_info,
 
     search,
-    exec_search,
+    update_search,
+    accept_search,
+    dismiss_search,
+
     command,
     exec_command,
 
     no_action,
-    dismiss_search,
 };
 
 const ActionSequence = struct {
@@ -194,12 +196,12 @@ fn captureSearch(self: *Self) !AppAction {
 
     if (slc[0] == 13) {
         self.search.stop(true);
-        return .select;
+        return .accept_search;
     }
 
     try self.search.capture(slc);
     log.info("search: \"{s}\"", .{self.search.string()});
-    return .exec_search;
+    return .update_search;
 }
 
 fn captureCommand(self: *Self) !AppAction {

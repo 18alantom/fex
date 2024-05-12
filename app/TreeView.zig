@@ -21,6 +21,7 @@ const args = @import("./args.zig");
 const statfmt = @import("../fs/statfmt.zig");
 const App = @import("./App.zig");
 const Stat = @import("../fs/Stat.zig");
+const State = @import("./State.zig");
 
 const Entry = Manager.Iterator.Entry;
 const Config = App.Config;
@@ -29,6 +30,8 @@ const fs = std.fs;
 const os = std.os;
 const fmt = std.fmt;
 const mem = std.mem;
+
+const SearchQuery = State.SearchQuery;
 
 const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
@@ -81,6 +84,7 @@ pub fn printLines(
     view: *View,
     draw: *Draw,
     start_row: usize,
+    search_query: ?*const SearchQuery,
 ) !void {
     self.resetIndentList();
     try draw.moveCursor(start_row, 0);
@@ -99,12 +103,12 @@ pub fn printLines(
             continue;
         }
 
-        if (view.print_all) {
-            try self.printLine(i, view, draw);
+        if (view.print_all or search_query != null) {
+            try self.printLine(i, view, draw, search_query);
         } else if (i == view.cursor or i == view.prev_cursor) {
             const row = start_row + (i - view.first);
             try draw.moveCursor(row, 0);
-            try self.printLine(i, view, draw);
+            try self.printLine(i, view, draw, null);
         }
     }
     view.print_all = false;
@@ -145,7 +149,13 @@ fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
     return obuf[0..e];
 }
 
-fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
+fn printLine(
+    self: *Self,
+    i: usize,
+    view: *const View,
+    draw: *Draw,
+    search_query: ?*const SearchQuery,
+) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
     var has_prefix_info = false;
@@ -187,8 +197,9 @@ fn printLine(self: *Self, i: usize, view: *const View, draw: *Draw) !void {
     }
 
     // Print name
+    const name = if (search_query) |q| q.query else entry.item.name();
     try draw.print(
-        entry.item.name(),
+        name,
         .{ .fg = try getFg(entry, view.cursor == i) },
     );
 

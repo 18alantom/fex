@@ -187,8 +187,14 @@ pub fn execSearch(state: *State) !void {
     }
 }
 
+pub fn acceptSearch(state: *State) !void {
+    try toggleChildrenOrOpenFile(state);
+    state.view.print_all = true;
+}
+
 pub fn dismissSearch(state: *State) void {
     state.view.cursor = state.pre_search_cursor;
+    state.view.print_all = true;
 }
 
 pub fn command(state: *State) void {

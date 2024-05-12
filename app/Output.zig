@@ -5,9 +5,12 @@ const args = @import("./args.zig");
 const tui = @import("../tui.zig");
 const View = @import("./View.zig");
 const App = @import("./App.zig");
+const State = @import("./State.zig");
 
 const TreeView = @import("./TreeView.zig");
+
 const Config = App.Config;
+const SearchQuery = State.SearchQuery;
 
 const fs = std.fs;
 const mem = std.mem;
@@ -51,7 +54,12 @@ pub fn deinit(self: *Self) void {
     self.allocator.destroy(self.writer);
 }
 
-pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
+pub fn printContents(
+    self: *Self,
+    start_row: u16,
+    view: *View,
+    search_query: ?*const SearchQuery,
+) !void {
     self.writer.buffered();
     defer {
         self.writer.flush() catch {};
@@ -63,6 +71,7 @@ pub fn printContents(self: *Self, start_row: u16, view: *View) !void {
         view,
         self.draw,
         start_row,
+        search_query,
     );
 
     const rendered_rows: u16 = @intCast(view.last - view.first);
