@@ -13,6 +13,7 @@ const libc = @cImport({
 pub const os = @import("./utils/os.zig");
 pub const log = @import("./utils/log.zig");
 pub const string = @import("./utils/string.zig");
+pub const BufferWriter = @import("./utils/BufferWriter.zig");
 
 pub const eql = string.eql;
 pub const lpad = string.lpad;

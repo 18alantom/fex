@@ -7,6 +7,7 @@ const apputils = @import("./utils.zig");
 const State = @import("./State.zig");
 const Item = @import("../fs/Item.zig");
 
+const ascii = std.ascii;
 const log = std.log.scoped(.actions);
 
 pub fn moveCursorUp(state: *State) void {
@@ -204,7 +205,7 @@ pub fn command(state: *State) void {
 pub fn execCommand(state: *State) !void {
     // Handled by shell line editing widget
     for (state.input.command.string()) |c| {
-        const char = if (c == ' ') '\n' else c;
+        const char = if (ascii.isWhitespace(c)) '\n' else c;
         try state.stdout.append(char);
     }
 
