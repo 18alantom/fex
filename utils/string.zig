@@ -9,15 +9,18 @@ pub const SearchQuery = struct {
     query: []const u8,
 };
 
-pub fn search(query: []const u8, candidate: []const u8, ignore_case: bool, fuzzy_search: bool) bool {
-    if (fuzzy_search) {
-        return fuzzySearch(query, candidate, ignore_case);
+pub fn search(
+    candidate: []const u8,
+    search_query: *const SearchQuery,
+) bool {
+    if (search_query.fuzzy_search) {
+        return fuzzySearch(candidate, search_query.query, search_query.ignore_case);
     }
 
-    return regularSearch(query, candidate, ignore_case);
+    return regularSearch(candidate, search_query.query, search_query.ignore_case);
 }
 
-pub fn regularSearch(query: []const u8, candidate: []const u8, ignore_case: bool) bool {
+pub fn regularSearch(candidate: []const u8, query: []const u8, ignore_case: bool) bool {
     var i: usize = 0;
     while (i < query.len) : (i += 1) {
         const should_ignore_case = ignore_case and !ascii.isUpper(query[i]);
@@ -29,7 +32,7 @@ pub fn regularSearch(query: []const u8, candidate: []const u8, ignore_case: bool
     return true;
 }
 
-pub fn fuzzySearch(query: []const u8, candidate: []const u8, ignore_case: bool) bool {
+pub fn fuzzySearch(candidate: []const u8, query: []const u8, ignore_case: bool) bool {
     var c_i: usize = 0;
     var q_i: usize = 0;
 
@@ -53,11 +56,26 @@ pub fn fuzzySearch(query: []const u8, candidate: []const u8, ignore_case: bool) 
     return false;
 }
 
-pub fn searchHighlight(buffer: []u8, string: []const u8, search_query: *const SearchQuery) []u8 {
-    _ = string;
-    _ = search_query;
-    @memcpy(buffer[0..4], "abcd");
-    return buffer[0..4];
+pub fn searchHighlight(buffer: []u8, candidate: []const u8, search_query: *const SearchQuery) []const u8 {
+    if (search_query.fuzzy_search) {
+        return fuzzySearchHighlight(buffer, candidate, search_query.query, search_query.ignore_case);
+    }
+
+    return regularSearchHighlight(buffer, candidate, search_query.query, search_query.ignore_case);
+}
+
+pub fn regularSearchHighlight(buffer: []u8, candidate: []const u8, query: []const u8, ignore_case: bool) []const u8 {
+    _ = buffer;
+    _ = query;
+    _ = ignore_case;
+    return candidate;
+}
+
+pub fn fuzzySearchHighlight(buffer: []u8, candidate: []const u8, query: []const u8, ignore_case: bool) []const u8 {
+    _ = buffer;
+    _ = query;
+    _ = ignore_case;
+    return candidate;
 }
 
 pub fn eql(a: []const u8, b: []const u8) bool {

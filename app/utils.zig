@@ -21,11 +21,15 @@ pub fn isMatch(state: *State, index: usize) bool {
 
     if (query.len > candidate.len) return false;
 
+    const search_query: string.SearchQuery = .{
+        .query = query,
+        .ignore_case = state.ignore_case,
+        .fuzzy_search = state.fuzzy_search,
+    };
+
     return string.search(
-        query,
         candidate,
-        state.ignore_case,
-        state.fuzzy_search,
+        &search_query,
     );
 }
 
