@@ -5,26 +5,68 @@ A command line file explorer inspired by
 [exa](https://github.com/ogham/exa) and
 [fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation).
 
-fex is built with quick exploration and navigation in mind. By using Vim-like
-keybindings fex ends up being a near-effortless tool to zip around a file
+`fex` is built with quick exploration and navigation in mind. By using Vim-like
+keybindings `fex` ends up being a near-effortless tool to zip around a file
 system.
 
 ## Installation
 
+Getting `fex` running involves:
+
+1. Installing the `fex` executable.
+2. Setting up the shell integration.
+
+To get install the `fex` executable follow this section. For the shell
+integration go to the [Setup](#setup) section.
+
+> [!NOTE]
+>
+> 🚧 installation using package managers (Homebrew, apt, etc) will be added.
+
 ### From Source
+
+To install fex from source, you will need version `zig` version 0.12.0 installed. You can get it from [here](https://ziglang.org/download/).
+
+Once you do that, compile the executable by using the following commands:
+
+```bash
+# Clone the fex repository
+git clone https://github.com/18alantom/fex && cd fex
+```
+
+If you're using `macOS`:
+
+```bash
+# Compile the fex executable for your system
+zig build-exe -O ReleaseSafe main.zig
+
+# Move the executable to usr bin
+mv main /usr/local/bin/fex
+```
+
+If you're using `linux`:
+
+```bash
+# Compile the fex executable for your system
+
+# Move the executable to usr bin
+
+```
 
 ## Setup
 
-To use `fex` to its full extent it needs to be set up as a shell widget. This allows fex to:
+To use `fex` to its full extent it needs to be set up as a shell widget. This
+allows fex to:
 
 - Be invoked using a key binding.
 - Execute shell commands. For example `cd` to quit and change directory.
 
-These are shell specific so you will need to set it up separately depending on the shell you use.
+These are shell specific so you will need to set it up separately depending on
+the shell you use.
 
 > [!NOTE]
 >
-> Support for bash and fish shell will be added.
+> 🚧 bash and fish shell support will be added.
 
 ### zsh setup
 
@@ -42,7 +84,7 @@ bindkey '^f' fex-widget
 > [!NOTE]
 >
 > You can change which key is used to invoke `fex` by using the ZSH `bindkey` command.
-> Reference: [Binding Kys and handling keymaps](https://zsh.sourceforge.io/Guide/zshguide04.html#l93)
+> Reference: [Binding Keys and handling keymaps](https://zsh.sourceforge.io/Guide/zshguide04.html#l93)
 
 ### `fex` Default Command
 
@@ -54,14 +96,14 @@ what flags `fex` is invoked using. For example:
 export FEX_DEFAULT_COMMAND="fex --time accessed --no-icons"
 ```
 
-## Config and Other Args
+## Config
 
 You can configure `fex` by passing it args.
 
 > [!NOTE]
 >
-> Config args are picked up from the `FEX_DEFAULT_COMMAND` envvar and CLI args
-> passed when calling `fex`. CLI args take higher precedence.
+> Config is picked up from the `FEX_DEFAULT_COMMAND` envvar and CLI args
+> passed when calling `fex`. CLI args take precedence.
 
 ### Display Config
 
@@ -84,7 +126,7 @@ This changes search behavior.
 | --regular-search | Uses regular search, instead of fuzzy search |
 | --match-case     | Match search query case, instead of ignoring |
 
-> [!NOTE]
+> [!TIP]
 >
 > `fex` uses a smart case matching where case is ignored only for lowercase
 > characters. If you use an uppercase character, `fex` will match case.
@@ -104,7 +146,7 @@ This changes search behavior.
 - **Search**: toggled with `/`, used to accept a query and find matching items in expanded directories.
 - **Command**: toggled with `:`, used to accept a shell command that is executed on `enter`. `fex` needs to be setup as a shell widget for this to work, see [Setup](#setup).
 
-> [!NOTE]
+> [!IMPORTANT]
 >
 > Keys mentioned in angle-brackets such as `<enter>` show which key has to be
 > pressed. Keys mentioned without such as `cd` are sequences that have to be
