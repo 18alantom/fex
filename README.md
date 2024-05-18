@@ -6,7 +6,7 @@ A command line file explorer inspired by
 [fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation).
 
 `fex` is built with quick exploration and navigation in mind. By using Vim-like
-keybindings `fex` ends up being a near-effortless tool to zip around a file
+keybindings, `fex` ends up being a near-effortless tool to zip around a file
 system.
 
 ## Installation
@@ -27,14 +27,14 @@ integration go to the [Setup](#setup) section.
 
 To install fex from source, you will need version `zig` version 0.12.0 installed. You can get it from [here](https://ziglang.org/download/).
 
-Once you do that, compile the executable by using the following commands:
+Once you had done that, compile the executable by using the following commands:
 
 ```bash
 # Clone the fex repository
 git clone https://github.com/18alantom/fex && cd fex
 ```
 
-If you're using `macOS`:
+#### macOS
 
 ```bash
 # Compile the fex executable for your system
@@ -44,13 +44,14 @@ zig build-exe -O ReleaseSafe main.zig
 mv main /usr/local/bin/fex
 ```
 
-If you're using `linux`:
+#### Linux
 
 ```bash
 # Compile the fex executable for your system
+zig build-exe -O ReleaseSafe main.zig -lc
 
 # Move the executable to usr bin
-
+mv main /usr/bin/fex
 ```
 
 ## Setup
