@@ -1,9 +1,16 @@
-# fex
+<div align="center" markdown="1">
 
-A command line file explorer inspired by
+<img src=".github/fex.png" alt="fex logo" width="720"/>
+
+Command line **f**ile **ex**plorer inspired by
 [Vim](<https://en.wikipedia.org/wiki/Vim_(text_editor)>),
 [exa](https://github.com/ogham/exa) and
 [fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation).
+
+
+</div>
+
+---
 
 `fex` is built with quick exploration and navigation in mind. By using Vim-like
 keybindings, `fex` ends up being a near-effortless tool to zip around a file
@@ -129,15 +136,14 @@ This changes search behavior.
 
 > [!TIP]
 >
-> `fex` uses a smart case matching where case is ignored only for lowercase
-> characters. If you use an uppercase character, `fex` will match case.
+> `fex` uses smart case matching by default i.e case is ignored until you
+> enter an upper case character.
 
 ### Other Args
 
-| arg              | description                        |
-| :--------------- | :--------------------------------- |
-| `--help`         | Prints the help message and quits. |
-| `--setup-zsh` 🚧 | Sets up the zsh widget and quits.  |
+| arg      | description                        |
+| :------- | :--------------------------------- |
+| `--help` | Prints the help message and quits. |
 
 ## Controls
 
@@ -171,7 +177,7 @@ This changes search behavior.
 | key             | action                                    |
 | :-------------- | :---------------------------------------- |
 | `<enter>`       | Toggle directory or open file (macOS)     |
-| `o`             | Open file (macOS)                         |
+| `o`             | Open item (macOS)                         |
 | `E`             | Expand all directories under root         |
 | `C`             | Collapse all directories                  |
 | `R`             | Change root to item under cursor (if dir) |
