@@ -1,6 +1,6 @@
 <div align="center" markdown="1">
 
-<img src=".github/fex.png" alt="fex logo" width="720"/>
+<img src=".github/fex.png" alt="fex logo" width="256"/>
 
 Command line **f**ile **ex**plorer inspired by
 [Vim](<https://en.wikipedia.org/wiki/Vim_(text_editor)>),
