@@ -109,7 +109,6 @@ const capture_list = [_]ActionSequence{
 
     // Capture actions
     .{ .seq = "/", .action = .search },
-    .{ .seq = "$", .action = .command },
     .{ .seq = ":", .action = .command },
 };
 

@@ -6,13 +6,10 @@ pub const help_string =
     \\Example
     \\  fex ~/Desktop --time accessed
     \\
-    \\Meta
-    \\  --help              Print this help message
-    \\
     \\Display Config
     \\  --no-icons          Skip printing icons
     \\  --no-size           Skip printing item sizes
-    \\  --no-time           Skip printing all times
+    \\  --no-time           Skip printing time
     \\  --no-mode           Skip printing permission info
     \\  --time VALUE        Set which time is displayed
     \\                      valid: modified, accessed, changed
@@ -25,18 +22,21 @@ pub const help_string =
     \\Setup
     \\  --setup-zsh         Setup fex ZSH widget and keybind it to CTRL-F
     \\
+    \\Meta
+    \\  --help              Print this help message
+    \\
     \\Navigation Controls
-    \\  j, down-arrow       Cursor down
-    \\  k, up-arrow         Cursor up
-    \\  h, left-arrow       Up a dir
-    \\  l, right-arrow      Down a dir
+    \\  j, <down-arrow>     Cursor down
+    \\  k, <up-arrow>       Cursor up
+    \\  h, <left-arrow>     Up a dir
+    \\  l, <right-arrow>    Down a dir
     \\  gg                  Jump to first item
     \\  G                   Jump to last item
     \\  {                   Jump to prev fold
     \\  }                   Jump to next fold
     \\  
     \\Action Controls
-    \\  return/enter        Toggle directory or open file (macOS)
+    \\  <enter>             Toggle directory or open file (macOS)
     \\  o                   Open item under cursor (macOS)
     \\  E                   Expand all directories
     \\  C                   Collapse all directories
@@ -45,15 +45,15 @@ pub const help_string =
     \\  /                   Toggle search mode
     \\  :                   Toggle command mode
     \\  1..9                Expand all directories upto $NUM depth
-    \\  q, ctrl-d           Quit
+    \\  q, <ctrl-d>         Quit
     \\
-    \\Search Controls
-    \\  escape              Quit search, restore cursor position
-    \\  return/enter        Quit search, toggle directory or open file (macOS)
+    \\Search Mode Controls
+    \\  <escape>            Quit search, restore cursor position
+    \\  <enter>             Quit search, toggle directory or open file (macOS)
     \\
-    \\Command Controls
-    \\  escape              Quit command mode, restore cursor position
-    \\  return/enter        Quit fex, execute command with item under cursor
+    \\Command Mode Controls
+    \\  <escape>            Quit command mode
+    \\  <enter>             Quit fex, execute command with item under cursor
     \\                      as arg
     \\
     \\File System Commands

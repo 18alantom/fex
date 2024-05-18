@@ -79,8 +79,9 @@ pub fn regularSearchHighlight(buffer: []u8, candidate: []const u8, query: []cons
 
     var i: usize = 0;
     while (i < query.len) : (i += 1) {
-        const c = if (ignore_case) ascii.toLower(candidate[i]) else candidate[i];
-        const q = if (ignore_case) ascii.toLower(query[i]) else query[i];
+        const should_ignore_case = ignore_case and !ascii.isUpper(query[i]);
+        const c = if (should_ignore_case) ascii.toLower(candidate[i]) else candidate[i];
+        const q = if (should_ignore_case) ascii.toLower(query[i]) else query[i];
 
         const c_ = candidate[i];
         defer bw.writeByte(c_) catch {};
@@ -117,8 +118,9 @@ pub fn fuzzySearchHighlight(buffer: []u8, candidate: []const u8, query: []const 
         if (q_i >= query.len) break;
         if (c_i >= candidate.len) break;
 
-        const c = if (ignore_case) ascii.toLower(candidate[c_i]) else candidate[c_i];
-        const q = if (ignore_case) ascii.toLower(query[q_i]) else query[q_i];
+        const should_ignore_case = ignore_case and !ascii.isUpper(query[q_i]);
+        const c = if (should_ignore_case) ascii.toLower(candidate[c_i]) else candidate[c_i];
+        const q = if (should_ignore_case) ascii.toLower(query[q_i]) else query[q_i];
 
         const c_ = candidate[c_i];
         defer bw.writeByte(c_) catch {};
