@@ -17,16 +17,42 @@ system.
 
 To use `fex` to its full extent it needs to be set up as a shell widget. This allows fex to:
 
-- Be invoked using a key binding. Default is `<ctrl-f>`
+- Be invoked using a key binding.
 - Execute shell commands. For example `cd` to quit and change directory.
 
 These are shell specific so you will need to set it up separately depending on the shell you use.
 
-### zsh
+> [!NOTE]
+>
+> Support for bash and fish shell will be added.
 
-### bash 🚧
+### zsh setup
 
-### fish 🚧
+To setup the ZSH widget for fex, first copy the file `shell/.fex.zsh` to your
+home directory. Then copy the following lines into your `.zshrc`:
+
+```bash
+# Source .fex.zsh if it's present
+[ -f ~/.fex.zsh ] && source ~/.fex.zsh
+
+# Bind CTRL-F to invoke fex (key binds can be custom)
+bindkey '^f' fex-widget
+```
+
+> [!NOTE]
+>
+> You can change which key is used to invoke `fex` by using the ZSH `bindkey` command.
+> Reference: [Binding Kys and handling keymaps](https://zsh.sourceforge.io/Guide/zshguide04.html#l93)
+
+### `fex` Default Command
+
+After you have set up fex for your shell, you can `FEX_DEFAULT_COMMAND` to change
+what flags `fex` is invoked using. For example:
+
+```bash
+# Sets time displayed to access time and hides icons
+export FEX_DEFAULT_COMMAND="fex --time accessed --no-icons"
+```
 
 ## Config and Other Args
 
@@ -65,10 +91,10 @@ This changes search behavior.
 
 ### Other Args
 
-| arg           | description                        |
-| :------------ | :--------------------------------- |
-| `--help`      | Prints the help message and quits. |
-| `--setup-zsh` | Sets up the zsh widget and quits.  |
+| arg              | description                        |
+| :--------------- | :--------------------------------- |
+| `--help`         | Prints the help message and quits. |
+| `--setup-zsh` 🚧 | Sets up the zsh widget and quits.  |
 
 ## Controls
 

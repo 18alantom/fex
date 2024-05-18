@@ -78,9 +78,6 @@ function fex-widget {
 # Register ZSH widget fex-widget
 zle -N fex-widget
 
-# Bind CTRL-F to run fex-widget
-bindkey '^f' fex-widget
-
 } always {
   # Restore the original options.
   eval $__fex_pre_init_options
