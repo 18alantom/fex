@@ -198,7 +198,7 @@ fn printLine(
 
     // Print name
     const name = if (search_query_or_null) |search_query|
-        string.searchHighlight(&self.obuf, entry.item.name(), search_query)
+        try string.searchHighlight(&self.obuf, entry.item.name(), search_query)
     else
         entry.item.name();
     try draw.print(
