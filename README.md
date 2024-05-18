@@ -2,19 +2,40 @@
 
 <img src=".github/fex.png" alt="fex logo" width="256"/>
 
-Command line **f**ile **ex**plorer inspired by
-[Vim](<https://en.wikipedia.org/wiki/Vim_(text_editor)>),
-[exa](https://github.com/ogham/exa) and
-[fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation).
-
+A CLI file explorer.
 
 </div>
 
 ---
 
-`fex` is built with quick exploration and navigation in mind. By using Vim-like
+`fex` is a command-line file explorer inspired by
+[Vim](<https://en.wikipedia.org/wiki/Vim_(text_editor)>),
+[exa](https://github.com/ogham/exa) and
+[fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation).
+
+It is built with quick exploration and navigation in mind. By using Vim-like
 keybindings, `fex` ends up being a near-effortless tool to zip around a file
 system.
+
+- [Installation](#installation)
+  - [From Source](#from-source)
+    - [macOS](#macos)
+    - [Linux](#linux)
+- [Setup](#setup)
+  - [zsh Setup](#zsh-setup)
+  - [fex Default Command](#fex-default-command)
+- [Config](#config)
+  - [Display Config](#display-config)
+  - [Search Config](#search-config)
+  - [Other Args](#other-args)
+- [Controls](#controls)
+  - [Navigation Controls](#navigation-controls)
+  - [Action Controls](#action-controls)
+  - [File System Controls](#file-system-controls)
+  - [Search Mode Controls](#search-mode-controls)
+  - [Command Mode Controls](#command-mode-controls)
+- [Platorm Support](#platform-support)
+- [Notes](#notes)
 
 ## Installation
 
@@ -76,7 +97,7 @@ the shell you use.
 >
 > 🚧 bash and fish shell support will be added.
 
-### zsh setup
+### zsh Setup
 
 To setup the ZSH widget for fex, first copy the file `shell/.fex.zsh` to your
 home directory. Then copy the following lines into your `.zshrc`:
@@ -211,4 +232,33 @@ Type `:` in regular mode to initiate command mode.
 | `<escape>` | Quit command mode                                       |
 | `<enter>`  | Quit fex, execute command with item under cursor as arg |
 
-## Support, Known Issues, and TODO
+## Platform Support
+
+`fex` should ideally compile and run on all macOS and Linux targets supported
+by Zig. Some features such as opening fs items work only on macOS for now.
+
+Portions of `fex` code is Platform specific and Windows compatibility has not
+been accounted for. This may be added in later.
+
+| arch | macOS      | Linux      | Windows |
+| ---- | ---------- | ---------- | ------- |
+| arm  | works      | might-work | ??      |
+| x86  | might-work | works      | ??      |
+
+Currently fex only has shell integration for zsh. Fish and bash integrations will
+be added.
+
+## Notes
+
+A list of next 10 things to be done:
+
+1. `fix`: line warping
+2. `ui`: command, search mode display input
+3. `chore`: publish on Homebrew
+4. `fix`: unicode support
+5. `ux`: command, search mode clear input
+6. `ux`: search mode, previous and next item
+7. `ux`: multiselect items (useful in command mode)
+8. `ui`: show link target when displaying links
+9. `ux`: common fs commands rm, cp, mv
+10. `fix`: handle access denied, stat errors
