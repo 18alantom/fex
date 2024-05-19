@@ -51,14 +51,19 @@ function __fex_exec {
 }
 
 function fex-widget {
+    # Single echo to preserve current prompt
+    echo
+    
     setopt localoptions pipefail no_aliases 2> /dev/null
     EXEC_CMD="$(__fex_exec)"
+
+    # Return code of executed fex returned command
+    local ret=$?
     
     # If no return value (normal quit) then reset prompt
-    # and exit with 0
     if [[ -z "$EXEC_CMD" ]]; then
       zle reset-prompt
-      return 0
+      return $ret
     fi
 
     # Pushes BUFFER onto stack and clears it
@@ -67,11 +72,8 @@ function fex-widget {
     # BUFFER is ZSH env var, accept-line execs what's in BUFFER
     BUFFER=$EXEC_CMD
     zle accept-line
-
-    # Return code of executed fex returned command
-    local ret=$?
-    
     zle reset-prompt
+
     return $ret
 }
 
