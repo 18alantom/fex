@@ -106,40 +106,48 @@ pub fn changeRoot(state: *State) !void {
 pub fn toPrevFold(state: *State) void {
     const entry = state.getEntryUnderCursor();
     const item = entry.item;
+    const initial = state.view.cursor;
+
     var i: usize = (state.getItemIndex(item) catch return) -| 1;
     while (i > 0) : (i = i - 1) {
         const possible_sibling = state.view.buffer.items[i];
-        if (possible_sibling.depth == entry.depth) {
-            continue;
-        }
-
         state.view.cursor = i;
+
+        if (possible_sibling.depth != entry.depth) {
+            break;
+        }
+    }
+
+    if (state.view.cursor != initial) {
         return;
     }
 
-    state.view.cursor -|= 1;
+    state.view.cursor = initial -| 1;
 }
 
 pub fn toNextFold(state: *State) !void {
     const entry = state.getEntryUnderCursor();
     const item = entry.item;
+    const initial = state.view.cursor;
 
     var i: usize = (state.getItemIndex(item) catch return) + 1;
     while (i < state.view.buffer.items.len) : (i = i + 1) {
-        if (i == (state.view.buffer.items.len - 1)) {
-            if (!(try state.appendOne())) break;
-        }
-
-        const possible_sibling = state.view.buffer.items[i];
-        if (possible_sibling.depth == entry.depth) {
-            continue;
-        }
-
         state.view.cursor = i;
+        const possible_sibling = state.view.buffer.items[i];
+        if (possible_sibling.depth != entry.depth) {
+            break;
+        }
+
+        if (i == (state.view.buffer.items.len - 1) and !(try state.appendOne())) {
+            break;
+        }
+    }
+
+    if (state.view.cursor != initial or state.view.buffer.items.len > initial + 1) {
         return;
     }
 
-    state.view.cursor +|= 1;
+    state.view.cursor = initial + 1;
 }
 
 pub fn openItem(state: *State) !void {

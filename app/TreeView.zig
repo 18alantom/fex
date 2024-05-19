@@ -37,6 +37,7 @@ const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
 const getStyle = tui.style.style;
 const getIcon = icons.getIcon;
+const log = std.log.scoped(.TreeView);
 
 const Info = struct {
     icons: bool = true,
@@ -120,7 +121,7 @@ fn resetIndentList(self: *Self) void {
     }
 }
 
-fn updateIndentList(self: *Self, entry: Manager.Iterator.Entry) !void {
+fn updateIndentList(self: *Self, entry: *Entry) !void {
     // default first value is `false`
     var prev: bool = false;
 
@@ -136,7 +137,7 @@ fn updateIndentList(self: *Self, entry: Manager.Iterator.Entry) !void {
     self.indent_list.items[entry.depth] = !entry.last and (entry.first or prev);
 }
 
-fn setIndentLines(self: *Self, entry: Manager.Iterator.Entry, obuf: []u8) []u8 {
+fn setIndentLines(self: *Self, entry: *Entry, obuf: []u8) []u8 {
     var e: usize = 0;
     for (0..entry.depth) |i| {
         const ic = if (self.indent_list.items[i]) "│   " else "    ";
@@ -222,7 +223,7 @@ fn timeType(self: *Self) ?Stat.TimeType {
     return null;
 }
 
-fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {
+fn getFg(entry: *Entry, is_selected: bool) !tui.style.Color {
     if (is_selected) return .magenta;
     const s = try entry.item.stat();
 
@@ -232,7 +233,7 @@ fn getFg(entry: Entry, is_selected: bool) !tui.style.Color {
     return .default;
 }
 
-fn getBranch(self: *Self, entry: Entry, obuf: []u8) ![]u8 {
+fn getBranch(self: *Self, entry: *Entry, obuf: []u8) ![]u8 {
     var e = self.setIndentLines(entry, obuf).len;
     const ec = if (entry.last) "└── " else "├── ";
     @memcpy(obuf[e .. e + ec.len], ec);

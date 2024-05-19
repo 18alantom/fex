@@ -2,6 +2,7 @@ const std = @import("std");
 
 const posix = std.posix;
 const fmt = std.fmt;
+const log = std.log.scoped(.terminal);
 
 pub const Size = struct {
     cols: u16,

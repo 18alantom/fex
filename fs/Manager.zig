@@ -111,7 +111,7 @@ pub const Iterator = struct {
         first: bool, // is first child
         last: bool, // is last child
     };
-    const EntryList = std.ArrayList(Entry);
+    const EntryList = std.ArrayList(*Entry);
 
     //// Itermode values:
     /// -1 : as deep as possible
@@ -120,32 +120,40 @@ pub const Iterator = struct {
     ///  n : expand until depth `n`
     itermode: i32 = -1,
     stack: EntryList,
+    allocator: mem.Allocator,
 
     pub fn init(allocator: mem.Allocator, first: *Item, itermode: i32) !Iterator {
         var stack = EntryList.init(allocator);
-        try stack.append(.{
+        const entry = try allocator.create(Entry);
+        entry.* = .{
             .item = first,
             .depth = 0,
             .index = 0,
             .first = true,
             .last = true,
-        });
+        };
+
+        try stack.append(entry);
         return .{
             .stack = stack,
             .itermode = itermode,
+            .allocator = allocator,
         };
     }
 
     pub fn deinit(self: *Iterator) void {
+        for (self.stack.items) |entry| {
+            self.allocator.destroy(entry);
+        }
         self.stack.deinit();
     }
 
-    pub fn next(self: *Iterator) ?Entry {
+    pub fn next(self: *Iterator) ?*Entry {
         if (self.stack.items.len == 0) {
             return null;
         }
 
-        const last_or_null: ?Entry = self.stack.popOrNull();
+        const last_or_null = self.stack.popOrNull();
         if (last_or_null) |last| {
             self.growStack(last) catch return null;
         }
@@ -153,7 +161,7 @@ pub const Iterator = struct {
         return last_or_null;
     }
 
-    fn growStack(self: *Iterator, entry: Entry) !void {
+    fn growStack(self: *Iterator, entry: *Entry) !void {
         // Invalid itermode value < -2
         if (self.itermode < -2) {
             return;
@@ -179,7 +187,8 @@ pub const Iterator = struct {
 
             // Required because Items are popped off the stack.
             const reverse_index = children.items.len - 1 - index;
-            const child_entry = getEntry(reverse_index, entry.depth, children);
+            const child_entry = try self.allocator.create(Entry);
+            child_entry.* = getEntry(reverse_index, entry.depth, children);
             try self.stack.append(child_entry);
         }
     }

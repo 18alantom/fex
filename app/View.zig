@@ -16,7 +16,7 @@ const Entry = Manager.Iterator.Entry;
 const Self = @This();
 
 allocator: mem.Allocator,
-buffer: std.ArrayList(Entry),
+buffer: std.ArrayList(*Entry),
 
 first: usize, // first index (top buffer boundary)
 last: usize, // last index (bottom buffer boundar)
@@ -34,7 +34,7 @@ prev_cursor: usize, // Previous cursor position.
 pub fn init(allocator: mem.Allocator) Self {
     return .{
         .allocator = allocator,
-        .buffer = std.ArrayList(Entry).init(allocator),
+        .buffer = std.ArrayList(*Entry).init(allocator),
         .cursor = 0,
         .first = 0,
         .last = 0,

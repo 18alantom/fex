@@ -9,7 +9,7 @@ const mem = std.mem;
 const Entry = Manager.Iterator.Entry;
 const eql = utils.eql;
 
-pub fn getIcon(entry: Entry) ![]const u8 {
+pub fn getIcon(entry: *Entry) ![]const u8 {
     const item = entry.item;
     var ext = path.extension(item.abspath());
     if (ext.len == 0) {

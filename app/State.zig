@@ -225,11 +225,11 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
 pub fn getEntry(self: *Self, index: usize) ?*Manager.Iterator.Entry {
     if (self.view.buffer.items.len <= index) return null;
 
-    return &self.view.buffer.items[index];
+    return self.view.buffer.items[index];
 }
 
 pub fn getEntryUnderCursor(self: *Self) *Manager.Iterator.Entry {
-    return &self.view.buffer.items[self.view.cursor];
+    return self.view.buffer.items[self.view.cursor];
 }
 
 pub fn getItem(self: *Self, index: usize) ?*Item {

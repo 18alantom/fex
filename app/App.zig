@@ -13,7 +13,6 @@ const TreeView = @import("./TreeView.zig");
 const Input = @import("./Input.zig");
 const Output = @import("./Output.zig");
 const Stat = @import("../fs/Stat.zig");
-const Entry = Manager.Iterator.Entry;
 
 const fs = std.fs;
 const mem = std.mem;
