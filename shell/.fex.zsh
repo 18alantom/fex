@@ -51,10 +51,11 @@ function __fex_exec {
 }
 
 function fex-widget {
+    setopt localoptions pipefail no_aliases 2> /dev/null
+
     # Single echo to preserve current prompt
     echo
     
-    setopt localoptions pipefail no_aliases 2> /dev/null
     EXEC_CMD="$(__fex_exec)"
 
     # Return code of executed fex returned command
