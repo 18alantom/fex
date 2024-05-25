@@ -22,7 +22,7 @@ system.
     - [macOS](#macos)
     - [Linux](#linux)
 - [Setup](#setup)
-  - [zsh Setup](#zsh-setup)
+  - [Zsh Setup](#zsh-setup)
   - [fex Default Command](#fex-default-command)
 - [Config](#config)
   - [Display Config](#display-config)
@@ -97,9 +97,9 @@ the shell you use.
 >
 > 🚧 bash and fish shell support will be added.
 
-### zsh Setup
+### Zsh Setup
 
-To setup the ZSH widget for fex, first copy the file `shell/.fex.zsh` to your
+To setup the Zsh widget for fex, first copy the file `shell/.fex.zsh` to your
 home directory. Then copy the following lines into your `.zshrc`:
 
 ```bash
@@ -112,8 +112,8 @@ bindkey '^f' fex-widget
 
 > [!TIP]
 >
-> You can change which key is used to invoke `fex` by using the ZSH `bindkey` command.
-> For example if you use ZSH vi mode, you can use `bindkey -a 'f' fex-widget` to
+> You can change which key is used to invoke `fex` by using the Zsh `bindkey` command.
+> For example if you use Zsh vi mode, you can use `bindkey -a 'f' fex-widget` to
 > invoke `fex` using the `'f'` key when in command mode.
 > 
 > Reference: 
@@ -250,7 +250,7 @@ been accounted for. This may be added in later.
 | arm  | works      | might-work | ??      |
 | x86  | might-work | works      | ??      |
 
-Currently fex only has shell integration for zsh. Fish and bash integrations will
+Currently fex only has shell integration for Zsh. Fish and bash integrations will
 be added.
 
 ## Notes
