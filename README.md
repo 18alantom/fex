@@ -110,10 +110,15 @@ home directory. Then copy the following lines into your `.zshrc`:
 bindkey '^f' fex-widget
 ```
 
-> [!NOTE]
+> [!TIP]
 >
 > You can change which key is used to invoke `fex` by using the ZSH `bindkey` command.
-> Reference: [Binding Keys and handling keymaps](https://zsh.sourceforge.io/Guide/zshguide04.html#l93)
+> For example if you use ZSH vi mode, you can use `bindkey -a 'f' fex-widget` to
+> invoke `fex` using the `'f'` key when in command mode.
+> 
+> Reference: 
+> - ZLE manpage (`man zshzle`), the ZLE BUILTINS section.
+> - [Binding Keys and handling keymaps](https://zsh.sourceforge.io/Guide/zshguide04.html#l93)
 
 ### `fex` Default Command
 
