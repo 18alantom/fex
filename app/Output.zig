@@ -36,6 +36,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     treeview.* = TreeView.init(allocator, config);
 
     try draw.hideCursor();
+    try draw.disableAutowrap();
     return .{
         .allocator = allocator,
         .writer = writer,
@@ -48,6 +49,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
 
 pub fn deinit(self: *Self) void {
     self.draw.showCursor() catch {};
+    self.draw.enableAutowrap() catch {};
     self.treeview.deinit();
     self.allocator.destroy(self.draw);
     self.allocator.destroy(self.treeview);

@@ -231,6 +231,14 @@ pub fn showCursor(self: *Self) !void {
     _ = try self.writer.write("\x1b[?25h");
 }
 
+pub fn enableAutowrap(self: *Self) !void {
+    _ = try self.writer.write("\x1b[?7h");
+}
+
+pub fn disableAutowrap(self: *Self) !void {
+    _ = try self.writer.write("\x1b[?7l");
+}
+
 /// Clear the screen and set cursor to the top left position.
 pub fn clearScreen(self: *Self) !void {
     _ = try self.writer.write("\x1b[2J\x1b[H");
