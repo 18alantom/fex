@@ -105,7 +105,7 @@ pub fn printLines(
             continue;
         }
 
-        const render_last = is_capturing_command and view.last == 1;
+        const render_last = is_capturing_command and view.last == i;
 
         // Assumes that cursor is at the right position.
         if (search_query != null or view.print_all) {

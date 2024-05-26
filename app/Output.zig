@@ -99,6 +99,6 @@ pub fn printCaptureString(self: *Self, view: *View, viewport: *Viewport, capture
     try self.draw.moveCursor(row, col);
 
     const sigil = if (capture.ctype == .search) "/" else ":";
-    try self.draw.print(sigil, .{ .bg = .cyan, .bold = true });
-    try self.draw.print(captured, .{ .bg = .yellow });
+    try self.draw.print(sigil, .{ .fg = .black, .bg = .cyan });
+    try self.draw.print(captured, .{ .fg = .black, .bg = .yellow });
 }
