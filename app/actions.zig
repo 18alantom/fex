@@ -222,3 +222,7 @@ pub fn execCommand(state: *State) !void {
     try state.stdout.appendSlice("\n");
     log.info("execCommand: \"{s}\"", .{state.input.command.string()});
 }
+
+pub fn dismissCommand(state: *State) void {
+    state.view.print_all = true;
+}

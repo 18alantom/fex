@@ -86,6 +86,7 @@ pub fn printLines(
     draw: *Draw,
     start_row: usize,
     search_query: ?*const SearchQuery,
+    is_capturing_command: bool,
 ) !void {
     self.resetIndentList();
     try draw.moveCursor(start_row, 0);
@@ -104,9 +105,15 @@ pub fn printLines(
             continue;
         }
 
-        if (view.print_all or search_query != null) {
+        const render_last = is_capturing_command and view.last == 1;
+
+        // Assumes that cursor is at the right position.
+        if (search_query != null or view.print_all) {
             try self.printLine(i, view, draw, search_query);
-        } else if (i == view.cursor or i == view.prev_cursor) {
+        }
+
+        // Move cursor to line and render it.
+        else if (i == view.cursor or i == view.prev_cursor or render_last) {
             const row = start_row + (i - view.first);
             try draw.moveCursor(row, 0);
             try self.printLine(i, view, draw, null);

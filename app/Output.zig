@@ -65,6 +65,7 @@ pub fn printContents(
     start_row: u16,
     view: *View,
     search_query: ?*const SearchQuery,
+    is_capturing_command: bool,
 ) !void {
     self.writer.buffered();
     defer {
@@ -78,6 +79,7 @@ pub fn printContents(
         self.draw,
         start_row,
         search_query,
+        is_capturing_command,
     );
 
     const rendered_rows: u16 = @intCast(view.last - view.first);
@@ -93,7 +95,7 @@ pub fn printCaptureString(self: *Self, view: *View, viewport: *Viewport, capture
 
     const captured = capture.string();
     const row = viewport.start_row + view.last - view.first;
-    const col = viewport.size.cols - captured.len - 2;
+    const col = viewport.size.cols - captured.len - 1;
     try self.draw.moveCursor(row, col);
 
     const sigil = if (capture.ctype == .search) "/" else ":";

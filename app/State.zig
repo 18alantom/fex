@@ -175,6 +175,7 @@ pub fn printContents(self: *Self) !void {
         self.viewport.start_row,
         self.view,
         search_query,
+        self.input.command.is_capturing,
     );
 
     if (self.input.search.is_capturing) {
@@ -221,6 +222,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .dismiss_search => actions.dismissSearch(self),
         .command => actions.command(self),
         .exec_command => try actions.execCommand(self),
+        .dismiss_command => actions.dismissCommand(self),
 
         // no-op, handled by the caller
         .quit => unreachable,

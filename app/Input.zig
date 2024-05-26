@@ -47,6 +47,7 @@ pub const AppAction = enum {
 
     command,
     exec_command,
+    dismiss_command,
 
     no_action,
 };
@@ -212,7 +213,7 @@ fn captureCommand(self: *Self) !AppAction {
 
     if (slc[0] == 27) {
         self.command.stop(true);
-        return .no_action;
+        return .dismiss_command;
     }
 
     if (slc[0] == 13) {
