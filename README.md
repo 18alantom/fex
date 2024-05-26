@@ -115,8 +115,9 @@ bindkey '^f' fex-widget
 > You can change which key is used to invoke `fex` by using the Zsh `bindkey` command.
 > For example if you use Zsh vi mode, you can use `bindkey -a 'f' fex-widget` to
 > invoke `fex` using the `'f'` key when in command mode.
-> 
-> Reference: 
+>
+> Reference:
+>
 > - ZLE manpage (`man zshzle`), the ZLE BUILTINS section.
 > - [Binding Keys and handling keymaps](https://zsh.sourceforge.io/Guide/zshguide04.html#l93)
 
@@ -213,7 +214,7 @@ This changes search behavior.
 | `/`             | Toggle search mode                        |
 | `:`             | Toggle command mode                       |
 
-### File System Conrols
+### File System Controls
 
 | key  | action                                                                 |
 | :--- | :--------------------------------------------------------------------- |
@@ -226,7 +227,7 @@ Type `/` in regular mode to initiate search mode.
 | key        | action                                             |
 | :--------- | :------------------------------------------------- |
 | `<escape>` | Quit search, restore cursor to pre-search position |
-| `<enter>`  | Quit search, toggle directory or open file (macOS) |
+| `<enter>`  | Quit search                                        |
 
 ### Command Mode Controls
 
@@ -252,18 +253,3 @@ been accounted for. This may be added in later.
 
 Currently fex only has shell integration for Zsh. Fish and bash integrations will
 be added.
-
-## Notes
-
-A list of next 10 things to be done:
-
-1. `fix`: line warping
-2. `ui`: command, search mode display input
-3. `chore`: publish on Homebrew
-4. `fix`: unicode support
-5. `ux`: command, search mode clear input
-6. `ux`: search mode, previous and next item
-7. `ux`: multiselect items (useful in command mode)
-8. `ui`: show link target when displaying links
-9. `ux`: common fs commands rm, cp, mv
-10. `fix`: handle access denied, stat errors

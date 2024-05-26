@@ -49,7 +49,7 @@ pub const help_string =
     \\
     \\Search Mode Controls
     \\  <escape>            Quit search, restore cursor position
-    \\  <enter>             Quit search, toggle directory or open file (macOS)
+    \\  <enter>             Quit search
     \\
     \\Command Mode Controls
     \\  <escape>            Quit command mode
