@@ -176,6 +176,12 @@ pub fn printContents(self: *Self) !void {
         self.view,
         search_query,
     );
+
+    if (self.input.search.is_capturing) {
+        try self.output.printCaptureString(self.view, self.viewport, self.input.search);
+    } else if (self.input.command.is_capturing) {
+        try self.output.printCaptureString(self.view, self.viewport, self.input.command);
+    }
 }
 
 pub fn getAppAction(self: *Self) !Input.AppAction {

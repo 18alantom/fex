@@ -7,17 +7,20 @@ const mem = std.mem;
 const os = std.os;
 
 const CharArray = utils.CharArray;
+const CaptureType = enum { search, command };
 
 is_capturing: bool,
+ctype: CaptureType,
 buffer: *CharArray,
 allocator: mem.Allocator,
 
 const Self = @This();
-pub fn init(allocator: mem.Allocator) !Self {
+pub fn init(allocator: mem.Allocator, ctype: CaptureType) !Self {
     const buffer = try allocator.create(CharArray);
     buffer.* = CharArray.init(allocator);
     return .{
         .buffer = buffer,
+        .ctype = ctype,
         .allocator = allocator,
         .is_capturing = false,
     };

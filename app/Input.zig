@@ -126,10 +126,10 @@ pub fn init(allocator: mem.Allocator) !Self {
     const reader = io.getStdIn().reader();
 
     const search = try allocator.create(Capture);
-    search.* = try Capture.init(allocator);
+    search.* = try Capture.init(allocator, .search);
 
     const command = try allocator.create(Capture);
-    command.* = try Capture.init(allocator);
+    command.* = try Capture.init(allocator, .command);
 
     return .{
         .reader = reader,

@@ -4,17 +4,21 @@ const std = @import("std");
 const args = @import("./args.zig");
 const tui = @import("../tui.zig");
 const string = @import("../utils/string.zig");
+const icons_ = @import("./icons.zig");
 
-const View = @import("./View.zig");
 const App = @import("./App.zig");
+const View = @import("./View.zig");
+const Capture = @import("./Capture.zig");
+const Viewport = @import("./Viewport.zig");
 const TreeView = @import("./TreeView.zig");
 
 const Config = App.Config;
 const SearchQuery = string.SearchQuery;
 
 const fs = std.fs;
-const mem = std.mem;
 const io = std.io;
+const mem = std.mem;
+const icons = icons_.icons;
 
 allocator: mem.Allocator,
 draw: *tui.Draw,
@@ -78,4 +82,21 @@ pub fn printContents(
 
     const rendered_rows: u16 = @intCast(view.last - view.first);
     try self.draw.clearLinesBelow(start_row + rendered_rows + 1);
+}
+
+pub fn printCaptureString(self: *Self, view: *View, viewport: *Viewport, capture: *Capture) !void {
+    self.writer.buffered();
+    defer {
+        self.writer.flush() catch {};
+        self.writer.unbuffered();
+    }
+
+    const captured = capture.string();
+    const row = viewport.start_row + view.last - view.first;
+    const col = viewport.size.cols - captured.len - 2;
+    try self.draw.moveCursor(row, col);
+
+    const sigil = if (capture.ctype == .search) "/" else ":";
+    try self.draw.print(sigil, .{ .bg = .cyan, .bold = true });
+    try self.draw.print(captured, .{ .bg = .yellow });
 }
