@@ -197,7 +197,6 @@ pub fn execSearch(state: *State) !void {
 }
 
 pub fn acceptSearch(state: *State) !void {
-    try toggleChildrenOrOpenFile(state);
     state.view.print_all = true;
 }
 
