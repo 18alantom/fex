@@ -110,6 +110,7 @@ pub fn getIcon(entry: *Entry) ![]const u8 {
     if (eql(ext, ".elm")) return icons.elm;
     if (eql(ext, ".php")) return icons.php;
     if (eql(ext, ".sqlite")) return icons.sqlite;
+    if (eql(ext, ".json")) return icons.json;
 
     if (try item.isDir()) {
         return if (item.hasChildren()) icons.folder_open else icons.folder;
@@ -168,6 +169,7 @@ const icons = .{
     .java = "\u{e66d}",
     .javascript = "\u{e74e}",
     .joomla = "\u{e741}",
+    .json = "\u{e60b}",
     .less = "\u{e758}",
     .linux = "\u{e712}",
     .markdown = "\u{e73e}",
