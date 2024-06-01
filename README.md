@@ -8,11 +8,19 @@
 `fex` is a command-line file explorer inspired by
 [Vim](<https://en.wikipedia.org/wiki/Vim_(text_editor)>),
 [exa](https://github.com/ogham/exa) and
-[fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation).
+[fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation), built with
+quick exploration and navigation in mind.
 
-It is built with quick exploration and navigation in mind. By using Vim-like
-keybindings, `fex` ends up being a near-effortless tool to zip around a file
-system.
+![fex](https://github.com/18alantom/fex/assets/29507195/12a7a223-0e13-445b-b035-9ae22e1f7c4d)
+
+By using Vim-like keybindings, `fex` ends up being a near-effortless
+tool to zip around a file system:
+- `j`, `k` to move to the pervious and next item
+- `h`, `l` to move up or drop down a directory
+- `/` to search for items
+- `:` to run commands on the selected item
+
+## Index
 
 - [Installation](#installation)
   - [From Source](#from-source)
