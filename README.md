@@ -11,11 +11,7 @@
 [fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation), built with
 quick exploration and navigation in mind.
 
-<div align="center" markdown="1">
-
- ![fex](https://github.com/18alantom/fex/assets/29507195/12a7a223-0e13-445b-b035-9ae22e1f7c4d)
-
-</div>
+<img width="949" alt="fex screenshot" src="https://github.com/18alantom/fex/assets/29507195/61a4b2a2-19a2-44ca-9c71-27f70415d7ca">
 
 By using Vim-like keybindings, `fex` ends up being a near-effortless
 tool to zip around a file system:
@@ -23,6 +19,13 @@ tool to zip around a file system:
 - `h`, `l` to move up or drop down a directory
 - `/` to search for items
 - `:` to run commands on the selected item
+
+<details>
+<summary><strong>Show Fex Demo</strong></summary>
+ 
+[Fex Demo.webm](https://github.com/18alantom/fex/assets/29507195/04bb6078-c8f0-4e27-88db-79b81c1e6429)
+
+</details>
 
 ## Index
 
