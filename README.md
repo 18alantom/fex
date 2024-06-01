@@ -1,10 +1,7 @@
-<div align="center" markdown="1">
+![fex logo bar](https://github.com/18alantom/fex/assets/29507195/f8f6ece5-14bb-4361-8d79-c2d5fb145fd4)
 
-<img src=".github/fex.png" alt="fex logo" width="256"/>
 
-A CLI file explorer.
-
-</div>
+**A CLI file explorer.**
 
 ---
 
