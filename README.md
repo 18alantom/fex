@@ -45,7 +45,7 @@ integration go to the [Setup](#setup) section.
 
 > [!NOTE]
 >
-> 🚧 installation using package managers (Homebrew, apt, etc) will be added.
+> 🚧 Installation using package managers (Homebrew, apt, etc) will be added.
 
 ### From Source
 
@@ -57,6 +57,10 @@ Once you had done that, compile the executable by using the following commands:
 # Clone the fex repository
 git clone https://github.com/18alantom/fex && cd fex
 ```
+
+> [!NOTE]
+>
+> 🚧 Pre-built binaries will be added soon.
 
 #### macOS
 
@@ -239,7 +243,7 @@ Type `:` in regular mode to initiate command mode.
 `fex` should ideally compile and run on all macOS and Linux targets supported
 by Zig. Some features such as opening fs items work only on macOS for now.
 
-Portions of `fex` code is Platform specific and Windows compatibility has not
+Portions of `fex` code is platform specific and Windows compatibility has not
 been accounted for. This may be added in later.
 
 | arch | macOS      | Linux      | Windows |
@@ -247,5 +251,5 @@ been accounted for. This may be added in later.
 | arm  | works      | might-work | ??      |
 | x86  | might-work | works      | ??      |
 
-Currently fex only has shell integration for Zsh. Fish and bash integrations will
+Currently fex only has shell integration for Zsh. Fish and Bash integrations will
 be added.
