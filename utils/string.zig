@@ -285,16 +285,23 @@ pub fn strWidth(str: []const u8) !usize {
 
 const testing = std.testing;
 test "search" {
-    try testing.expect(regularSearch("hello", "Hello, World!", true));
-    try testing.expect(regularSearch("Hello", "Hello, World!", false));
+    try testing.expect(regularSearch("Hello, World!", "hello", true));
+    try testing.expect(regularSearch("Hello, World!", "Hello", false));
 
-    try testing.expect(!regularSearch("hello", "Hello, World!", false));
-    try testing.expect(!regularSearch("hello", "Hello, hello!", false));
+    try testing.expect(!regularSearch("Hello, World!", "hello", false));
+    try testing.expect(!regularSearch("Hello, hello!", "hello", false));
 
-    try testing.expect(fuzzySearch("hello", "Hello, hello!", false));
-    try testing.expect(fuzzySearch("hello", "h.e.l.l.o.!", false));
-    try testing.expect(fuzzySearch("hello", "H.e.L.l.O.!", true));
+    try testing.expect(fuzzySearch("Hello, hello!", "hello", false));
+    try testing.expect(fuzzySearch("h.e.l.l.o.!", "hello", false));
+    try testing.expect(fuzzySearch("H.e.L.l.O.!", "hello", true));
 
-    try testing.expect(!fuzzySearch("hello", "H.L.l.O.!", true));
-    try testing.expect(!fuzzySearch("hello", "h.e.L.l.O.!", false));
+    try testing.expect(!fuzzySearch("H.L.l.O.!", "hello", true));
+    try testing.expect(!fuzzySearch("h.e.L.l.O.!", "hello", false));
+
+    try testing.expect(fuzzySearch("_he_l_lo_", "hello", true));
+    try testing.expect(!fuzzySearch("_he_l_lo_", "^hello", true));
+    try testing.expect(!fuzzySearch("_he_l_lo_", "hello$", true));
+    try testing.expect(fuzzySearch("he_l_lo_", "^hello", true));
+    try testing.expect(!fuzzySearch("he_l_lo_", "^hello$", true));
+    try testing.expect(fuzzySearch("h_e_l_l_o", "^hello$", true));
 }
