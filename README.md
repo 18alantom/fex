@@ -32,7 +32,6 @@ system.
   - [Search Mode Controls](#search-mode-controls)
   - [Command Mode Controls](#command-mode-controls)
 - [Platorm Support](#platform-support)
-- [Notes](#notes)
 
 ## Installation
 
