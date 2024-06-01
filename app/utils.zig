@@ -19,8 +19,6 @@ pub fn isMatch(state: *State, index: usize) bool {
     const query = state.input.search.string();
     const candidate = item_or_null.?.name();
 
-    if (query.len > candidate.len) return false;
-
     const search_query: string.SearchQuery = .{
         .query = query,
         .ignore_case = state.ignore_case,

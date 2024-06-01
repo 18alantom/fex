@@ -1,5 +1,6 @@
 const std = @import("std");
 const BufferWriter = @import("./BufferWriter.zig");
+const log = std.log.scoped(.string);
 
 const mem = std.mem;
 const ascii = std.ascii;
@@ -33,7 +34,16 @@ pub fn regularSearch(candidate: []const u8, query: []const u8, ignore_case: bool
     return true;
 }
 
-pub fn fuzzySearch(candidate: []const u8, query: []const u8, ignore_case: bool) bool {
+pub fn fuzzySearch(candidate: []const u8, query_: []const u8, ignore_case: bool) bool {
+    var query = query_;
+    const matches_start = doesMatchStart(candidate, query, ignore_case);
+    const matches_end = doesMatchEnd(candidate, query, ignore_case);
+
+    if (matches_start == .no_match or matches_end == .no_match) return false;
+    if (matches_start == .match) query = query[1..];
+    if (matches_end == .match) query = query[0..(query.len -| 1)];
+    if (query.len > candidate.len) return false;
+
     var c_i: usize = 0;
     var q_i: usize = 0;
 
@@ -108,7 +118,16 @@ pub fn regularSearchHighlight(buffer: []u8, candidate: []const u8, query: []cons
     return bw.string();
 }
 
-pub fn fuzzySearchHighlight(buffer: []u8, candidate: []const u8, query: []const u8, ignore_case: bool) ![]const u8 {
+pub fn fuzzySearchHighlight(buffer: []u8, candidate: []const u8, query_: []const u8, ignore_case: bool) ![]const u8 {
+    var query = query_;
+    const matches_start = doesMatchStart(candidate, query, ignore_case);
+    const matches_end = doesMatchEnd(candidate, query, ignore_case);
+
+    if (matches_start == .no_match or matches_end == .no_match) return candidate;
+    if (matches_start == .match) query = query[1..];
+    if (matches_end == .match) query = query[0..(query.len -| 1)];
+    if (query.len > candidate.len) return candidate;
+
     var bw = BufferWriter{ .buffer = buffer };
     var c_i: usize = 0;
     var q_i: usize = 0;
@@ -158,6 +177,43 @@ pub fn fuzzySearchHighlight(buffer: []u8, candidate: []const u8, query: []const 
     }
 
     return candidate;
+}
+
+const DoesMatch = enum { match, no_match, no_query };
+/// '^' is used to match the starting character
+fn doesMatchStart(candidate: []const u8, query: []const u8, ignore_case: bool) DoesMatch {
+    const q_len = query.len;
+    const c_len = candidate.len;
+
+    if (q_len == 0 or (q_len >= 1 and query[0] != '^')) return .no_query;
+    if (q_len == 1 or c_len == 0) return .no_match;
+    std.debug.assert(q_len > 1 and query[0] == '^');
+
+    const q = query[1];
+    const should_ignore_case = ignore_case and !ascii.isUpper(q);
+    const c = if (should_ignore_case) ascii.toLower(candidate[0]) else candidate[0];
+    if (q == c) {
+        return .match;
+    }
+    return .no_match;
+}
+
+/// '$' is used to match the ending character
+fn doesMatchEnd(candidate: []const u8, query: []const u8, ignore_case: bool) DoesMatch {
+    const q_len = query.len;
+    const c_len = candidate.len;
+
+    if (q_len == 0 or (q_len >= 1 and query[q_len - 1] != '$')) return .no_query;
+    if (query.len == 1 or candidate.len == 0) return .no_match;
+    std.debug.assert(query.len > 1 and query[q_len - 1] == '$');
+
+    const q = query[q_len - 2];
+    const should_ignore_case = ignore_case and !ascii.isUpper(q);
+    const c = if (should_ignore_case) ascii.toLower(candidate[c_len - 1]) else candidate[c_len - 1];
+    if (q == c) {
+        return .match;
+    }
+    return .no_match;
 }
 
 pub fn eql(a: []const u8, b: []const u8) bool {
@@ -229,11 +285,11 @@ pub fn strWidth(str: []const u8) !usize {
 
 const testing = std.testing;
 test "search" {
-    try testing.expect(search("hello", "Hello, World!", true));
-    try testing.expect(search("Hello", "Hello, World!", false));
+    try testing.expect(regularSearch("hello", "Hello, World!", true));
+    try testing.expect(regularSearch("Hello", "Hello, World!", false));
 
-    try testing.expect(!search("hello", "Hello, World!", false));
-    try testing.expect(!search("hello", "Hello, hello!", false));
+    try testing.expect(!regularSearch("hello", "Hello, World!", false));
+    try testing.expect(!regularSearch("hello", "Hello, hello!", false));
 
     try testing.expect(fuzzySearch("hello", "Hello, hello!", false));
     try testing.expect(fuzzySearch("hello", "h.e.l.l.o.!", false));
