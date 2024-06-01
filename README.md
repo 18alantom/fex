@@ -11,7 +11,11 @@
 [fzf](https://github.com/junegunn/fzf?tab=readme-ov-file#installation), built with
 quick exploration and navigation in mind.
 
-![fex](https://github.com/18alantom/fex/assets/29507195/12a7a223-0e13-445b-b035-9ae22e1f7c4d)
+<div align="center" markdown="1">
+
+ ![fex](https://github.com/18alantom/fex/assets/29507195/12a7a223-0e13-445b-b035-9ae22e1f7c4d)
+
+</div>
 
 By using Vim-like keybindings, `fex` ends up being a near-effortless
 tool to zip around a file system:
