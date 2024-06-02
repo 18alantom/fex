@@ -1,6 +1,5 @@
 ![fex logo bar](https://github.com/18alantom/fex/assets/29507195/f8f6ece5-14bb-4361-8d79-c2d5fb145fd4)
 
-
 **A CLI file explorer.**
 
 ---
@@ -15,6 +14,7 @@ quick exploration and navigation in mind.
 
 By using Vim-like keybindings, `fex` ends up being a near-effortless
 tool to zip around a file system:
+
 - `j`, `k` to move to the pervious and next item
 - `h`, `l` to move up or drop down a directory
 - `/` to search for items
@@ -224,8 +224,9 @@ This changes search behavior.
 | `C`             | Collapse all directories                  |
 | `R`             | Change root to item under cursor (if dir) |
 | `I`             | Toggle item stat info                     |
-| `1..9`          | Expand all directories upto $NUM depth    |
+| `1..9`          | Expand all directories up to $NUM depth   |
 | `q`, `<ctrl-d>` | Quit                                      |
+| `<tab>`         | Toggle item selection under cursor        |
 | `/`             | Toggle search mode                        |
 | `:`             | Toggle command mode                       |
 
@@ -242,16 +243,16 @@ Type `/` in regular mode to initiate search mode.
 | key        | action                                             |
 | :--------- | :------------------------------------------------- |
 | `<escape>` | Quit search, restore cursor to pre-search position |
-| `<enter>`  | Quit search                                        |
+| `<enter>`  | Quit search, cursor stays on found item            |
 
 ### Command Mode Controls
 
 Type `:` in regular mode to initiate command mode.
 
-| key        | action                                                  |
-| :--------- | :------------------------------------------------------ |
-| `<escape>` | Quit command mode                                       |
-| `<enter>`  | Quit fex, execute command with item under cursor as arg |
+| key        | action                                                                       |
+| :--------- | :--------------------------------------------------------------------------- |
+| `<escape>` | Quit command mode                                                            |
+| `<enter>`  | Quit fex, execute command with selected items or item under cursor as arg(s) |
 
 ## Platform Support
 

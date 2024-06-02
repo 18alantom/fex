@@ -217,9 +217,19 @@ pub fn execCommand(state: *State) !void {
     }
 
     try state.stdout.appendSlice("\n");
-    const item = state.getItemUnderCursor();
-    try state.stdout.appendSlice(item.abspath());
-    try state.stdout.appendSlice("\n");
+    var has_selection = false;
+    for (state.view.buffer.items) |entry| {
+        if (!entry.selected) continue;
+        try state.stdout.appendSlice(entry.item.abspath());
+        try state.stdout.appendSlice("\n");
+        has_selection = true;
+    }
+
+    if (!has_selection) {
+        const item = state.getItemUnderCursor();
+        try state.stdout.appendSlice(item.abspath());
+        try state.stdout.appendSlice("\n");
+    }
     log.info("execCommand: \"{s}\"", .{state.input.command.string()});
 }
 

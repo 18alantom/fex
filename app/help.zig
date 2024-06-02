@@ -45,6 +45,7 @@ pub const help_string =
     \\  /                   Toggle search mode
     \\  :                   Toggle command mode
     \\  1..9                Expand all directories upto $NUM depth
+    \\  <tab>               Toggle item selection under cursor
     \\  q, <ctrl-d>         Quit
     \\
     \\Search Mode Controls
@@ -53,8 +54,8 @@ pub const help_string =
     \\
     \\Command Mode Controls
     \\  <escape>            Quit command mode
-    \\  <enter>             Quit fex, execute command with item under cursor
-    \\                      as arg
+    \\  <enter>             Quit fex, execute command with selected items or item
+    \\                      under cursor as arg(s)
     \\
     \\File System Commands
     \\  cd                  Quit and change directory to item under cursor (needs setup)
