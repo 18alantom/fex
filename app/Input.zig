@@ -18,7 +18,7 @@ pub const AppAction = enum {
     down,
     left,
     right,
-    select,
+    enter,
     quit,
     top,
     bottom,
@@ -39,6 +39,7 @@ pub const AppAction = enum {
     open_item,
     change_dir,
     toggle_info,
+    select,
 
     search,
     update_search,
@@ -72,7 +73,7 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "\x1b\x5b\x43", .action = .right }, // Right Arrow
 
     // Toggle expansion or open
-    .{ .seq = "\x0d", .action = .select }, // Enter if ~ICRNL else \x0a
+    .{ .seq = "\x0d", .action = .enter }, // Enter if ~ICRNL else \x0a
 
     // Quit
     .{ .seq = "q", .action = .quit },
@@ -107,6 +108,7 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "o", .action = .open_item },
     .{ .seq = "cd", .action = .change_dir },
     .{ .seq = "I", .action = .toggle_info },
+    .{ .seq = "\t", .action = .select },
 
     // Capture actions
     .{ .seq = "/", .action = .search },

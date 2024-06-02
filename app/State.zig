@@ -198,7 +198,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .bottom => try actions.goToBottom(self),
         .left => try actions.shiftIntoParent(self),
         .right => try actions.shiftIntoChild(self),
-        .select => try actions.toggleChildrenOrOpenFile(self),
+        .enter => try actions.toggleChildrenOrOpenFile(self),
         .expand_all => actions.expandAll(self),
         .collapse_all => actions.collapseAll(self),
         .prev_fold => actions.toPrevFold(self),
@@ -223,6 +223,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .command => actions.command(self),
         .exec_command => try actions.execCommand(self),
         .dismiss_command => actions.dismissCommand(self),
+        .select => actions.toggleSelection(self),
 
         // no-op, handled by the caller
         .quit => unreachable,

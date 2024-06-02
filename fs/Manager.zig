@@ -110,6 +110,7 @@ pub const Iterator = struct {
         index: usize, // child index
         first: bool, // is first child
         last: bool, // is last child
+        selected: bool = false,
     };
     const EntryList = std.ArrayList(*Entry);
 
@@ -131,6 +132,7 @@ pub const Iterator = struct {
             .index = 0,
             .first = true,
             .last = true,
+            .selected = false,
         };
 
         try stack.append(entry);

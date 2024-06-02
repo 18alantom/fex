@@ -211,7 +211,7 @@ fn printLine(
         entry.item.name();
     try draw.print(
         name,
-        .{ .fg = try getFg(entry, view.cursor == i) },
+        .{ .fg = try getFg(entry, view.cursor == i), .underline = entry.selected },
     );
 
     // Print cursor

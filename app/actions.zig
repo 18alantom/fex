@@ -226,3 +226,9 @@ pub fn execCommand(state: *State) !void {
 pub fn dismissCommand(state: *State) void {
     state.view.print_all = true;
 }
+
+pub fn toggleSelection(state: *State) void {
+    var entry = state.getEntryUnderCursor();
+    entry.selected = !entry.selected;
+    log.debug("toggleSelection: selected={any}, {s}", .{ entry.selected, entry.item.name() });
+}
