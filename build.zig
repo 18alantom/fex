@@ -26,6 +26,7 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
     b.installArtifact(exe);
+    exe.linkLibC();
 
     // zig build run
     const run_cmd = b.addRunArtifact(exe);
