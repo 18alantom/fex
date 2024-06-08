@@ -160,6 +160,20 @@ pub fn toggleInfo(state: *State) void {
     state.view.print_all = true;
 }
 
+pub fn toggleSize(state: *State) void {
+    state.output.treeview.info.size = !state.output.treeview.info.size;
+    state.view.print_all = true;
+}
+
+pub fn togglePerm(state: *State) void {
+    state.output.treeview.info.mode = !state.output.treeview.info.mode;
+    state.view.print_all = true;
+}
+
+pub fn toggleTime(state: *State) void {
+    _ = state;
+}
+
 pub fn changeDir(state: *State) !void {
     // Handled by shell line editing widget
     const item = state.getItemUnderCursor();

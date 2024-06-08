@@ -38,7 +38,12 @@ pub const AppAction = enum {
     change_root,
     open_item,
     change_dir,
+
     toggle_info,
+    toggle_size,
+    toggle_time,
+    toggle_perm,
+
     select,
 
     search,
@@ -91,6 +96,12 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "8", .action = .depth_eight },
     .{ .seq = "9", .action = .depth_nine },
 
+    // Toggle
+    .{ .seq = "ti", .action = .toggle_info },
+    .{ .seq = "ts", .action = .toggle_size },
+    .{ .seq = "tp", .action = .toggle_perm },
+    .{ .seq = "tt", .action = .toggle_time },
+
     // Expansion toggles
     .{ .seq = "E", .action = .expand_all },
     .{ .seq = "C", .action = .collapse_all },
@@ -107,7 +118,6 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "R", .action = .change_root },
     .{ .seq = "o", .action = .open_item },
     .{ .seq = "cd", .action = .change_dir },
-    .{ .seq = "I", .action = .toggle_info },
     .{ .seq = "\t", .action = .select },
 
     // Capture actions
