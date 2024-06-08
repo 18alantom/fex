@@ -46,6 +46,7 @@ tool to zip around a file system:
   - [File System Controls](#file-system-controls)
   - [Search Mode Controls](#search-mode-controls)
   - [Command Mode Controls](#command-mode-controls)
+  - [Display Toggle Controls](#display-toggle-controls)
 - [Platorm Support](#platform-support)
 
 ## Installation
@@ -253,6 +254,21 @@ Type `:` in regular mode to initiate command mode.
 | :--------- | :--------------------------------------------------------------------------- |
 | `<escape>` | Quit command mode                                                            |
 | `<enter>`  | Quit fex, execute command with selected items or item under cursor as arg(s) |
+
+### Display Toggle Controls
+
+Toggle displayed information.
+
+| key  | action                         |
+| :--- | :----------------------------- |
+| `I`  | Toggle item stat info          |
+| `ti` | Toggle icon display            |
+| `tp` | Toggle permission info display |
+| `ts` | Toggle size display            |
+| `tt` | Toggle time display            |
+| `tm` | Display modified time          |
+| `ta` | Display accessed time          |
+| `tc` | Display changed time           |
 
 ## Platform Support
 

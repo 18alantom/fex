@@ -41,7 +41,6 @@ pub const help_string =
     \\  E                   Expand all directories
     \\  C                   Collapse all directories
     \\  R                   Change root to item under cursor (if dir)
-    \\  I                   Toggle item stat info
     \\  /                   Toggle search mode
     \\  :                   Toggle command mode
     \\  1..9                Expand all directories upto $NUM depth
@@ -57,7 +56,17 @@ pub const help_string =
     \\  <enter>             Quit fex, execute command with selected items or item
     \\                      under cursor as arg(s)
     \\
-    \\File System Commands
+    \\File System Controls
     \\  cd                  Quit and change directory to item under cursor (needs setup)
+    \\
+    \\Display Toggle Controls
+    \\  I                   Toggle item stat info
+    \\  ti                  Toggle icon display
+    \\  tp                  Toggle permission info display
+    \\  ts                  Toggle size display
+    \\  tt                  Toggle time display
+    \\  tm                  Display modified time
+    \\  ta                  Display accessed time
+    \\  tc                  Display changed time
     \\
 ;
