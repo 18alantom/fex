@@ -42,7 +42,7 @@ const log = std.log.scoped(.TreeView);
 const Info = struct {
     icons: bool = true,
     size: bool = true,
-    mode: bool = true,
+    perm: bool = true,
     modified: bool = true,
     changed: bool = false,
     accessed: bool = false,
@@ -67,11 +67,11 @@ pub fn init(allocator: mem.Allocator, config: *Config) Self {
         .info = .{
             .icons = !config.no_icons,
             .size = !config.no_size,
-            .mode = !config.no_mode,
+            .perm = !config.no_perm,
             .modified = !config.no_time and config.time == .modified,
             .changed = !config.no_time and config.time == .changed,
             .accessed = !config.no_time and config.time == .accessed,
-            .show = !(config.no_icons and config.no_size and config.no_mode and config.no_time),
+            .show = !(config.no_icons and config.no_size and config.no_perm and config.no_time),
         },
     };
 }
@@ -169,7 +169,7 @@ fn printLine(
     var has_prefix_info = false;
 
     // Print permission info
-    if (self.info.show and self.info.mode) {
+    if (self.info.show and self.info.perm) {
         const mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
         try draw.print(mode, .{ .no_style = true });
         has_prefix_info = true;

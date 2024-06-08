@@ -166,7 +166,7 @@ pub fn toggleSize(state: *State) void {
 }
 
 pub fn togglePerm(state: *State) void {
-    state.output.treeview.info.mode = !state.output.treeview.info.mode;
+    state.output.treeview.info.perm = !state.output.treeview.info.perm;
     state.view.print_all = true;
 }
 

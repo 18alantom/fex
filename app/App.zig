@@ -37,7 +37,7 @@ pub const Config = struct {
     // Display config
     no_icons: bool = false,
     no_size: bool = false,
-    no_mode: bool = false,
+    no_perm: bool = false,
     no_time: bool = false,
     time: TimeType = .modified,
 

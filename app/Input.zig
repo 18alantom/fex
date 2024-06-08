@@ -97,7 +97,7 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "9", .action = .depth_nine },
 
     // Toggle
-    .{ .seq = "ti", .action = .toggle_info },
+    .{ .seq = "I", .action = .toggle_info },
     .{ .seq = "ts", .action = .toggle_size },
     .{ .seq = "tp", .action = .toggle_perm },
     .{ .seq = "tt", .action = .toggle_time },

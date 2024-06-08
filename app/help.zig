@@ -10,7 +10,7 @@ pub const help_string =
     \\  --no-icons          Skip printing icons
     \\  --no-size           Skip printing item sizes
     \\  --no-time           Skip printing time
-    \\  --no-mode           Skip printing permission info
+    \\  --no-perm           Skip printing permission info
     \\  --time VALUE        Set which time is displayed
     \\                      valid: modified, accessed, changed
     \\                      default: modified

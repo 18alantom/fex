@@ -164,7 +164,7 @@ Changes values displayed in an item line.
 | `--no-icons`   | Skip printing icons. Note: icons need a [patched font](https://github.com/ryanoasis/nerd-fonts) to work. |
 | `--no-size`    | Skip printing item sizes                                                                                 |
 | `--no-time`    | Skip printing time                                                                                       |
-| `--no-mode`    | Skip printing permission info                                                                            |
+| `--no-perm`    | Skip printing permission info                                                                            |
 | `--time VALUE` | Set which time is displayed. VALUE: modified, accessed, changed. Default: modified                       |
 
 ### Search Config

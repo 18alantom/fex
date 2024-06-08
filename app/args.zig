@@ -57,8 +57,8 @@ fn ConfigIterator(Iterator: type) type {
                     config.no_icons = true;
                 } else if (eql(arg, "--no-size")) {
                     config.no_size = true;
-                } else if (eql(arg, "--no-mode")) {
-                    config.no_mode = true;
+                } else if (eql(arg, "--no-perm")) {
+                    config.no_perm = true;
                 } else if (eql(arg, "--no-time")) {
                     config.no_time = true;
                 } else if (eql(arg, "--time")) {
