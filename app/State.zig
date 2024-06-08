@@ -216,6 +216,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_eight => actions.expandToDepth(self, 7),
         .depth_nine => actions.expandToDepth(self, 8),
         .toggle_info => actions.toggleInfo(self),
+        .toggle_icons => actions.toggleIcons(self),
         .toggle_size => actions.toggleSize(self),
         .toggle_perm => actions.togglePerm(self),
         .toggle_time => actions.toggleTime(self),

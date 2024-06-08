@@ -40,6 +40,7 @@ pub const AppAction = enum {
     change_dir,
 
     toggle_info,
+    toggle_icons,
     toggle_size,
     toggle_time,
     toggle_perm,
@@ -98,6 +99,7 @@ const capture_list = [_]ActionSequence{
 
     // Toggle
     .{ .seq = "I", .action = .toggle_info },
+    .{ .seq = "ti", .action = .toggle_icons },
     .{ .seq = "ts", .action = .toggle_size },
     .{ .seq = "tp", .action = .toggle_perm },
     .{ .seq = "tt", .action = .toggle_time },

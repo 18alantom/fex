@@ -170,6 +170,11 @@ pub fn togglePerm(state: *State) void {
     state.view.print_all = true;
 }
 
+pub fn toggleIcons(state: *State) void {
+    state.output.treeview.info.icons = !state.output.treeview.info.icons;
+    state.view.print_all = true;
+}
+
 pub fn toggleTime(state: *State) void {
     _ = state;
 }
