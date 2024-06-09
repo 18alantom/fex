@@ -44,6 +44,9 @@ pub const AppAction = enum {
     toggle_size,
     toggle_time,
     toggle_perm,
+    time_modified,
+    time_changed,
+    time_accessed,
 
     select,
 
@@ -97,12 +100,15 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "8", .action = .depth_eight },
     .{ .seq = "9", .action = .depth_nine },
 
-    // Toggle
+    // Display toggles
     .{ .seq = "I", .action = .toggle_info },
     .{ .seq = "ti", .action = .toggle_icons },
     .{ .seq = "ts", .action = .toggle_size },
     .{ .seq = "tp", .action = .toggle_perm },
     .{ .seq = "tt", .action = .toggle_time },
+    .{ .seq = "tm", .action = .time_modified },
+    .{ .seq = "tc", .action = .time_changed },
+    .{ .seq = "ta", .action = .time_accessed },
 
     // Expansion toggles
     .{ .seq = "E", .action = .expand_all },

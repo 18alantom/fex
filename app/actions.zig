@@ -176,7 +176,29 @@ pub fn toggleIcons(state: *State) void {
 }
 
 pub fn toggleTime(state: *State) void {
+    // TODO: Add this
     _ = state;
+}
+
+pub fn timeModified(state: *State) void {
+    state.output.treeview.info.accessed = false;
+    state.output.treeview.info.modified = true;
+    state.output.treeview.info.changed = false;
+    state.view.print_all = true;
+}
+
+pub fn timeChanged(state: *State) void {
+    state.output.treeview.info.accessed = false;
+    state.output.treeview.info.modified = false;
+    state.output.treeview.info.changed = true;
+    state.view.print_all = true;
+}
+
+pub fn timeAccessed(state: *State) void {
+    state.output.treeview.info.accessed = true;
+    state.output.treeview.info.modified = false;
+    state.output.treeview.info.changed = false;
+    state.view.print_all = true;
 }
 
 pub fn changeDir(state: *State) !void {
