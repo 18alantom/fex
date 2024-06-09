@@ -176,11 +176,12 @@ pub fn toggleIcons(state: *State) void {
 }
 
 pub fn toggleTime(state: *State) void {
-    // TODO: Add this
-    _ = state;
+    state.output.treeview.info.time = !state.output.treeview.info.time;
+    state.view.print_all = true;
 }
 
 pub fn timeModified(state: *State) void {
+    state.output.treeview.info.time = true;
     state.output.treeview.info.accessed = false;
     state.output.treeview.info.modified = true;
     state.output.treeview.info.changed = false;
@@ -188,6 +189,7 @@ pub fn timeModified(state: *State) void {
 }
 
 pub fn timeChanged(state: *State) void {
+    state.output.treeview.info.time = true;
     state.output.treeview.info.accessed = false;
     state.output.treeview.info.modified = false;
     state.output.treeview.info.changed = true;
@@ -195,6 +197,7 @@ pub fn timeChanged(state: *State) void {
 }
 
 pub fn timeAccessed(state: *State) void {
+    state.output.treeview.info.time = true;
     state.output.treeview.info.accessed = true;
     state.output.treeview.info.modified = false;
     state.output.treeview.info.changed = false;

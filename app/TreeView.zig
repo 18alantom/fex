@@ -43,6 +43,7 @@ const Info = struct {
     icons: bool = true,
     size: bool = true,
     perm: bool = true,
+    time: bool = true,
     modified: bool = true,
     changed: bool = false,
     accessed: bool = false,
@@ -68,9 +69,10 @@ pub fn init(allocator: mem.Allocator, config: *Config) Self {
             .icons = !config.no_icons,
             .size = !config.no_size,
             .perm = !config.no_perm,
-            .modified = !config.no_time and config.time == .modified,
-            .changed = !config.no_time and config.time == .changed,
-            .accessed = !config.no_time and config.time == .accessed,
+            .time = !config.no_time,
+            .modified = config.time == .modified,
+            .changed = config.time == .changed,
+            .accessed = config.time == .accessed,
             .show = !(config.no_icons and config.no_size and config.no_perm and config.no_time),
         },
     };
@@ -222,7 +224,7 @@ fn printLine(
 }
 
 fn timeType(self: *Self) ?Stat.TimeType {
-    if (!self.info.show) return null;
+    if (!self.info.show or !self.info.time) return null;
 
     if (self.info.modified) return .modified;
     if (self.info.accessed) return .accessed;
