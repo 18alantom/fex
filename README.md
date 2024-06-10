@@ -91,6 +91,11 @@ mv main /usr/local/bin/fex
 #### Linux
 
 ```bash
+# To be able to open files, you will need xdg-open from xdg-utils
+sudo apt install xdg-utils
+```
+
+```bash
 # Compile the fex executable for your system
 zig build-exe -O ReleaseSafe main.zig -lc
 
