@@ -90,8 +90,6 @@ pub fn enableRawMode(bak: *posix.termios) !void {
     termios.lflag.IEXTEN = false;
     termios.lflag.ISIG = true;
 
-    // termios.iflag &= ~(posix.system.IXON | posix.system.ICRNL);
-    // termios.lflag &= ~(posix.system.ECHO | posix.system.ICANON | posix.system.IEXTEN) | posix.system.ISIG;
     try posix.tcsetattr(
         posix.STDIN_FILENO,
         posix.TCSA.FLUSH,
@@ -106,5 +104,4 @@ pub fn disableRawMode(bak: *posix.termios) !void {
         posix.TCSA.FLUSH,
         bak.*,
     );
-    return;
 }
