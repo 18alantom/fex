@@ -5,6 +5,7 @@ const process = std.process;
 pub fn open(path: []const u8) !void {
     switch (builtin.os.tag) {
         .macos => try openMacOs(path),
+        .linux => try openLinux(path),
         else => return,
     }
 }
@@ -14,11 +15,17 @@ fn openMacOs(path: []const u8) !void {
     try run(&argv);
 }
 
+fn openLinux(path: []const u8) !void {
+    var argv = [_][]const u8{ "xdg-open", path };
+    _ = try run(&argv);
+}
+
 pub fn run(argv: [][]const u8) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
 
+    // Initialize child process
     var child = process.Child.init(argv, allocator);
     child.stdout_behavior = .Close;
     child.stderr_behavior = .Close;
