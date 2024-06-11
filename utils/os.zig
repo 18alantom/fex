@@ -4,8 +4,8 @@ const process = std.process;
 
 pub fn open(path: []const u8) !void {
     switch (builtin.os.tag) {
-        .macos => try openMacOs(path),
-        .linux => try openLinux(path),
+        .macos => openMacOs(path) catch {},
+        .linux => openLinux(path) catch {},
         else => return,
     }
 }
@@ -17,7 +17,7 @@ fn openMacOs(path: []const u8) !void {
 
 fn openLinux(path: []const u8) !void {
     var argv = [_][]const u8{ "xdg-open", path };
-    _ = try run(&argv);
+    try run(&argv);
 }
 
 pub fn run(argv: [][]const u8) !void {
