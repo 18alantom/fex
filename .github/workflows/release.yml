@@ -105,14 +105,13 @@ jobs:
       - name: Prepare source code
         run: |
           cd ..
-          zip -r v${{ env.RELEASE_VERSION }}.zip ${{ github.event.repository.name }}
           tar -czvf v${{ env.RELEASE_VERSION }}.tar.gz ${{ github.event.repository.name }}
-          mv v${{ env.RELEASE_VERSION }}* ${{ github.event.repository.name }}
+          mv v${{ env.RELEASE_VERSION }}.tar.gz ${{ github.event.repository.name }}
 
       - name: Upload for release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: v${{ env.RELEASE_VERSION }}*
+          file: v${{ env.RELEASE_VERSION }}.tar.gz
           file_glob: true
           overwrite: true
           tag: ${{ github.ref }}
