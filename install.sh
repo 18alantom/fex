@@ -136,14 +136,10 @@ function setup_defaults() {
   fi
   
   # Which time to set, defaults to changed.
-  if [[ $display_time == "y" && $(ask "Show modified time?") == "y" ]]; then
-    default_command+=" --time modified"
-  elif [[ $display_time == "y" && $(ask "Show accessed time?") == "y" ]]; then
-    default_command+=" --time accessed"
-  elif [[ $display_time == "y" ]]; then
-   default_command+=" --time changed"
+  if [[ $display_time == "y" ]]; then
+    local time_type=$(mcq "Select which time to display" "modified accessed changed")
+    default_command+=" --time $time_type"
   fi
-
   default_command+="\""
 
   local rc_path=$(which_rc)
@@ -154,7 +150,6 @@ function setup_defaults() {
     echo $default_command >> $rc_path
   fi
 }
-
 
 function setup_zsh() {
   if [[ ! -f ".fex.zsh" ]]; then
@@ -214,6 +209,39 @@ function ask() {
   fi
   
   echo "n"
+}
+
+function mcq() {
+  local items
+  read -r -a items <<< "$2"
+  local len=${#items[@]}
+
+  local prompt="$1\n"
+  prompt+="$yellow>$reset "
+  for (( i=0; i<$len; i++ )); do
+    prompt+=${items[$i]}
+    if [[ $i -eq 0 ]]; then
+      prompt+=" $faint[$i]$reset, "
+    elif [[ $i -eq $((len - 1)) ]]; then
+      prompt+=" $faint($i)$reset"
+    else
+      prompt+=" $faint($i)$reset, "
+    fi
+  done
+  prompt+=":"
+
+  read -p "$(echo -e $prompt) " -r
+  local idx=$REPLY
+  
+  if ! [[ $idx =~ ^[0-9]$ ]]; then
+    idx=0
+  fi
+
+  if [[ $idx -ge $len ]]; then
+    idx=0
+  fi
+
+  echo "${items[$idx]}"
 }
 
 function cleanup() {
