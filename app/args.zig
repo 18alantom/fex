@@ -10,6 +10,8 @@ const process = std.process;
 const TimeType = Stat.TimeType;
 const Config = App.Config;
 
+const version = "0.0.1";
+
 const eql = utils.eql;
 
 pub fn setConfigFromEnv(config: *Config) !void {
@@ -108,7 +110,7 @@ fn printHelp() !void {
 }
 
 fn printVersion() !void {
-    _ = try std.io.getStdOut().writer().print("{s}\n", .{"0.0.1"});
+    _ = try std.io.getStdOut().writer().print("{s}\n", .{version});
 }
 
 fn setupZsh() !void {
