@@ -88,8 +88,8 @@ function update_build_zon() {
   local file_name="build.zig.zon"
   if local old=$(grep "\.version = " $file_name); then
     local new="    \.version = \"$version\","
-    sed -i".bak" "s/$old/$new/" $file_name
-    rm $file_name.bak
+    sed -i".bac" "s/$old/$new/" $file_name
+    rm $file_name.bac
   fi
 }
 

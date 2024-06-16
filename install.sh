@@ -97,15 +97,15 @@ function place_binary() {
   fi
 
   chmod +x fex
-  # local output=$(./fex --version 2>&1)
+  local output=$(./fex --version 2>&1)
 
-  # if [[ $? -ne 0 ]]; then
-  #   error "Invalid binary, error: $output"
-  # fi
+  if [[ $? -ne 0 ]]; then
+    error "Invalid binary, error: $output"
+  fi
   
-  # if [[ "$output" != "$version" ]]; then
-  #   error "Invalid version: $output"
-  # fi
+  if [[ "$output" != "$version" ]]; then
+    error "Invalid version: $output"
+  fi
   
   mv ./fex /usr/local/bin/fex
 }
@@ -148,7 +148,8 @@ function setup_defaults() {
 
   local rc_path=$(which_rc)
   if old_command=$(grep "export FEX_DEFAULT_COMMAND=" $rc_path); then
-    sed -i="" "s/$old_command/$default_command/" $rc_path
+    sed -i".bac" "s/$old_command/$default_command/" $rc_path
+    rm $rc_path.bac
   else
     echo $default_command >> $rc_path
   fi
