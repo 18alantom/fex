@@ -10,7 +10,7 @@ const process = std.process;
 const TimeType = Stat.TimeType;
 const Config = App.Config;
 
-const version = "0.0.1";
+const version = "0.0.2";
 
 const eql = utils.eql;
 

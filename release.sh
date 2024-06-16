@@ -61,7 +61,7 @@ function commit_and_push_version_bump() {
   fi
 }
 
-function create_and_push_tag() {
+function create_and_push_tags() {
   if [[ $(ask "Create tag v$version?") == "y" ]]; then
     git tag v$version
   else

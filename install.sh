@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly version=0.0.1
+readonly version=0.0.2
 readonly base_dir=$(pwd)
 untar_dir=""
 
