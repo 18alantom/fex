@@ -2,19 +2,16 @@
 
 set -euo pipefail
 
-version=0.0.1
+readonly version=0.0.1
+readonly base_dir=$(pwd)
+untar_dir=""
 
-# Styles
-red="\x1b[31m"
-yellow="\x1b[33m"
-faint="\x1b[2m"
-reset="\x1b[m"
-
-# TODO:
-# - Cleanup on error
-# - Style sucess messsages
-# - Add setup complete
-# - Test script
+readonly red="\x1b[31m"
+readonly yellow="\x1b[33m"
+readonly green="\x1b[32m"
+readonly faint="\x1b[2m"
+readonly reset="\x1b[m"
+readonly check="${green}✔${reset}"
 
 function install() {
   if [[ $(can_install) == "n" ]]; then
@@ -22,11 +19,15 @@ function install() {
   fi
 
   local tar_name=$(get_tar_name)
-
-  echo "Downloading $tar_name from GitHub"
+  echo -n "Downloading $tar_name from GitHub"
   local folder_name=$(download $tar_name)
-  cd $folder_name
+  echo -e " $check"
+
+  untar_dir=$base_dir/$folder_name
+
+  echo -n "Placing binary"
   place_binary
+  echo -e " $check"
 
   if [[ $(ask "Setup fex default command?") == "y" ]]; then
     setup_defaults
@@ -35,6 +36,8 @@ function install() {
   if [[ $(which_shell) == "zsh" && $(ask "Setup zsh configuration?") == "y" ]]; then
     setup_zsh
   fi
+  
+  echo -e "Fex installation complete $check"
 }
 
 function get_tar_name() {
@@ -58,7 +61,7 @@ function can_install() {
   local bin_path=$(command -v "fex")
   local installed_version=$($bin_path --version)
 
-  ask "Found installed $installed_version, overwrite with $version?"
+  ask "Found version $installed_version installed, overwrite with $version?"
 }
 
 function download() {
@@ -87,20 +90,22 @@ function download() {
 }
 
 function place_binary() {
+  cd $untar_dir
+
   if [[ ! -f "fex" ]]; then
     error "Binary (fex) not found at $(pwd)"
   fi
 
   chmod +x fex
-  local output=$(./fex --version 2>&1)
+  # local output=$(./fex --version 2>&1)
 
-  if [[ $? -ne 0 ]]; then
-    error "Invalid binary, error: $output"
-  fi
+  # if [[ $? -ne 0 ]]; then
+  #   error "Invalid binary, error: $output"
+  # fi
   
-  if [[ "$output" != "$version" ]]; then
-    error "Invalid version: $output"
-  fi
+  # if [[ "$output" != "$version" ]]; then
+  #   error "Invalid version: $output"
+  # fi
   
   mv ./fex /usr/local/bin/fex
 }
@@ -172,13 +177,15 @@ function setup_zsh() {
   local bind_ctrlf="bindkey '^f' fex-widget"
   if $(ask "Bind CTRL-F to invoke fex?") == "y"; then
     echo $bind_ctrlf >> $rc_path
+  else
+    echo "Check https://github.com/18alantom/fex?tab=readme-ov-file#zsh-setup for info on custom keybinds"
   fi
 }
 
 function which_rc() {
   case $(which_shell) in
-    "zsh")  echo -e "~/.zshrc"  ;;
-    "bash") echo -e "~/.bashrc" ;;
+    "zsh")  echo "~/.zshrc"  ;;
+    "bash") echo "~/.bashrc" ;;
   esac
 }
 
@@ -186,14 +193,15 @@ function which_shell() {
   local shells="zsh bash"
   for s in $shells; do
     if echo "$SHELL" | grep -q "$s"; then
-      echo "zsh"
+      echo "$s"
       break
     fi
   done
 }
 
 function error() {
-  echo -e "\x1b[31m$1\x1b[m"
+  echo -e "\n${red}Error${reset}: $1"
+  cleanup
   exit 1
 }
 
@@ -208,7 +216,12 @@ function ask() {
 }
 
 function cleanup() {
- #TODO: complete this
+  if [[ ! -d $untar_dir ]]; then 
+    return
+  fi
+  
+  cd $base_dir
+  rm -rf $untar_dir
 }
 
 install
