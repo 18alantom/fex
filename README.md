@@ -189,9 +189,10 @@ This changes search behavior.
 
 ### Other Args
 
-| arg      | description                        |
-| :------- | :--------------------------------- |
-| `--help` | Prints the help message and quits. |
+| arg         | description                        |
+| :---------- | :--------------------------------- |
+| `--help`    | Prints the help message and quits. |
+| `--version` | Prints the version and quits.      |
 
 ## Controls
 

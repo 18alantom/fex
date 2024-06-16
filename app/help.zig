@@ -24,6 +24,7 @@ pub const help_string =
     \\
     \\Meta
     \\  --help              Print this help message
+    \\  --version           Print the version and quit
     \\
     \\Navigation Controls
     \\  j, <down-arrow>     Cursor down
