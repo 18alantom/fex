@@ -180,7 +180,7 @@ function setup_zsh() {
   fi
 
   local bind_ctrlf="bindkey '^f' fex-widget"
-  if $(ask "Bind CTRL-F to invoke fex?") == "y"; then
+  if [[ $(ask "Bind CTRL-F to invoke fex?") == "y" ]]; then
     echo $bind_ctrlf >> $rc_path
   else
     echo "Check https://github.com/18alantom/fex?tab=readme-ov-file#zsh-setup for info on custom keybinds"
