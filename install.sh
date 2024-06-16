@@ -141,19 +141,28 @@ function setup_defaults() {
     default_command+=" --time $time_type"
   fi
   default_command+="\""
+  set_default_command "$default_command"
+}
 
+function set_default_command() {
+  local new_command=$1
   local rc_path=$(which_rc)
   if old_command=$(grep "export FEX_DEFAULT_COMMAND=" $rc_path); then
-    sed -i".bac" "s/$old_command/$default_command/" $rc_path
+    sed -i".bac" "s/$old_command/$new_command/" $rc_path
     rm $rc_path.bac
   else
-    echo $default_command >> $rc_path
+    echo $new_command >> $rc_path
   fi
 }
 
 function setup_zsh() {
-  if [[ ! -f ".fex.zsh" ]]; then
+  if [[ ! -f ./.fex.zsh ]]; then
     error "Zsh file (.fex.zsh) not found at $(pwd)"
+  fi
+  
+  # Remove old fex-widget if present
+  if [[ -f ~/.fex.zsh ]]; then
+    rm ~/.fex.zsh
   fi
   
   cp ./.fex.zsh ~/.fex.zsh
@@ -180,8 +189,8 @@ function setup_zsh() {
 
 function which_rc() {
   case $(which_shell) in
-    "zsh")  echo "~/.zshrc"  ;;
-    "bash") echo "~/.bashrc" ;;
+    "zsh")  echo "$HOME/.zshrc"  ;;
+    "bash") echo "$HOME/.bashrc" ;;
   esac
 }
 
@@ -202,13 +211,13 @@ function error() {
 }
 
 function ask() {
-  read -p "$(echo -e "$yellow>$reset $1 $faint([n]/y)$reset: ")" -r
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "y"
+  read -p "$(echo -e "$yellow>$reset $1 $faint([y]/n)$reset: ")" -r
+  if [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo "n"
     return
   fi
   
-  echo "n"
+  echo "y"
 }
 
 function mcq() {
