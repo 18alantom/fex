@@ -30,6 +30,7 @@ tool to zip around a file system:
 ## Index
 
 - [Installation](#installation)
+  - [Using `install.sh`](#using-installsh)
   - [From Source](#from-source)
     - [macOS](#macos)
     - [Linux](#linux)
@@ -63,6 +64,16 @@ integration go to the [Setup](#setup) section.
 >
 > 🚧 Installation using package managers (Homebrew, apt, etc) will be added.
 
+### Using `install.sh`
+
+You can use [`install.sh`](https://github.com/18alantom/fex/blob/master/install.sh) script to [download](https://github.com/18alantom/fex/releases) and setup fex.
+
+Run the following bash one-liner to setup fex:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/18alantom/fex/master/install.sh -o install.sh && bash install.sh
+```
+
 ### From Source
 
 To install fex from source, you will need version `zig` version 0.12.0 installed. You can get it from [here](https://ziglang.org/download/).
@@ -73,10 +84,6 @@ Once you had done that, compile the executable by using the following commands:
 # Clone the fex repository
 git clone https://github.com/18alantom/fex && cd fex
 ```
-
-> [!NOTE]
->
-> 🚧 Pre-built binaries will be added soon.
 
 #### macOS
 
@@ -225,8 +232,8 @@ This changes search behavior.
 
 | key             | action                                    |
 | :-------------- | :---------------------------------------- |
-| `<enter>`       | Toggle directory or open file (macOS)     |
-| `o`             | Open item (macOS)                         |
+| `<enter>`       | Toggle directory or open file             |
+| `o`             | Open item                                 |
 | `E`             | Expand all directories under root         |
 | `C`             | Collapse all directories                  |
 | `R`             | Change root to item under cursor (if dir) |

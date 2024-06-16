@@ -37,8 +37,8 @@ pub const help_string =
     \\  }                   Jump to next fold
     \\  
     \\Action Controls
-    \\  <enter>             Toggle directory or open file (macOS)
-    \\  o                   Open item under cursor (macOS)
+    \\  <enter>             Toggle directory or open file
+    \\  o                   Open item under cursor
     \\  E                   Expand all directories
     \\  C                   Collapse all directories
     \\  R                   Change root to item under cursor (if dir)
