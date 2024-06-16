@@ -114,5 +114,14 @@ function error() {
   exit 1
 }
 
+function ask() {
+  read -p "$(echo -e "$yellow>$reset $1 $faint([n]/y)$reset: ")" -r
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "y"
+    return
+  fi
+  
+  echo "n"
+}
 
 release $1
