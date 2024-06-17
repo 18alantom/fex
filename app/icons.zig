@@ -111,9 +111,15 @@ pub fn getIcon(entry: *Entry) ![]const u8 {
     if (eql(ext, ".php")) return icons.php;
     if (eql(ext, ".sqlite")) return icons.sqlite;
     if (eql(ext, ".json")) return icons.json;
+    if (eql(ext, ".toml")) return icons.toml;
 
-    if (try item.isDir()) {
+    const stat = try item.stat();
+    if (stat.isDir()) {
         return if (item.hasChildren()) icons.folder_open else icons.folder;
+    }
+
+    if (stat.isBlock() or stat.isChr()) {
+        return icons.file_empty;
     }
 
     // TODO: Add fonts for audio, video, etc
@@ -217,6 +223,7 @@ const icons = .{
     .bug = "\u{f188}",
     .calendar = "\u{f073}",
     .file = "\u{f15b}",
+    .file_empty = "\u{f016}",
     .filter = "\u{f0b0}",
     .font = "\u{f031}",
     .gear = "\u{f013}",

@@ -239,6 +239,7 @@ fn getFg(entry: *Entry, is_selected: bool) !tui.style.Color {
     if (s.isDir()) return .blue;
     if (s.isLink()) return .cyan;
     if (s.isExec()) return .green;
+    if (s.isChr() or s.isBlock()) return .yellow;
     return .default;
 }
 

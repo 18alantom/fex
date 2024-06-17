@@ -7,8 +7,8 @@ const fmt = std.fmt;
 // Item Type
 const d = "\x1b[34;1md\x1b[m"; // Blue 'd' for dir
 const l = "\x1b[36;1ml\x1b[m"; // Cyan 'l' for link
-const b = "\x1b[31;1ml\x1b[m"; // Red 'b' for block
-const c = "\x1b[33;1ml\x1b[m"; // Yellow 'c' for char
+const b = "\x1b[33;1mb\x1b[m"; // Yellow 'b' for block
+const c = "\x1b[33;1mc\x1b[m"; // Yellow 'c' for char
 
 // Item Perms
 const x = "\x1b[32;1mx\x1b[m"; // Green 'x' for exec
