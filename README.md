@@ -74,6 +74,12 @@ Run the following bash one-liner to setup fex:
 curl -fsSL https://raw.githubusercontent.com/18alantom/fex/master/install.sh -o install.sh && bash install.sh
 ```
 
+> [!NOTE]
+>
+> To uninstall fex: 
+> 1. Remove the `$HOME/.fex` directory.
+> 2. Delete the lines pertaining to fex from your `.bashrc` or `.zshrc` file.
+
 ### From Source
 
 To install fex from source, you will need version `zig` version 0.12.0 installed. You can get it from [here](https://ziglang.org/download/).
