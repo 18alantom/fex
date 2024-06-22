@@ -4,6 +4,8 @@ set -euo pipefail
 
 readonly version=0.0.2
 readonly base_dir=$(pwd)
+readonly fex_target_dir="$HOME/.fex"
+readonly fex_path="$fex_target_dir/bin"
 untar_dir=""
 
 readonly red="\x1b[31m"
@@ -19,15 +21,15 @@ function install() {
   fi
 
   local tar_name=$(get_tar_name)
-  echo -n "Downloading $tar_name from GitHub"
+  echo -n "Downloading $tar_name from GitHub "
   local folder_name=$(download $tar_name)
-  echo -e " $check"
+  echo -e "$check"
 
   untar_dir=$base_dir/$folder_name
 
-  echo -n "Placing binary"
+  echo -n "Placing binary at $fex_target_dir "
   place_binary
-  echo -e " $check"
+  echo -e "$check"
 
   if [[ $(ask "Setup fex default command?") == "y" ]]; then
     setup_defaults
@@ -37,7 +39,9 @@ function install() {
     setup_zsh
   fi
   
-  echo -e "Fex installation complete $check"
+  cleanup
+  echo -e "Installation complete $check"
+  echo "Restart your shell to use fex"
 }
 
 function get_tar_name() {
@@ -107,7 +111,25 @@ function place_binary() {
     error "Invalid version: $output"
   fi
   
-  mv ./fex /usr/local/bin/fex
+  if [[ -f "$fex_path/fex" ]]; then
+    rm "$fex_path/fex"
+  fi
+  
+  mkdir -p $fex_path
+  mv ./fex "$fex_path/fex"
+
+  update_path
+}
+
+function update_path() {
+  local path_update_line="[[ ! \$PATH == *$fex_path* ]] && export PATH=\"$fex_path:\$PATH\""
+  local rc_path=$(which_rc)
+  
+  if grep -q "export PATH=\"$fex_path:\$PATH\"" $rc_path; then
+    return
+  fi
+  
+  echo "$path_update_line" >> $rc_path
 }
 
 
@@ -160,15 +182,16 @@ function setup_zsh() {
     error "Zsh file (.fex.zsh) not found at $(pwd)"
   fi
   
+  local widget_path="$fex_target_dir/.fex.zsh"
   # Remove old fex-widget if present
-  if [[ -f ~/.fex.zsh ]]; then
-    rm ~/.fex.zsh
+  if [[ -f $widget_path ]]; then
+    rm $widget_path
   fi
   
-  cp ./.fex.zsh ~/.fex.zsh
+  mv ./.fex.zsh $widget_path
   
   local rc_path=$(which_rc)
-  local load_widget="[ -f ~/.fex.zsh ] && source ~/.fex.zsh"
+  local load_widget="[ -f $widget_path ] && source $widget_path"
   
   if ! grep -q "$load_widget" $rc_path; then
     echo $load_widget >> $rc_path
@@ -191,6 +214,7 @@ function which_rc() {
   case $(which_shell) in
     "zsh")  echo "$HOME/.zshrc"  ;;
     "bash") echo "$HOME/.bashrc" ;;
+    *)      echo "$HOME/.bashrc" ;;
   esac
 }
 
@@ -262,4 +286,4 @@ function cleanup() {
   rm -rf $untar_dir
 }
 
-install
+install || cleanup
