@@ -160,7 +160,7 @@ function setup_defaults() {
   # Which time to set, defaults to changed.
   if [[ $display_time == "y" ]]; then
     local time_type=$(mcq "Select which time to display" "modified accessed changed")
-    default_command+=" --time $time_type"
+    default_command+=" --time-type $time_type"
   fi
   default_command+="\""
   set_default_command "$default_command"

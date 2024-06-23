@@ -179,14 +179,14 @@ You can configure `fex` by passing it args.
 
 Changes values displayed in an item line.
 
-| arg            | description                                                                                              |
-| :------------- | :------------------------------------------------------------------------------------------------------- |
-| `--no-icons`   | Skip printing icons. Note: icons need a [patched font](https://github.com/ryanoasis/nerd-fonts) to work. |
-| `--no-size`    | Skip printing item sizes                                                                                 |
-| `--no-time`    | Skip printing time                                                                                       |
-| `--no-perm`    | Skip printing permission info                                                                            |
-| `--no-link`    | Skip printing link target                                                                                |
-| `--time VALUE` | Set which time is displayed. VALUE: modified, accessed, changed. Default: modified                       |
+| arg                 | description                                                                                             |
+| :------------------ | :------------------------------------------------------------------------------------------------------ |
+| `--[no-]icons`      | Show or hide icons. Note: icons need a [patched font](https://github.com/ryanoasis/nerd-fonts) to work. |
+| `--[no-]size`       | Show or hide item sizes                                                                                 |
+| `--[no-]time`       | Show or hide time                                                                                       |
+| `--[no-]perm`       | Show or hide permission info                                                                            |
+| `--[no-]link`       | Show or hide link target                                                                                |
+| `--time-type VALUE` | Set which time is displayed. VALUE: modified, accessed, changed. Default: modified                      |
 
 ### Search Config
 

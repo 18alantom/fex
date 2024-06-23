@@ -7,12 +7,12 @@ pub const help_string =
     \\  fex ~/Desktop --time accessed
     \\
     \\Display Config
-    \\  --no-icons          Skip printing icons
-    \\  --no-size           Skip printing item sizes
-    \\  --no-time           Skip printing time
-    \\  --no-perm           Skip printing permission info
-    \\  --no-link           Skip printing link target
-    \\  --time VALUE        Set which time is displayed
+    \\  --[no-]icons        Show or hide icons
+    \\  --[no-]size         Show or hide item sizes
+    \\  --[no-]time         Show or hide time
+    \\  --[no-]perm         Show or hide permission info
+    \\  --[no-]link         Show or hide link target
+    \\  --time-type VALUE   Set which time is displayed
     \\                      valid: modified, accessed, changed
     \\                      default: modified
     \\
