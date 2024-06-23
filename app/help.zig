@@ -4,7 +4,7 @@ pub const help_string =
     \\  fex [path] [options]
     \\
     \\Example
-    \\  fex ~/Desktop --time accessed
+    \\  fex ~/Desktop --time-type accessed
     \\
     \\Display Config
     \\  --[no-]icons        Show or hide icons

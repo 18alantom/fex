@@ -163,7 +163,7 @@ what flags `fex` is invoked using. For example:
 
 ```bash
 # Sets time displayed to access time and hides icons
-export FEX_DEFAULT_COMMAND="fex --time accessed --no-icons"
+export FEX_DEFAULT_COMMAND="fex --time-type accessed --no-icons"
 ```
 
 ## Config

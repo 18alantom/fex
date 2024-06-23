@@ -35,12 +35,12 @@ const Self = @This();
 pub const Config = struct {
     root: []const u8,
     // Display config
-    no_icons: bool = false,
-    no_size: bool = false,
-    no_perm: bool = false,
-    no_time: bool = false,
-    no_link: bool = false,
-    time: TimeType = .modified,
+    icons: bool = true,
+    size: bool = true,
+    perm: bool = true,
+    time: bool = true,
+    link: bool = true,
+    time_type: TimeType = .modified,
 
     // Search config
     fuzzy_search: bool = true,

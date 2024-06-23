@@ -56,33 +56,33 @@ fn ConfigIterator(Iterator: type) type {
 
                 // Display args, negative filters
                 else if (eql(arg, "--no-icons")) {
-                    config.no_icons = true;
+                    config.icons = false;
                 } else if (eql(arg, "--no-size")) {
-                    config.no_size = true;
+                    config.size = false;
                 } else if (eql(arg, "--no-perm")) {
-                    config.no_perm = true;
+                    config.perm = false;
                 } else if (eql(arg, "--no-time")) {
-                    config.no_time = true;
+                    config.time = false;
                 } else if (eql(arg, "--no-link")) {
-                    config.no_link = true;
+                    config.link = false;
                 }
 
                 // Display args, positive filters
                 else if (eql(arg, "--icons")) {
-                    config.no_icons = false;
+                    config.icons = true;
                 } else if (eql(arg, "--size")) {
-                    config.no_size = false;
+                    config.size = true;
                 } else if (eql(arg, "--perm")) {
-                    config.no_perm = false;
+                    config.perm = true;
                 } else if (eql(arg, "--time")) {
-                    config.no_time = false;
+                    config.time = true;
                 } else if (eql(arg, "--link")) {
-                    config.no_link = false;
+                    config.link = true;
                 }
 
                 // Time selection
                 else if (eql(arg, "--time-type")) {
-                    config.time = getTime(iterator_.next());
+                    config.time_type = getTime(iterator_.next());
                 }
 
                 // Search args
