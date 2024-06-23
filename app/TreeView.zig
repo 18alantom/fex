@@ -72,6 +72,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) Self {
             .size = !config.no_size,
             .perm = !config.no_perm,
             .time = !config.no_time,
+            .link = !config.no_link,
             .modified = config.time == .modified,
             .changed = config.time == .changed,
             .accessed = config.time == .accessed,

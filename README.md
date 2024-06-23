@@ -76,7 +76,8 @@ curl -fsSL https://raw.githubusercontent.com/18alantom/fex/master/install.sh -o 
 
 > [!NOTE]
 >
-> To uninstall fex: 
+> To uninstall fex:
+>
 > 1. Remove the `$HOME/.fex` directory.
 > 2. Delete the lines pertaining to fex from your `.bashrc` or `.zshrc` file.
 
@@ -184,6 +185,7 @@ Changes values displayed in an item line.
 | `--no-size`    | Skip printing item sizes                                                                                 |
 | `--no-time`    | Skip printing time                                                                                       |
 | `--no-perm`    | Skip printing permission info                                                                            |
+| `--no-link`    | Skip printing link target                                                                                |
 | `--time VALUE` | Set which time is displayed. VALUE: modified, accessed, changed. Default: modified                       |
 
 ### Search Config
@@ -285,6 +287,7 @@ Toggle displayed information.
 | `tp` | Toggle permission info display |
 | `ts` | Toggle size display            |
 | `tt` | Toggle time display            |
+| `tl` | Toggle link target display     |
 | `tm` | Display modified time          |
 | `ta` | Display accessed time          |
 | `tc` | Display changed time           |

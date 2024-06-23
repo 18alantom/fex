@@ -63,6 +63,8 @@ fn ConfigIterator(Iterator: type) type {
                     config.no_perm = true;
                 } else if (eql(arg, "--no-time")) {
                     config.no_time = true;
+                } else if (eql(arg, "--no-link")) {
+                    config.no_link = true;
                 } else if (eql(arg, "--time")) {
                     config.time = getTime(iterator_.next());
                 }

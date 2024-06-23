@@ -11,6 +11,7 @@ pub const help_string =
     \\  --no-size           Skip printing item sizes
     \\  --no-time           Skip printing time
     \\  --no-perm           Skip printing permission info
+    \\  --no-link           Skip printing link target
     \\  --time VALUE        Set which time is displayed
     \\                      valid: modified, accessed, changed
     \\                      default: modified
@@ -66,6 +67,7 @@ pub const help_string =
     \\  tp                  Toggle permission info display
     \\  ts                  Toggle size display
     \\  tt                  Toggle time display
+    \\  tl                  Toggle link target display
     \\  tm                  Display modified time
     \\  ta                  Display accessed time
     \\  tc                  Display changed time

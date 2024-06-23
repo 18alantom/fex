@@ -39,6 +39,7 @@ pub const Config = struct {
     no_size: bool = false,
     no_perm: bool = false,
     no_time: bool = false,
+    no_link: bool = false,
     time: TimeType = .modified,
 
     // Search config
