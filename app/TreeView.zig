@@ -32,6 +32,7 @@ const fs = std.fs;
 const os = std.os;
 const fmt = std.fmt;
 const mem = std.mem;
+const posix = std.posix;
 
 const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
@@ -47,6 +48,7 @@ const Info = struct {
     modified: bool = true,
     changed: bool = false,
     accessed: bool = false,
+    link: bool = true,
     show: bool = true,
 };
 
@@ -215,6 +217,15 @@ fn printLine(
         name,
         .{ .fg = try getFg(entry, view.cursor == i), .underline = entry.selected },
     );
+
+    if (self.info.link and try entry.item.isLink()) {
+        const link_slc = try posix.readlink(
+            entry.item.abspath(),
+            &self.obuf,
+        );
+        try draw.print(" -> ", .{ .no_style = true });
+        try draw.print(link_slc, .{ .fg = .red });
+    }
 
     // Print cursor
     if (view.cursor == i) {
