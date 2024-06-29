@@ -278,12 +278,15 @@ function mcq() {
 }
 
 function cleanup() {
-  if [[ ! -d $untar_dir ]]; then 
-    return
+  cd $base_dir
+
+  if [[ -d $untar_dir ]]; then 
+    rm -rf $untar_dir
   fi
   
-  cd $base_dir
-  rm -rf $untar_dir
+  if [[ -f "$base_dir/install.sh" ]]; then
+    rm "$base_dir/install.sh"
+  fi
 }
 
 install || cleanup
