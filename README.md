@@ -83,7 +83,7 @@ curl -fsSL https://raw.githubusercontent.com/18alantom/fex/master/install.sh -o 
 
 ### From Source
 
-To install fex from source, you will need version `zig` version 0.12.0 installed. You can get it from [here](https://ziglang.org/download/).
+To install fex from source, you will need version `zig` version 0.13.0 installed. You can get it from [here](https://ziglang.org/download/).
 
 Once you had done that, compile the executable by using the following commands:
 

@@ -1,7 +1,7 @@
 .{
     .name = "fex",
     .version = "0.0.2",
-    .minimum_zig_version = "0.12.0",
+    .minimum_zig_version = "0.13.0",
     .dependencies = .{
         // libc
     },
