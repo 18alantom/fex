@@ -1,13 +1,11 @@
 const std = @import("std");
-const utils = @import("./utils.zig");
-const builtin = std.builtin;
 
-pub fn typeInfo(comptime T: type) void {
-    _typeInfo(T, 0);
+pub fn reflect(comptime T: type) void {
+    typeInfo(T, 0);
     std.debug.print("\n", .{});
 }
 
-fn _typeInfo(comptime T: type, indent: usize) void {
+fn typeInfo(comptime T: type, indent: usize) void {
     if (indent == 0) std.debug.print("\x1b[31m{any}\x1b[m\n", .{T});
     const info = @typeInfo(T);
     switch (info) {
@@ -16,10 +14,10 @@ fn _typeInfo(comptime T: type, indent: usize) void {
     }
 }
 
-fn printStruct(comptime S: builtin.Type.Struct, indent: usize) void {
+fn printStruct(comptime S: std.builtin.Type.Struct, indent: usize) void {
     var buf: [256]u8 = undefined;
-    const spc = utils.repeat(&buf, "   ", indent);
-    const spc2 = utils.repeat(buf[spc.len..], "   ", indent + 1);
+    const spc = repeat(&buf, "   ", indent);
+    const spc2 = repeat(buf[spc.len..], "   ", indent + 1);
 
     // Fields
     if (S.fields.len > 0) std.debug.print("{s}\x1b[36mfields\x1b[m:\n", .{spc});
@@ -32,7 +30,7 @@ fn printStruct(comptime S: builtin.Type.Struct, indent: usize) void {
         std.debug.print("is_comptime: {any}, ", .{field.is_comptime});
         std.debug.print("default_value: {any}\x1b[m", .{field.default_value});
         std.debug.print("\n", .{});
-        _typeInfo(field.type, indent + 1);
+        typeInfo(field.type, indent + 1);
     }
 
     // Declarations
@@ -45,4 +43,15 @@ fn printStruct(comptime S: builtin.Type.Struct, indent: usize) void {
     std.debug.print("{s}\x1b[2mlayout: {any}, ", .{ spc, S.layout });
     std.debug.print("is_tuple: {any}, ", .{S.is_tuple});
     std.debug.print("backing_integer: {any}\x1b[m\n", .{S.backing_integer});
+}
+
+fn repeat(buf: []u8, str: []const u8, reps: usize) []u8 {
+    for (0..reps) |i| {
+        const s = i * str.len;
+        const e = (i + 1) * str.len;
+
+        @memcpy(buf[s..e], str);
+    }
+
+    return buf[0 .. str.len * reps];
 }
