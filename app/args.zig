@@ -50,7 +50,7 @@ fn ConfigIterator(Iterator: type) type {
             while (iterator_.next()) |arg| {
                 defer argc += 1;
 
-                if (argc == 0 and arg[0] != '-' and !from_env) {
+                if (argc == 0 and arg[0] != '-' and !from_env and isDir(arg)) {
                     config.root = arg;
                 }
 
@@ -133,4 +133,9 @@ fn printVersion() !void {
 
 fn setupZsh() !void {
     return error.NotImplemented;
+}
+
+fn isDir(path: []const u8) bool {
+    const stat = Stat.stat(path) catch return false;
+    return stat.isDir();
 }
