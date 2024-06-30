@@ -221,6 +221,8 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .toggle_perm => actions.togglePerm(self),
         .toggle_time => actions.toggleTime(self),
         .toggle_link => actions.toggleLink(self),
+        .toggle_user => actions.toggleUser(self),
+        .toggle_group => actions.toggleGroup(self),
         .time_modified => actions.timeModified(self),
         .time_changed => actions.timeChanged(self),
         .time_accessed => actions.timeAccessed(self),

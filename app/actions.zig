@@ -185,6 +185,16 @@ pub fn toggleLink(state: *State) void {
     state.view.print_all = true;
 }
 
+pub fn toggleUser(state: *State) void {
+    state.output.treeview.info.user = !state.output.treeview.info.user;
+    state.view.print_all = true;
+}
+
+pub fn toggleGroup(state: *State) void {
+    state.output.treeview.info.group = !state.output.treeview.info.group;
+    state.view.print_all = true;
+}
+
 pub fn timeModified(state: *State) void {
     state.output.treeview.info.time = true;
     state.output.treeview.info.accessed = false;
