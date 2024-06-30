@@ -41,6 +41,8 @@ pub const Config = struct {
     time: bool = true,
     link: bool = true,
     time_type: TimeType = .modified,
+    user: bool = false,
+    group: bool = false,
 
     // Search config
     fuzzy_search: bool = true,

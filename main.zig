@@ -42,6 +42,6 @@ fn exe(allocator: mem.Allocator, config: *App.Config) !void {
 test "app" {
     // TODO: run test on different thread, send inputs
     std.debug.print("\n", .{});
-    var config: args.Config = .{ .root = "." };
+    var config: App.Config = .{ .root = "." };
     try exe(std.testing.allocator, &config);
 }

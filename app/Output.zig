@@ -37,7 +37,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
 
     writer.* = tui.BufferedStdOut.init();
     draw.* = tui.Draw{ .writer = writer };
-    treeview.* = TreeView.init(allocator, config);
+    treeview.* = try TreeView.init(allocator, config);
 
     try draw.hideCursor();
     try draw.disableAutowrap();

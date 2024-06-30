@@ -49,6 +49,8 @@ const Info = struct {
     changed: bool = false,
     accessed: bool = false,
     link: bool = true,
+    group: bool = false,
+    user: bool = false,
     show: bool = true,
 };
 
@@ -56,12 +58,23 @@ obuf: [2048]u8, // Content Buffer
 sbuf: [2048]u8, // Style Buffer
 
 allocator: mem.Allocator,
-indent_list: IndentList,
+indent_list: *IndentList,
 info: Info,
 
+// Used to store gid, uid names
+gmap: *Stat.IDNameMap,
+umap: *Stat.IDNameMap,
+
 const Self = @This();
-pub fn init(allocator: mem.Allocator, config: *Config) Self {
-    const indent_list = IndentList.init(allocator);
+pub fn init(allocator: mem.Allocator, config: *Config) !Self {
+    const indent_list = try allocator.create(IndentList);
+    indent_list.* = IndentList.init(allocator);
+
+    const gmap = try allocator.create(Stat.IDNameMap);
+    gmap.* = Stat.IDNameMap.init(allocator);
+
+    const umap = try allocator.create(Stat.IDNameMap);
+    umap.* = Stat.IDNameMap.init(allocator);
     return .{
         .indent_list = indent_list,
         .allocator = allocator,
@@ -78,11 +91,20 @@ pub fn init(allocator: mem.Allocator, config: *Config) Self {
             .accessed = config.time_type == .accessed,
             .show = config.icons or config.size or config.perm or config.time or config.link,
         },
+        .gmap = gmap,
+        .umap = umap,
     };
 }
 
 pub fn deinit(self: *Self) void {
     self.indent_list.deinit();
+    self.allocator.destroy(self.indent_list);
+
+    Stat.deinitIdNameMap(self.gmap);
+    self.allocator.destroy(self.gmap);
+
+    Stat.deinitIdNameMap(self.umap);
+    self.allocator.destroy(self.umap);
 }
 
 pub fn printLines(
@@ -95,6 +117,11 @@ pub fn printLines(
 ) !void {
     self.resetIndentList();
     try draw.moveCursor(start_row, 0);
+
+    var gum: GidUidMax = .{ .gid_max = 0, .uid_max = 0 };
+    if (self.info.show and (self.info.group or self.info.user)) {
+        try self.setGidUidMaxLen(view, &gum);
+    }
 
     // Need to iterate over items before the view buffer because
     // calculating the indent list depends on previous items.
@@ -114,17 +141,39 @@ pub fn printLines(
 
         // Assumes that cursor is at the right position.
         if (search_query != null or view.print_all) {
-            try self.printLine(i, view, draw, search_query);
+            try self.printLine(i, view, draw, search_query, &gum);
         }
 
         // Move cursor to line and render it.
         else if (i == view.cursor or i == view.prev_cursor or render_last) {
             const row = start_row + (i - view.first);
             try draw.moveCursor(row, 0);
-            try self.printLine(i, view, draw, null);
+            try self.printLine(i, view, draw, null, &gum);
         }
     }
     view.print_all = false;
+}
+
+const GidUidMax = struct {
+    gid_max: usize,
+    uid_max: usize,
+};
+
+fn setGidUidMaxLen(self: *Self, view: *View, gum: *GidUidMax) !void {
+    for (0..(view.last + 1)) |i| {
+        const entry = view.buffer.items[i];
+
+        if (i > view.last) break;
+        if (i < view.first) continue;
+
+        const s = try entry.item.stat();
+
+        const group = try s.getGroupName(self.gmap);
+        gum.gid_max = @max(gum.gid_max, group.len);
+
+        const user = try s.getUserName(self.umap);
+        gum.uid_max = @max(gum.uid_max, user.len);
+    }
 }
 
 fn resetIndentList(self: *Self) void {
@@ -168,30 +217,56 @@ fn printLine(
     view: *const View,
     draw: *Draw,
     search_query_or_null: ?*const SearchQuery,
+    gum: *GidUidMax,
 ) !void {
     try draw.clearLine();
     var entry = view.buffer.items[i];
-    var has_prefix_info = false;
+    const has_prefix_info = self.info.show and (self.info.perm or
+        self.info.size or
+        self.info.user or
+        self.info.group or
+        self.info.time);
 
     // Print permission info
     if (self.info.show and self.info.perm) {
         const mode = try statfmt.mode(try entry.item.stat(), &self.obuf);
         try draw.print(mode, .{ .no_style = true });
-        has_prefix_info = true;
     }
 
     // Print size
     if (self.info.show and self.info.size) {
         const size = try statfmt.size(try entry.item.stat(), &self.obuf);
         try draw.print(size, .{ .fg = .cyan });
-        has_prefix_info = true;
+    }
+
+    // Print User Name
+    if (self.info.show and self.info.user) {
+        const s = try entry.item.stat();
+        const user = string.rpad(
+            try s.getUserName(self.umap),
+            gum.uid_max + 1,
+            ' ',
+            &self.obuf,
+        );
+        try draw.print(user, .{ .fg = .blue });
+    }
+
+    // Print Group Name
+    if (self.info.show and self.info.group) {
+        const s = try entry.item.stat();
+        const group = string.rpad(
+            try s.getGroupName(self.gmap),
+            gum.gid_max + 1,
+            ' ',
+            &self.obuf,
+        );
+        try draw.print(group, .{ .fg = .green });
     }
 
     // Print time
     if (self.timeType()) |time_type| {
         const time = statfmt.time(try entry.item.stat(), time_type, &self.obuf);
         try draw.print(time, .{ .fg = .yellow });
-        has_prefix_info = true;
     }
 
     if (has_prefix_info) {
@@ -241,7 +316,7 @@ fn timeType(self: *Self) ?Stat.TimeType {
     if (self.info.modified) return .modified;
     if (self.info.accessed) return .accessed;
     if (self.info.changed) return .changed;
-    return null;
+    return .modified;
 }
 
 fn getFg(entry: *Entry, is_selected: bool) !tui.style.Color {

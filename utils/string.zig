@@ -248,6 +248,18 @@ pub fn lpad(str: []const u8, len: usize, pad: u8, buf: []u8) []u8 {
     return buf[0..(diff + str.len)];
 }
 
+pub fn rpad(str: []const u8, len: usize, pad: u8, buf: []u8) []u8 {
+    const diff = len -| str.len;
+    if (diff == 0) {
+        @memcpy(buf[0..str.len], str);
+        return buf[0..str.len];
+    }
+
+    @memcpy(buf[0..str.len], str);
+    @memset(buf[str.len..(diff + str.len)], pad);
+    return buf[0..(diff + str.len)];
+}
+
 /// Returns width of a grapheme in terms of number of characters required to display it
 /// assuming a monospace font.
 pub fn strWidth(str: []const u8) !usize {
