@@ -6,6 +6,8 @@ const linux = std.os.linux;
 // Due to lazy eval not included if linux
 const libc = @cImport({
     @cInclude("sys/stat.h");
+    @cInclude("grp.h");
+    @cInclude("pwd.h");
 });
 
 const is_linux = builtin.os.tag == .linux;
@@ -19,6 +21,8 @@ const mem = std.mem;
 
 mode: Mode,
 size: i64,
+uid: u32,
+gid: u32,
 
 // Seconds since epoch
 mtime_sec: isize, // Modified
@@ -43,6 +47,8 @@ pub fn stat(abspath: []const u8) !Self {
         return .{
             .mode = statbuf.mode,
             .size = statbuf.size,
+            .uid = statbuf.uid,
+            .gid = statbuf.gid,
             .mtime_sec = statbuf.mtim.tv_sec,
             .atime_sec = statbuf.atim.tv_sec,
             .ctime_sec = statbuf.ctim.tv_sec,
@@ -59,6 +65,8 @@ pub fn stat(abspath: []const u8) !Self {
         return .{
             .mode = statbuf.st_mode,
             .size = statbuf.st_size,
+            .uid = statbuf.st_uid,
+            .gid = statbuf.st_gid,
             .mtime_sec = statbuf.st_mtimespec.tv_sec,
             .atime_sec = statbuf.st_atimespec.tv_sec,
             .ctime_sec = statbuf.st_ctimespec.tv_sec,
@@ -146,4 +154,68 @@ pub fn hasOtherWrite(self: *const Self) bool {
 pub fn hasOtherRead(self: *const Self) bool {
     const mask = if (is_linux) linux.S.IROTH else libc.S_IROTH;
     return (mask & self.mode) > 0;
+}
+
+// Get group and user names from gid and uid
+pub fn getGroupName(self: *const Self, map: *IDNameMap) ![]u8 {
+    return try getIdName(self.gid, map, .group);
+}
+
+pub fn getUserName(self: *const Self, map: *IDNameMap) ![]u8 {
+    return try getIdName(self.uid, map, .user);
+}
+
+pub const IDName = struct {
+    buf: [1024]u8,
+    len: usize,
+
+    pub fn name(self: *IDName) []u8 {
+        return self.buf[0..self.len];
+    }
+};
+
+// IDNameMap is used to store the names in a map to prevent
+// repeat calling of getgrgid and getpwuid.
+pub const IDNameMap = std.AutoHashMap(u32, *IDName);
+pub fn deinitIdNameMap(map: *IDNameMap) void {
+    defer map.deinit();
+
+    var iter = map.iterator();
+    while (iter.next()) |entry| map.allocator.destroy(entry.value_ptr.*);
+}
+
+const IDType = enum {
+    group,
+    user,
+};
+
+fn getIdName(id: u32, map: *IDNameMap, id_type: IDType) ![]u8 {
+    if (map.get(id)) |id_name| {
+        return id_name.name();
+    }
+
+    const id_name = try map.allocator.create(IDName);
+    switch (id_type) {
+        .group => setIDName(
+            libc.getgrgid(id).*.gr_name,
+            id_name,
+        ),
+        .user => setIDName(
+            libc.getpwuid(id).*.pw_name,
+            id_name,
+        ),
+    }
+    try map.put(id, id_name);
+
+    return id_name.name();
+}
+
+fn setIDName(c_str: [*c]u8, id_name: *IDName) void {
+    id_name.len = 0;
+    for (0..id_name.buf.len) |i| {
+        id_name.len = i;
+        const char = c_str[i];
+        if (char == 0) break;
+        id_name.buf[i] = c_str[i];
+    }
 }
