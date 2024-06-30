@@ -65,6 +65,10 @@ fn ConfigIterator(Iterator: type) type {
                     config.time = false;
                 } else if (eql(arg, "--no-link")) {
                     config.link = false;
+                } else if (eql(arg, "--no-group")) {
+                    config.group = false;
+                } else if (eql(arg, "--no-user")) {
+                    config.user = false;
                 }
 
                 // Display args, positive filters
@@ -78,6 +82,10 @@ fn ConfigIterator(Iterator: type) type {
                     config.time = true;
                 } else if (eql(arg, "--link")) {
                     config.link = true;
+                } else if (eql(arg, "--group")) {
+                    config.group = true;
+                } else if (eql(arg, "--user")) {
+                    config.user = true;
                 }
 
                 // Time selection

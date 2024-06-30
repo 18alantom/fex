@@ -186,6 +186,8 @@ Changes values displayed in an item line.
 | `--[no-]time`       | Show or hide time                                                                                       |
 | `--[no-]perm`       | Show or hide permission info                                                                            |
 | `--[no-]link`       | Show or hide link target                                                                                |
+| `--[no-]user`       | Show or hide user name                                                                                  |
+| `--[no-]group`      | Show or hide group name                                                                                 |
 | `--time-type VALUE` | Set which time is displayed. VALUE: modified, accessed, changed. Default: modified                      |
 
 ### Search Config
