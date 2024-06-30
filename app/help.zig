@@ -70,6 +70,8 @@ pub const help_string =
     \\  ts                  Toggle size display
     \\  tt                  Toggle time display
     \\  tl                  Toggle link target display
+    \\  tu                  Toggle user name display
+    \\  tg                  Toggle group name display
     \\  tm                  Display modified time
     \\  ta                  Display accessed time
     \\  tc                  Display changed time
