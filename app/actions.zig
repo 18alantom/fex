@@ -270,9 +270,14 @@ pub fn command(state: *State) void {
 
 pub fn execCommand(state: *State) !void {
     // Handled by shell line editing widget
+    var is_prev_whitespace = false;
     for (state.input.command.string()) |c| {
-        const char = if (ascii.isWhitespace(c)) '\n' else c;
+        const is_whitespace = ascii.isWhitespace(c);
+        if (is_whitespace and is_prev_whitespace) continue;
+
+        const char = if (is_whitespace) '\n' else c;
         try state.stdout.append(char);
+        is_prev_whitespace = is_whitespace;
     }
 
     try state.stdout.appendSlice("\n");
