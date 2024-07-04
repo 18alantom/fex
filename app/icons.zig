@@ -102,6 +102,10 @@ pub fn getIcon(entry: *Entry) ![]const u8 {
 
     // Misc
     if (eql(ext, ".rs")) return icons.rust;
+    if (eql(ext, ".sh")) return icons.shell;
+    if (eql(ext, ".bash")) return icons.shell;
+    if (eql(ext, ".zsh")) return icons.shell;
+    if (eql(ext, ".fish")) return icons.shell;
     if (eql(ext, ".rb")) return icons.ruby;
     if (eql(ext, ".cr")) return icons.crystal;
     if (eql(ext, ".asm")) return icons.assembly;
@@ -191,6 +195,7 @@ const icons = .{
     .redhat = "\u{e7bb}",
     .ruby = "\u{e739}",
     .rust = "\u{e7a8}",
+    .shell = "\u{f489}",
     .safari = "\u{e748}",
     .sass = "\u{e74b}",
     .scala = "\u{e737}",
