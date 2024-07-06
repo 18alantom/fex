@@ -55,7 +55,7 @@ pub fn update(
     const prev_first = self.first;
     const prev_last = self.last;
     if (self.first == 0) {
-        self.correct(max_rows);
+        try self.correct(max_rows, iter);
     }
 
     while (true) {
@@ -74,20 +74,17 @@ pub fn update(
             break;
         }
     }
-    self.correct(max_rows);
 
-    // Whether buffer diff has changed
-    self.print_all = self.print_all or (self.last != prev_last) or (self.first != prev_first);
-
-    // Whether buffer bounds have scrolled
-    self.print_all = self.print_all or (self.last - self.first) != (prev_last - prev_first);
+    try self.correct(max_rows, iter);
+    self.setPrintAll(prev_first, prev_last);
 }
 
-fn correct(self: *Self, max_rows: u16) void {
+fn correct(self: *Self, max_rows: u16, iter: *Manager.Iterator) !void {
     const current_diff: usize = self.last -| self.first;
     const max_diff: usize = self.first + max_rows;
 
     // Correct `last`: ensure `last` less than buffer len
+    try self.ensureBufferLen(self.first + max_rows, iter);
     self.last = @min(max_diff, self.buffer.items.len) - 1;
     if (self.first == 0) {
         return;
@@ -131,4 +128,21 @@ fn decrementIndices(self: *Self) void {
     const diff = self.last - self.first;
     self.first = self.cursor;
     self.last = self.first + diff;
+}
+
+fn ensureBufferLen(self: *Self, len: usize, iter: *Manager.Iterator) !void {
+    if (self.buffer.items.len >= len) return;
+
+    while (iter.next()) |e| {
+        try self.buffer.append(e);
+        if (self.buffer.items.len >= len) break;
+    }
+}
+
+fn setPrintAll(self: *Self, prev_first: usize, prev_last: usize) void {
+    // Whether buffer diff has changed
+    self.print_all = self.print_all or (self.last != prev_last) or (self.first != prev_first);
+
+    // Whether buffer bounds have scrolled
+    self.print_all = self.print_all or (self.last - self.first) != (prev_last - prev_first);
 }

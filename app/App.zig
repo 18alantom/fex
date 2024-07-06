@@ -67,6 +67,7 @@ pub fn deinit(self: *Self) void {
 pub fn run(self: *Self) !void {
     try self.state.preRun();
     while (true) {
+        try self.state.updateViewport();
         try self.state.fillBuffer();
         try self.state.updateView();
         try self.state.printContents();

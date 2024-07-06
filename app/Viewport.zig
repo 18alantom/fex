@@ -38,11 +38,37 @@ pub fn deinit(self: *Self) void {
 }
 
 pub fn setBounds(self: *Self) !void {
+    try self._setBounds(
+        terminal.getTerminalSize(),
+        try terminal.getCursorPosition(),
+    );
+}
+
+pub fn updateBounds(self: *Self) !bool {
+    const position = terminal.getCursorPosition() catch {
+        return false;
+    };
+    const has_cursor_shifted = position.row < self.position.row;
+
+    const size = terminal.getTerminalSize();
+    const has_size_changed = size.rows != self.size.rows;
+    if (!has_cursor_shifted and !has_size_changed) {
+        return false;
+    }
+
+    try self._setBounds(size, position);
+    return true;
+}
+
+pub fn _setBounds(
+    self: *Self,
+    size: terminal.Size,
+    position: terminal.Position,
+) !void {
     // Note: terminal indices start from 1
     // Hence top left is 1,1
-    self.size = terminal.getTerminalSize();
-    const cursor_position = try terminal.getCursorPosition();
-    self.position = try Self.getAdjustedPosition(self.size, cursor_position);
+    self.size = size;
+    self.position = try Self.getAdjustedPosition(self.size, position);
 
     // Max rows used for printing
     // - first `- 1`  to adjust for 1 based index

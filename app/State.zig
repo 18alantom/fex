@@ -14,6 +14,7 @@ const Output = @import("./Output.zig");
 const App = @import("./App.zig");
 const Capture = @import("./Capture.zig");
 
+const terminal = @import("../tui/terminal.zig");
 const actions = @import("./actions.zig");
 const utils = @import("../utils.zig");
 const args = @import("./args.zig");
@@ -119,6 +120,10 @@ pub fn preRun(self: *Self) !void {
     try self.viewport.setBounds();
     _ = try self.manager.root.children();
     self.reiterate = true;
+}
+
+pub fn updateViewport(self: *Self) !void {
+    self.view.print_all = try self.viewport.updateBounds();
 }
 
 pub fn fillBuffer(self: *Self) !void {
