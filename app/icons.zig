@@ -100,8 +100,22 @@ pub fn getIcon(entry: *Entry) ![]const u8 {
     if (eql(ext, ".otf")) return icons.font;
     if (eql(ext, ".ttf")) return icons.font;
 
+    // Images
+    if (eql(ext, ".jpg")) return icons.image;
+    if (eql(ext, ".png")) return icons.image;
+    if (eql(ext, ".jpeg")) return icons.image;
+    if (eql(ext, ".webp")) return icons.image;
+    if (eql(ext, ".avif")) return icons.image;
+    if (eql(ext, ".bmp")) return icons.image;
+    if (eql(ext, ".svg")) return icons.image;
+    if (eql(ext, ".heic")) return icons.image;
+    if (eql(ext, ".nef")) return icons.image;
+    if (eql(ext, ".tiff")) return icons.image;
+
     // Misc
+    if (eql(ext, ".DS_Store")) return icons.apple;
     if (eql(ext, ".rs")) return icons.rust;
+    if (eql(ext, ".pdf")) return icons.pdf;
     if (eql(ext, ".sh")) return icons.shell;
     if (eql(ext, ".bash")) return icons.shell;
     if (eql(ext, ".zsh")) return icons.shell;
@@ -190,11 +204,11 @@ const icons = .{
     .photoshop = "\u{e7b8}",
     .php = "\u{e73d}",
     .prolog = "\u{e7a1}",
-    .python = "\u{e73c}",
+    .python = "\u{e606}",
     .react = "\u{e7ba}",
     .redhat = "\u{e7bb}",
     .ruby = "\u{e739}",
-    .rust = "\u{e7a8}",
+    .rust = "\u{e68b}",
     .shell = "\u{f489}",
     .safari = "\u{e748}",
     .sass = "\u{e74b}",
@@ -242,7 +256,7 @@ const icons = .{
     .hourglass = "\u{f254}",
     .id_badge = "\u{f2c1}",
     .id_card = "\u{f2c2}",
-    .image = "\u{f03e}",
+    .image = "\u{f1c5}",
     .imdb = "\u{f2d8}",
     .inbox = "\u{f01c}",
     .info = "\u{f129}",
@@ -253,6 +267,7 @@ const icons = .{
     .mortar_board = "\u{f19d}",
     .paperclip = "\u{f0c6}",
     .paste = "\u{f0ea}",
+    .pdf = "\u{f1c1}",
     .pencil = "\u{f040}",
     .play = "\u{f04b}",
     .plug = "\u{f1e6}",
