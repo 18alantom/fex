@@ -12,6 +12,7 @@ const os = std.os;
 
 const Manager = @import("../fs/Manager.zig");
 const Entry = Manager.Iterator.Entry;
+const log = std.log.scoped(.view);
 
 const Self = @This();
 
@@ -66,7 +67,7 @@ pub fn update(
 
         // Cursor exceeds top boundary
         else if (self.cursor < self.first) {
-            self.decrementIndices();
+            self.decrementIndices(max_rows);
         }
 
         // Break, cursor within bounds
@@ -124,10 +125,18 @@ fn incrementIndices(self: *Self, iter: *Manager.Iterator) !void {
     }
 }
 
-fn decrementIndices(self: *Self) void {
+fn decrementIndices(self: *Self, max_rows: usize) void {
     const diff = self.last - self.first;
-    self.first = self.cursor;
-    self.last = self.first + diff;
+    // If next diff can be larger i.e. within max_rows, allow diff expansion don't change last
+    if (diff < max_rows and self.last - self.cursor < max_rows) {
+        self.first = self.cursor;
+    }
+
+    // Fallback to maintaining diff
+    else {
+        self.first = self.cursor;
+        self.last = self.first + diff;
+    }
 }
 
 fn ensureBufferLen(self: *Self, len: usize, iter: *Manager.Iterator) !void {

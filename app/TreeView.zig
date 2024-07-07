@@ -38,7 +38,7 @@ const IndentList = std.ArrayList(bool);
 const Draw = tui.Draw;
 const getStyle = tui.style.style;
 const getIcon = icons.getIcon;
-const log = std.log.scoped(.TreeView);
+const log = std.log.scoped(.treeview);
 
 const Info = struct {
     icons: bool = true,

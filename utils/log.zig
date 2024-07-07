@@ -23,11 +23,14 @@ pub fn logFn(
     const scope_text = switch (scope) {
         std.log.default_log_scope => "",
         .app => "\x1b[39m(" ++ @tagName(scope) ++ ")\x1b[m ",
-        .input => "\x1b[35m(" ++ @tagName(scope) ++ ")\x1b[m ",
-        .state => "\x1b[32m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .apputils => "\x1b[39m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .input => "\x1b[32m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .state => "\x1b[33m(" ++ @tagName(scope) ++ ")\x1b[m ",
         .terminal => "\x1b[33m(" ++ @tagName(scope) ++ ")\x1b[m ",
-        .TreeView => "\x1b[34m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .string => "\x1b[34m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .treeview => "\x1b[34m(" ++ @tagName(scope) ++ ")\x1b[m ",
         .actions => "\x1b[35m(" ++ @tagName(scope) ++ ")\x1b[m ",
+        .view => "\x1b[35m(" ++ @tagName(scope) ++ ")\x1b[m ",
         else => "\x1b[1m(" ++ @tagName(scope) ++ ")\x1b[m ",
     };
 
