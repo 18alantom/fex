@@ -71,7 +71,7 @@ You can use [`install.sh`](https://github.com/18alantom/fex/blob/master/install.
 Run the following bash one-liner to setup fex:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/18alantom/fex/master/install.sh && bash install.sh
+curl -O https://raw.githubusercontent.com/18alantom/fex/master/install.sh && bash install.sh
 ```
 
 > [!NOTE]

@@ -13,9 +13,11 @@ readonly yellow="\x1b[33m"
 readonly green="\x1b[32m"
 readonly faint="\x1b[2m"
 readonly reset="\x1b[m"
+readonly logo="\x1b[46m \x1b[m\x1b[43m  \x1b[m"
 readonly check="${green}✔${reset}"
 
 function install() {
+  echo -e "Installing fex $logo"
   if [[ $(can_install) == "n" ]]; then
     error "Installation cancelled"
   fi
