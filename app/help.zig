@@ -1,4 +1,3 @@
-// TODO: Probably should be a file
 pub const help_string =
     \\Usage
     \\  fex [path] [options]

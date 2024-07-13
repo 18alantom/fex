@@ -185,8 +185,6 @@ pub const Iterator = struct {
 
         const children = try entry.item.children();
         for (0..children.items.len) |index| {
-            // TODO: Add ignore patterns
-
             // Required because Items are popped off the stack.
             const reverse_index = children.items.len - 1 - index;
             const child_entry = try self.allocator.create(Entry);
