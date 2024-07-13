@@ -117,7 +117,7 @@ pub fn deinit(self: *Self) void {
 }
 
 pub fn preRun(self: *Self) !void {
-    try self.viewport.setBounds();
+    try self.viewport.initBounds();
     _ = try self.manager.root.children();
     self.reiterate = true;
 }
