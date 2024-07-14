@@ -123,7 +123,8 @@ pub fn preRun(self: *Self) !void {
 }
 
 pub fn updateViewport(self: *Self) !void {
-    self.view.print_all = try self.viewport.updateBounds();
+    const bounds_updated = try self.viewport.updateBounds();
+    self.view.print_all = bounds_updated or self.view.print_all;
 }
 
 pub fn fillBuffer(self: *Self) !void {
