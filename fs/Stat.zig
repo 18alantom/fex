@@ -11,8 +11,12 @@ const libc = @cImport({
 });
 
 const is_linux = builtin.os.tag == .linux;
+const is_intel_mac = builtin.os.tag == .macos and builtin.cpu.arch == .x86_64;
+
 const Mode = if (is_linux)
     utils.FieldType(linux.Stat, "mode") // u32
+else if (is_intel_mac)
+    utils.FieldType(std.c.Stat, "mode") // u16
 else
     utils.FieldType(libc.struct_stat, "st_mode"); // c_int, i32
 
@@ -52,6 +56,24 @@ pub fn stat(abspath: []const u8) !Self {
             .mtime_sec = statbuf.mtim.tv_sec,
             .atime_sec = statbuf.atim.tv_sec,
             .ctime_sec = statbuf.ctim.tv_sec,
+        };
+    }
+
+    // if intel mac, use std.c.stat as fallback ∵ libc.lstat returns incorrect values
+    else if (is_intel_mac) {
+        var statbuf: std.c.Stat = undefined;
+        if (std.c.stat(abspath_w, &statbuf) != 0) {
+            return error.StatError;
+        }
+
+        return .{
+            .mode = statbuf.mode,
+            .size = statbuf.size,
+            .uid = statbuf.uid,
+            .gid = statbuf.gid,
+            .mtime_sec = statbuf.mtimespec.tv_sec,
+            .atime_sec = statbuf.atimespec.tv_sec,
+            .ctime_sec = statbuf.ctimespec.tv_sec,
         };
     }
 
