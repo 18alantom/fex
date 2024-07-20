@@ -6,12 +6,18 @@ const utils = @import("../utils.zig");
 const Capture = @import("./Capture.zig");
 const View = @import("./View.zig");
 const TreeView = @import("./TreeView.zig");
+const terminal = @import("../tui/terminal.zig");
 
 const fs = std.fs;
 const io = std.io;
 const mem = std.mem;
 
 const log = std.log.scoped(.input);
+
+const ReadError = error{
+    EndOfStream,
+    ReceivedCursorPosition,
+};
 
 pub const AppAction = enum {
     up,
@@ -178,20 +184,14 @@ pub fn deinit(self: *Self) void {
 pub fn read(self: *Self, buf: []u8) ![]u8 {
     const size = try self.reader.read(buf);
     if (size == 0) {
-        return error.EndOfStream;
+        return ReadError.EndOfStream;
+    }
+
+    if (terminal.isCursorPosition(buf[0..size])) {
+        return ReadError.ReceivedCursorPosition;
     }
 
     return buf[0..size];
-}
-
-pub fn readUntil(self: *Self, buf: []u8, delimiter: u8, max: usize) []u8 {
-    var fbs = io.fixedBufferStream(buf);
-    try self.reader.streamUntilDelimiter(
-        fbs.writer(),
-        delimiter,
-        max,
-    );
-    return fbs.getWritten();
 }
 
 pub fn getAppAction(self: *Self) !AppAction {
@@ -210,6 +210,7 @@ pub fn getAppAction(self: *Self) !AppAction {
 
 fn captureSearch(self: *Self) !AppAction {
     const slc = self.read(&self.buf) catch |err| switch (err) {
+        error.ReceivedCursorPosition => return .no_action,
         error.EndOfStream => return .no_action,
         else => return err,
     };
@@ -232,6 +233,7 @@ fn captureSearch(self: *Self) !AppAction {
 
 fn captureCommand(self: *Self) !AppAction {
     const slc = self.read(&self.buf) catch |err| switch (err) {
+        error.ReceivedCursorPosition => return .no_action,
         error.EndOfStream => return .no_action,
         else => return err,
     };
@@ -256,8 +258,12 @@ fn captureCommand(self: *Self) !AppAction {
 fn readAppAction(self: *Self) !AppAction {
     var len = try self.reader.read(&self.buf);
     var slc = self.buf[0..len];
-    var ibuf: [128]u8 = undefined;
 
+    if (terminal.isCursorPosition(slc)) {
+        return .no_action;
+    }
+
+    var ibuf: [128]u8 = undefined;
     while (true) {
         log.debug("slc: {any}", .{slc});
         inline for (capture_list) |ca| {

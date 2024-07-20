@@ -31,7 +31,7 @@ pub fn getCursorPosition() !Position {
     // format: \x1b, "[", R1,..., Rn, ";", C1, ..., Cn, "R"
     const len = try posix.read(posix.STDIN_FILENO, &buf);
 
-    if (len < 6 or buf[0] != 27 or buf[1] != '[') {
+    if (!isCursorPosition(buf[0..len])) {
         return error.InvalidValueReturned;
     }
 
@@ -66,6 +66,20 @@ pub fn getCursorPosition() !Position {
         .row = try fmt.parseInt(u16, row[0..ridx], 10),
         .col = try fmt.parseInt(u16, col[0..cidx], 10),
     };
+}
+
+/// Function is more of a heuristic as opposed
+/// to an exact check.
+pub fn isCursorPosition(buf: []u8) bool {
+    if (buf.len < 6) {
+        return false;
+    }
+
+    if (buf[0] != 27 or buf[1] != '[') {
+        return false;
+    }
+
+    return true;
 }
 
 /// Sets the following
