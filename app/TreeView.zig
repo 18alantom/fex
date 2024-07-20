@@ -299,7 +299,8 @@ fn printLine(
             entry.item.abspath(),
             &self.obuf,
         );
-        try draw.print(" -> ", .{ .no_style = true });
+        const arrow = if (self.info.icons) " " ++ icons.icons.arrow_right ++ " " else " -> ";
+        try draw.print(arrow, .{ .no_style = true });
         try draw.print(link_slc, .{ .fg = .red });
     }
 

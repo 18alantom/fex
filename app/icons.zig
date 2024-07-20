@@ -146,7 +146,7 @@ pub fn getIcon(entry: *Entry) ![]const u8 {
 
 // Unicode values sourced from the Nerd-fonts cheatsheet.
 // https://www.nerdfonts.com/cheat-sheet
-const icons = .{
+pub const icons = .{
     .assembly = "\u{e6ab}",
     .c = "\u{e61e}",
     .cpp = "\u{e61d}",
@@ -227,10 +227,7 @@ const icons = .{
     .wordpress = "\u{e70b}",
     .yahoo = "\u{e715}",
     .archive = "\u{f187}",
-    .arrow_down = "\u{f063}",
-    .arrow_left = "\u{f060}",
-    .arrow_right = "\u{f061}",
-    .arrow_up = "\u{f062}",
+    .arrow_right = "\u{ea9c}",
     .bath = "\u{f2cd}",
     .bed = "\u{f236}",
     .bell = "\u{f0f3}",
