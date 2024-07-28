@@ -75,4 +75,12 @@ pub const help_string =
     \\  ta                  Display accessed time
     \\  tc                  Display changed time
     \\
+    \\Sort Controls
+    \\  sn                  Sort in ascending order by name
+    \\  ss                  Sort in ascending order by size
+    \\  st                  Sort in ascending order by displayed time
+    \\  sdn                 Sort in descending order by name
+    \\  sds                 Sort in descending order by size
+    \\  sdt                 Sort in descending order by displayed time
+    \\
 ;

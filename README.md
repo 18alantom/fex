@@ -296,6 +296,19 @@ Toggle displayed information.
 | `ta` | Display accessed time          |
 | `tc` | Display changed time           |
 
+### Sort Controls
+
+Sort entries in a directory.
+
+| key   | action                                     |
+| :---- | :----------------------------------------- |
+| `sn`  | Sort in ascending order by name            |
+| `ss`  | Sort in ascending order by size            |
+| `st`  | Sort in ascending order by displayed time  |
+| `sdn` | Sort in descending order by name           |
+| `sds` | Sort in descending order by size           |
+| `sdt` | Sort in descending order by displayed time |
+
 ## Platform Support
 
 `fex` should ideally compile and run on all macOS and Linux targets supported
