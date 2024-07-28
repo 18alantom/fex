@@ -53,6 +53,12 @@ tool to zip around a file system:
 
 ## Installation
 
+The most convenient way is by running the following bash one-liner:
+
+```bash
+curl -O https://raw.githubusercontent.com/18alantom/fex/master/install.sh && bash install.sh
+```
+
 Getting `fex` running involves:
 
 1. Installing the `fex` executable.
