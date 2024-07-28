@@ -48,6 +48,7 @@ tool to zip around a file system:
   - [Search Mode Controls](#search-mode-controls)
   - [Command Mode Controls](#command-mode-controls)
   - [Display Toggle Controls](#display-toggle-controls)
+  - [Sort Controls](#sort-controls)
 - [Platorm Support](#platform-support)
 
 ## Installation
