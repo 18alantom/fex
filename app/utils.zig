@@ -38,8 +38,10 @@ pub fn toggleItemChildren(item: *Item) !bool {
     }
 
     _ = item.children() catch |e| {
+        // TODO: show user
         switch (e) {
             ItemError.IsNotDirectory => return false,
+            error.AccessDenied => return false,
             else => return e,
         }
     };
