@@ -317,10 +317,12 @@ by Zig. Some features such as opening fs items work only on macOS for now.
 Portions of `fex` code is platform specific and Windows compatibility has not
 been accounted for. This may be added in later.
 
-| arch | macOS    | Linux            | Windows          |
-| ---- | -------- | ---------------- | ---------------- |
-| arm  | works    | does not compile | does not compile |
-| x86  | compiles | works            | does not compile |
+| arch | macOS   | Linux            | Windows          |
+| ---- | ------- | ---------------- | ---------------- |
+| arm  | works   | does not compile | does not compile |
+| x86  | works\* | works            | does not compile |
 
 Currently fex only has shell integration for Zsh. Fish and Bash integrations will
 be added.
+
+_works\*: uses stat instead of lstat for macOS x86 so links may not be shown._
