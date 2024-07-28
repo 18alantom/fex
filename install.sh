@@ -50,7 +50,7 @@ function get_tar_name() {
   local target_stub=""
   case $(uname -sm) in
     "Darwin arm64")  target_stub="aarch64-macos"   ;;
-    # "Darwin x86_64") target_stub="x86_64-macos"    ;;
+    "Darwin x86_64") target_stub="x86_64-macos"    ;;
     "Linux x86_64")  target_stub="x86_64-linux"    ;;
     *) error "Binary unavailable for $(uname -sm)" ;;
   esac
