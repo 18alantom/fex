@@ -1,8 +1,11 @@
 const std = @import("std");
-
+const _sort = @import("./sort.zig");
 const Item = @import("./Item.zig");
+
 const ItemList = Item.ItemList;
 const ItemError = Item.ItemError;
+
+const SortType = _sort.SortType;
 
 const fs = std.fs;
 const mem = std.mem;
@@ -203,6 +206,10 @@ pub fn getEntry(index: usize, parent_depth: usize, children: ItemList) Iterator.
         .first = index == 0,
         .last = index == children.items.len - 1,
     };
+}
+
+pub fn sort(self: *Self, how: SortType, asc: bool) void {
+    self.root.sortChildren(how, asc);
 }
 
 const testing = std.testing;

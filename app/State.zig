@@ -204,14 +204,18 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .bottom => try actions.goToBottom(self),
         .left => try actions.shiftIntoParent(self),
         .right => try actions.shiftIntoChild(self),
+
         .enter => try actions.toggleChildrenOrOpenFile(self),
         .expand_all => actions.expandAll(self),
         .collapse_all => actions.collapseAll(self),
+
         .prev_fold => actions.toPrevFold(self),
         .next_fold => try actions.toNextFold(self),
+
         .change_root => try actions.changeRoot(self),
         .open_item => try actions.openItem(self),
         .change_dir => try actions.changeDir(self),
+
         .depth_one => actions.expandToDepth(self, 0),
         .depth_two => actions.expandToDepth(self, 1),
         .depth_three => actions.expandToDepth(self, 2),
@@ -221,6 +225,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .depth_seven => actions.expandToDepth(self, 6),
         .depth_eight => actions.expandToDepth(self, 7),
         .depth_nine => actions.expandToDepth(self, 8),
+
         .toggle_info => actions.toggleInfo(self),
         .toggle_icons => actions.toggleIcons(self),
         .toggle_size => actions.toggleSize(self),
@@ -229,13 +234,24 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .toggle_link => actions.toggleLink(self),
         .toggle_user => actions.toggleUser(self),
         .toggle_group => actions.toggleGroup(self),
+
         .time_modified => actions.timeModified(self),
         .time_changed => actions.timeChanged(self),
         .time_accessed => actions.timeAccessed(self),
+
+        .sort_name => actions.sort(self, .name, true),
+        .sort_size => actions.sort(self, .size, true),
+        .sort_time => actions.sortTime(self, true),
+
+        .sort_name_desc => actions.sort(self, .name, false),
+        .sort_size_desc => actions.sort(self, .size, false),
+        .sort_time_desc => actions.sortTime(self, false),
+
         .search => actions.search(self),
         .update_search => try actions.execSearch(self),
         .accept_search => try actions.acceptSearch(self),
         .dismiss_search => actions.dismissSearch(self),
+
         .command => actions.command(self),
         .exec_command => try actions.execCommand(self),
         .dismiss_command => actions.dismissCommand(self),

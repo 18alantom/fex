@@ -6,6 +6,7 @@ const apputils = @import("./utils.zig");
 
 const State = @import("./State.zig");
 const Item = @import("../fs/Item.zig");
+const SortType = @import("../fs/sort.zig").SortType;
 
 const ascii = std.ascii;
 const log = std.log.scoped(.actions);
@@ -216,6 +217,24 @@ pub fn timeAccessed(state: *State) void {
     state.output.treeview.info.accessed = true;
     state.output.treeview.info.modified = false;
     state.output.treeview.info.changed = false;
+    state.view.print_all = true;
+}
+
+pub fn sort(state: *State, how: SortType, asc: bool) void {
+    state.manager.sort(how, asc);
+    state.reiterate = true;
+    state.view.print_all = true;
+}
+
+pub fn sortTime(state: *State, asc: bool) void {
+    const how: SortType = if (state.output.treeview.info.modified)
+        .modified
+    else if (state.output.treeview.info.accessed)
+        .accessed
+    else
+        .changed;
+    state.manager.sort(how, asc);
+    state.reiterate = true;
     state.view.print_all = true;
 }
 

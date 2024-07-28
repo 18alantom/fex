@@ -57,6 +57,13 @@ pub const AppAction = enum {
     time_changed,
     time_accessed,
 
+    sort_name,
+    sort_size,
+    sort_time,
+    sort_name_desc,
+    sort_size_desc,
+    sort_time_desc,
+
     select,
 
     search,
@@ -121,6 +128,14 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "tm", .action = .time_modified },
     .{ .seq = "tc", .action = .time_changed },
     .{ .seq = "ta", .action = .time_accessed },
+
+    // Sorting
+    .{ .seq = "sn", .action = .sort_name },
+    .{ .seq = "ss", .action = .sort_size },
+    .{ .seq = "st", .action = .sort_time },
+    .{ .seq = "sdn", .action = .sort_name_desc },
+    .{ .seq = "sds", .action = .sort_size_desc },
+    .{ .seq = "sdt", .action = .sort_time_desc },
 
     // Expansion toggles
     .{ .seq = "E", .action = .expand_all },

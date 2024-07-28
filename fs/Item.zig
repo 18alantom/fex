@@ -1,4 +1,5 @@
 const std = @import("std");
+const sort = @import("./sort.zig");
 const Stat = @import("./Stat.zig");
 
 const fs = std.fs;
@@ -6,6 +7,7 @@ const mem = std.mem;
 const os = std.os;
 
 const print = std.debug.print;
+const log = std.log.scoped(.item);
 
 const Self = @This();
 pub const ItemList = std.ArrayList(*Self);
@@ -242,6 +244,15 @@ pub fn freeChildren(self: *Self, child_to_skip: ?*Self) void {
     }
     self._children.?.deinit();
     self._children = null;
+}
+
+pub fn sortChildren(self: *Self, how: sort.SortType, asc: bool) void {
+    if (self._children) |items| {
+        var items_ = items;
+        std.log.info("sort: {s}", .{self.name()});
+        sort.sort(&items_, how, asc);
+        for (items.items) |ch| ch.sortChildren(how, asc);
+    }
 }
 
 const testing = std.testing;
