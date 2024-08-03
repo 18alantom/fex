@@ -87,15 +87,19 @@ const capture_list = [_]ActionSequence{
     // UDLR, navigation inputs
     .{ .seq = "k", .action = .up },
     .{ .seq = "\x1b\x5b\x41", .action = .up }, // Up Arrow
+    .{ .seq = "\x1b\x4f\x41", .action = .up }, // Up Arrow (zsh-widget)
 
     .{ .seq = "j", .action = .down },
     .{ .seq = "\x1b\x5b\x42", .action = .down }, // Down Arrow
+    .{ .seq = "\x1b\x4f\x42", .action = .down }, // Down Arrow (zsh-widget)
 
     .{ .seq = "h", .action = .left },
     .{ .seq = "\x1b\x5b\x44", .action = .left }, // Left Arrow
+    .{ .seq = "\x1b\x4f\x44", .action = .left }, // Left Arrow (zsh-widget)
 
     .{ .seq = "l", .action = .right },
     .{ .seq = "\x1b\x5b\x43", .action = .right }, // Right Arrow
+    .{ .seq = "\x1b\x4f\x43", .action = .right }, // Right Arrow (zsh-widget)
 
     // Toggle expansion or open
     .{ .seq = "\x0d", .action = .enter }, // Enter if ~ICRNL else \x0a

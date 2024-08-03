@@ -1,6 +1,6 @@
 ![fex logo bar](https://github.com/18alantom/fex/assets/29507195/f8f6ece5-14bb-4361-8d79-c2d5fb145fd4)
 
-**A CLI file explorer.**
+**A command-line file explorer.**
 
 ---
 
