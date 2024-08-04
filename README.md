@@ -59,6 +59,16 @@ The most convenient way is by running the following bash one-liner:
 curl -O https://raw.githubusercontent.com/18alantom/fex/master/install.sh && bash install.sh
 ```
 
+If you are a Nix user, just run one of the following commands:
+
+```bash
+# Run the program immediately:
+nix run github:18alantom/fex
+
+# Enter a temporary shell with `fex` available:
+nix shell github:18alantom/fex
+```
+
 Getting `fex` running involves:
 
 1. Installing the `fex` executable.
