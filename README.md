@@ -73,13 +73,20 @@ integration go to the [Setup](#setup) section.
 
 ### Using `install.sh`
 
-You can use [`install.sh`](https://github.com/18alantom/fex/blob/master/install.sh) script to [download](https://github.com/18alantom/fex/releases) and setup fex.
+You can use the
+[`install.sh`](https://github.com/18alantom/fex/blob/master/install.sh) script
+to [download](https://github.com/18alantom/fex/releases) and setup the latest
+version of fex.
 
 Run the following bash one-liner to setup fex:
 
 ```bash
 curl -O https://raw.githubusercontent.com/18alantom/fex/master/install.sh && bash install.sh
 ```
+
+> [!TIP]
+>
+> The same bash one-liner can be used to update your fex install.
 
 > [!NOTE]
 >
