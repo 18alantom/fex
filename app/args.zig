@@ -88,6 +88,11 @@ fn ConfigIterator(Iterator: type) type {
                     config.user = true;
                 }
 
+                // Misc display args
+                else if (eql(arg, "--show-hidden")) {
+                    config.show_hidden = true;
+                }
+
                 // Time selection
                 else if (eql(arg, "--time-type")) {
                     config.time_type = getTime(iterator_.next());
