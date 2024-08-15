@@ -188,6 +188,7 @@ Changes values displayed in an item line.
 
 | arg                 | description                                                                                             |
 | :------------------ | :------------------------------------------------------------------------------------------------------ |
+| `--[no-]dotfiles`   | Show or hide dotfiles (hidden by default).                                                              |
 | `--[no-]icons`      | Show or hide icons. Note: icons need a [patched font](https://github.com/ryanoasis/nerd-fonts) to work. |
 | `--[no-]size`       | Show or hide item sizes                                                                                 |
 | `--[no-]time`       | Show or hide time                                                                                       |
@@ -291,6 +292,7 @@ Toggle displayed information.
 
 | key  | action                         |
 | :--- | :----------------------------- |
+| `.`  | Toggle dotfile display         |
 | `I`  | Toggle item stat info          |
 | `ti` | Toggle icon display            |
 | `tp` | Toggle permission info display |
