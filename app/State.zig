@@ -42,7 +42,7 @@ stdout: *CharArray,
 reiterate: bool,
 itermode: i32,
 iterator: ?*Manager.Iterator,
-show_dotfiles: bool,
+dotfiles: bool,
 
 // Search config
 pre_search_cursor: usize,
@@ -83,7 +83,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .reiterate = false,
         .itermode = -2,
         .iterator = null,
-        .show_dotfiles = config.show_dotfiles,
+        .dotfiles = config.dotfiles,
 
         .pre_search_cursor = 0,
         .fuzzy_search = config.fuzzy_search,
@@ -157,7 +157,7 @@ fn initializeIterator(self: *Self) !void {
     }
 
     const iterator = try self.allocator.create(Manager.Iterator);
-    iterator.* = try self.manager.iterate(self.itermode, self.show_dotfiles);
+    iterator.* = try self.manager.iterate(self.itermode, self.dotfiles);
 
     self.iterator = iterator;
 }

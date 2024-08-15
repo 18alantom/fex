@@ -69,6 +69,8 @@ fn ConfigIterator(Iterator: type) type {
                     config.group = false;
                 } else if (eql(arg, "--no-user")) {
                     config.user = false;
+                } else if (eql(arg, "--no-dotfiles")) {
+                    config.dotfiles = false;
                 }
 
                 // Display args, positive filters
@@ -86,11 +88,8 @@ fn ConfigIterator(Iterator: type) type {
                     config.group = true;
                 } else if (eql(arg, "--user")) {
                     config.user = true;
-                }
-
-                // Misc display args
-                else if (eql(arg, "--show-dotfiles")) {
-                    config.show_dotfiles = true;
+                } else if (eql(arg, "--dotfiles")) {
+                    config.dotfiles = true;
                 }
 
                 // Time selection

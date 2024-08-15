@@ -197,7 +197,7 @@ pub fn toggleGroup(state: *State) void {
 }
 
 pub fn toggleDotfiles(state: *State) void {
-    state.show_dotfiles = !state.show_dotfiles;
+    state.dotfiles = !state.dotfiles;
     state.view.print_all = true;
     state.reiterate = true;
 }
