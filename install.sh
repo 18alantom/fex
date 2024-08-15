@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly version=0.1.1
+readonly version=0.1.2
 readonly base_dir=$(pwd)
 readonly fex_target_dir="$HOME/.fex"
 readonly fex_path="$fex_target_dir/bin"
