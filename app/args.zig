@@ -111,7 +111,7 @@ fn ConfigIterator(Iterator: type) type {
                     try setupZsh();
                     return true;
                 } else if (eql(arg, "--help")) {
-                    try printHelp();
+                    try help.printHelp();
                     return true;
                 } else if (eql(arg, "--version")) {
                     try printVersion();
@@ -133,10 +133,6 @@ fn getTime(arg: ?([]const u8)) TimeType {
     if (eql(a, "accessed")) return .accessed;
 
     return .modified;
-}
-
-fn printHelp() !void {
-    _ = try std.io.getStdOut().writer().write(help.help_string);
 }
 
 fn printVersion() !void {
