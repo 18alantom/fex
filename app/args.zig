@@ -89,8 +89,8 @@ fn ConfigIterator(Iterator: type) type {
                 }
 
                 // Misc display args
-                else if (eql(arg, "--show-hidden")) {
-                    config.show_hidden = true;
+                else if (eql(arg, "--show-dotfiles")) {
+                    config.show_dotfiles = true;
                 }
 
                 // Time selection

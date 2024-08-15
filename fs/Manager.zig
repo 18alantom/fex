@@ -98,12 +98,12 @@ fn _findParent(parent: *Item, child: *Item) !?*Item {
     return null;
 }
 
-pub fn iterate(self: *Self, depth: i32, show_hidden: bool) !Iterator {
+pub fn iterate(self: *Self, depth: i32, show_dotfiles: bool) !Iterator {
     return try Iterator.init(
         self.allocator,
         self.root,
         depth,
-        show_hidden,
+        show_dotfiles,
     );
 }
 
@@ -126,13 +126,13 @@ pub const Iterator = struct {
     itermode: i32 = -1,
     stack: EntryList,
     allocator: mem.Allocator,
-    show_hidden: bool,
+    show_dotfiles: bool,
 
     pub fn init(
         allocator: mem.Allocator,
         first: *Item,
         itermode: i32,
-        show_hidden: bool,
+        show_dotfiles: bool,
     ) !Iterator {
         var stack = EntryList.init(allocator);
         const entry = try allocator.create(Entry);
@@ -150,7 +150,7 @@ pub const Iterator = struct {
             .stack = stack,
             .itermode = itermode,
             .allocator = allocator,
-            .show_hidden = show_hidden,
+            .show_dotfiles = show_dotfiles,
         };
     }
 
@@ -200,7 +200,7 @@ pub const Iterator = struct {
             const reverse_index = children.items.len - 1 - index;
             const item = children.items[reverse_index];
 
-            if (skipChild(item, self.show_hidden)) continue;
+            if (skipChild(item, self.show_dotfiles)) continue;
 
             const child_entry = try self.allocator.create(Entry);
             child_entry.* = getEntry(reverse_index, entry.depth, children);
@@ -209,8 +209,8 @@ pub const Iterator = struct {
     }
 };
 
-fn skipChild(item: *Item, show_hidden: bool) bool {
-    if (show_hidden) {
+fn skipChild(item: *Item, show_dotfiles: bool) bool {
+    if (show_dotfiles) {
         return false;
     }
 

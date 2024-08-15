@@ -64,6 +64,7 @@ pub const help_string =
     \\
     \\Display Toggle Controls
     \\  I                   Toggle item stat info
+    \\  .                   Toggle dot files display
     \\  ti                  Toggle icon display
     \\  tp                  Toggle permission info display
     \\  ts                  Toggle size display

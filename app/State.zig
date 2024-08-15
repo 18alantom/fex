@@ -42,7 +42,7 @@ stdout: *CharArray,
 reiterate: bool,
 itermode: i32,
 iterator: ?*Manager.Iterator,
-show_hidden: bool,
+show_dotfiles: bool,
 
 // Search config
 pre_search_cursor: usize,
@@ -83,7 +83,7 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .reiterate = false,
         .itermode = -2,
         .iterator = null,
-        .show_hidden = config.show_hidden,
+        .show_dotfiles = config.show_dotfiles,
 
         .pre_search_cursor = 0,
         .fuzzy_search = config.fuzzy_search,
@@ -157,7 +157,7 @@ fn initializeIterator(self: *Self) !void {
     }
 
     const iterator = try self.allocator.create(Manager.Iterator);
-    iterator.* = try self.manager.iterate(self.itermode, self.show_hidden);
+    iterator.* = try self.manager.iterate(self.itermode, self.show_dotfiles);
 
     self.iterator = iterator;
 }
@@ -236,7 +236,7 @@ pub fn executeAction(self: *Self, action: AppAction) !void {
         .toggle_link => actions.toggleLink(self),
         .toggle_user => actions.toggleUser(self),
         .toggle_group => actions.toggleGroup(self),
-        .toggle_hidden => actions.toggleHidden(self),
+        .toggle_dotfiles => actions.toggleDotfiles(self),
 
         .time_modified => actions.timeModified(self),
         .time_changed => actions.timeChanged(self),

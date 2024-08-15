@@ -56,7 +56,7 @@ pub const AppAction = enum {
     time_modified,
     time_changed,
     time_accessed,
-    toggle_hidden,
+    toggle_dotfiles,
 
     sort_name,
     sort_size,
@@ -133,7 +133,7 @@ const capture_list = [_]ActionSequence{
     .{ .seq = "tm", .action = .time_modified },
     .{ .seq = "tc", .action = .time_changed },
     .{ .seq = "ta", .action = .time_accessed },
-    .{ .seq = ".", .action = .toggle_hidden },
+    .{ .seq = ".", .action = .toggle_dotfiles },
 
     // Sorting
     .{ .seq = "sn", .action = .sort_name },

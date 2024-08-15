@@ -196,8 +196,8 @@ pub fn toggleGroup(state: *State) void {
     state.view.print_all = true;
 }
 
-pub fn toggleHidden(state: *State) void {
-    state.show_hidden = !state.show_hidden;
+pub fn toggleDotfiles(state: *State) void {
+    state.show_dotfiles = !state.show_dotfiles;
     state.view.print_all = true;
     state.reiterate = true;
 }
