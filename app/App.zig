@@ -43,6 +43,7 @@ pub const Config = struct {
     time_type: TimeType = .modified,
     user: bool = false,
     group: bool = false,
+    dotfiles: bool = false,
 
     // Search config
     fuzzy_search: bool = true,

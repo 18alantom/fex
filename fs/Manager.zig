@@ -98,11 +98,12 @@ fn _findParent(parent: *Item, child: *Item) !?*Item {
     return null;
 }
 
-pub fn iterate(self: *Self, depth: i32) !Iterator {
+pub fn iterate(self: *Self, depth: i32, dotfiles: bool) !Iterator {
     return try Iterator.init(
         self.allocator,
         self.root,
         depth,
+        dotfiles,
     );
 }
 
@@ -125,8 +126,14 @@ pub const Iterator = struct {
     itermode: i32 = -1,
     stack: EntryList,
     allocator: mem.Allocator,
+    dotfiles: bool,
 
-    pub fn init(allocator: mem.Allocator, first: *Item, itermode: i32) !Iterator {
+    pub fn init(
+        allocator: mem.Allocator,
+        first: *Item,
+        itermode: i32,
+        dotfiles: bool,
+    ) !Iterator {
         var stack = EntryList.init(allocator);
         const entry = try allocator.create(Entry);
         entry.* = .{
@@ -143,6 +150,7 @@ pub const Iterator = struct {
             .stack = stack,
             .itermode = itermode,
             .allocator = allocator,
+            .dotfiles = dotfiles,
         };
     }
 
@@ -190,6 +198,10 @@ pub const Iterator = struct {
         for (0..children.items.len) |index| {
             // Required because Items are popped off the stack.
             const reverse_index = children.items.len - 1 - index;
+            const item = children.items[reverse_index];
+
+            if (skipChild(item, self.dotfiles)) continue;
+
             const child_entry = try self.allocator.create(Entry);
             child_entry.* = getEntry(reverse_index, entry.depth, children);
             try self.stack.append(child_entry);
@@ -197,10 +209,22 @@ pub const Iterator = struct {
     }
 };
 
-pub fn getEntry(index: usize, parent_depth: usize, children: ItemList) Iterator.Entry {
-    const item = children.items[index];
+fn skipChild(item: *Item, dotfiles: bool) bool {
+    if (dotfiles) {
+        return false;
+    }
+
+    const name = item.name();
+    if (name.len > 0 and name[0] == '.') {
+        return true;
+    }
+
+    return false;
+}
+
+fn getEntry(index: usize, parent_depth: usize, children: ItemList) Iterator.Entry {
     return .{
-        .item = item,
+        .item = children.items[index],
         .index = index,
         .depth = parent_depth + 1,
         .first = index == 0,

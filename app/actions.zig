@@ -196,6 +196,12 @@ pub fn toggleGroup(state: *State) void {
     state.view.print_all = true;
 }
 
+pub fn toggleDotfiles(state: *State) void {
+    state.dotfiles = !state.dotfiles;
+    state.view.print_all = true;
+    state.reiterate = true;
+}
+
 pub fn timeModified(state: *State) void {
     state.output.treeview.info.time = true;
     state.output.treeview.info.accessed = false;

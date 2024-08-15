@@ -6,6 +6,7 @@ pub const help_string =
     \\  fex ~/Desktop --time-type accessed
     \\
     \\Display Config
+    \\  --[no-]dotfiles     Show or hide dotfiles (default hidden)
     \\  --[no-]icons        Show or hide icons
     \\  --[no-]size         Show or hide item sizes
     \\  --[no-]time         Show or hide time
@@ -64,6 +65,7 @@ pub const help_string =
     \\
     \\Display Toggle Controls
     \\  I                   Toggle item stat info
+    \\  .                   Toggle dot files display
     \\  ti                  Toggle icon display
     \\  tp                  Toggle permission info display
     \\  ts                  Toggle size display
