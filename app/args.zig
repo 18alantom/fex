@@ -45,12 +45,12 @@ pub fn setConfig(config: *Config) !bool {
 fn ConfigIterator(Iterator: type) type {
     return struct {
         pub fn setConfig(config: *Config, iterator: Iterator, from_env: bool) !bool {
-            var argc: usize = 0;
+            var arg_counter: usize = 0;
             var iterator_ = iterator;
             while (iterator_.next()) |arg| {
-                defer argc += 1;
+                defer arg_counter += 1;
 
-                if (argc == 0 and arg[0] != '-' and !from_env and isDir(arg)) {
+                if (arg.len >= 1 and arg[0] != '-' and !from_env and isDir(arg)) {
                     config.root = arg;
                 }
 
