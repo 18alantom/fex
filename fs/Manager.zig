@@ -111,7 +111,6 @@ pub const Iterator = struct {
     pub const Entry = struct {
         item: *Item,
         depth: usize,
-        index: usize, // child index
         first: bool, // is first child
         last: bool, // is last child
         selected: bool = false,
@@ -139,7 +138,6 @@ pub const Iterator = struct {
         entry.* = .{
             .item = first,
             .depth = 0,
-            .index = 0,
             .first = true,
             .last = true,
             .selected = false,
@@ -195,15 +193,19 @@ pub const Iterator = struct {
         }
 
         const children = try entry.item.children();
+        var skip_count: usize = 0;
         for (0..children.items.len) |index| {
             // Required because Items are popped off the stack.
             const reverse_index = children.items.len - 1 - index;
             const item = children.items[reverse_index];
 
-            if (skipChild(item, self.dotfiles)) continue;
+            if (skipChild(item, self.dotfiles)) {
+                skip_count += 1;
+                continue;
+            }
 
             const child_entry = try self.allocator.create(Entry);
-            child_entry.* = getEntry(reverse_index, entry.depth, children);
+            child_entry.* = getEntry(reverse_index, entry.depth, children, skip_count);
             try self.stack.append(child_entry);
         }
     }
@@ -222,13 +224,17 @@ fn skipChild(item: *Item, dotfiles: bool) bool {
     return false;
 }
 
-fn getEntry(index: usize, parent_depth: usize, children: ItemList) Iterator.Entry {
+fn getEntry(
+    index: usize,
+    parent_depth: usize,
+    children: ItemList,
+    skip_count: usize,
+) Iterator.Entry {
     return .{
         .item = children.items[index],
-        .index = index,
         .depth = parent_depth + 1,
-        .first = index == 0,
-        .last = index == children.items.len - 1,
+        .first = (index -| skip_count) == 0,
+        .last = index == children.items.len -| (1 + skip_count),
     };
 }
 
