@@ -350,8 +350,10 @@ pub fn appendOne(self: *Self) !bool {
 }
 
 pub fn dumpStdout(self: *Self) !void {
-    self.output.writer.unbuffered();
-    try self.output.draw.clearLinesBelow(self.viewport.start_row);
+    if (!self.fullscreen) {
+        self.output.writer.unbuffered();
+        try self.output.draw.clearLinesBelow(self.viewport.start_row);
+    }
 
     _ = try std.io.getStdOut().writer().write(self.stdout.items);
 }
