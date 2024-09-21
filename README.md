@@ -204,6 +204,7 @@ Changes values displayed in an item line.
 | `--[no-]user`       | Show or hide user name                                                                                  |
 | `--[no-]group`      | Show or hide group name                                                                                 |
 | `--time-type VALUE` | Set which time is displayed. VALUE: modified, accessed, changed. Default: modified                      |
+| `--[no-]fullscreen` | Enable or disable full screen mode. Previous screen is restored on quit.                                |
 
 ### Search Config
 

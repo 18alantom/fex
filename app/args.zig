@@ -102,6 +102,13 @@ fn ConfigIterator(Iterator: type) type {
                     config.fuzzy_search = false;
                 } else if (eql(arg, "--match-case")) {
                     config.ignore_case = false;
+                }
+
+                // Viewport args
+                else if (eql(arg, "--fullscreen")) {
+                    config.fullscreen = true;
+                } else if (eql(arg, "--no-fullscreen")) {
+                    config.fullscreen = false;
                 } else if (from_env) {
                     continue;
                 }

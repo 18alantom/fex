@@ -49,6 +49,9 @@ pre_search_cursor: usize,
 fuzzy_search: bool,
 ignore_case: bool,
 
+// Viewport config
+fullscreen: bool,
+
 allocator: mem.Allocator,
 
 const Self = @This();
@@ -89,6 +92,8 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
         .fuzzy_search = config.fuzzy_search,
         .ignore_case = config.ignore_case,
 
+        .fullscreen = config.fullscreen,
+
         .allocator = allocator,
     };
 }
@@ -119,9 +124,25 @@ pub fn deinit(self: *Self) void {
 }
 
 pub fn preRun(self: *Self) !void {
+    if (self.fullscreen) {
+        self.output.writer.unbuffered();
+        try self.output.draw.enableAlternateBuffer();
+        try self.output.draw.clearScreen();
+    }
+
     try self.viewport.initBounds();
     _ = try self.manager.root.children();
     self.reiterate = true;
+}
+
+pub fn postRun(self: *Self) !void {
+    if (self.fullscreen) {
+        try self.output.draw.disableAlternateBuffer();
+    }
+
+    if (self.stdout.items.len > 0) {
+        try self.dumpStdout();
+    }
 }
 
 pub fn updateViewport(self: *Self) !void {
@@ -328,11 +349,11 @@ pub fn appendOne(self: *Self) !bool {
     return true;
 }
 
-pub fn dumpStdout(self: *Self) !bool {
-    if (self.stdout.items.len == 0) return false;
-    self.output.writer.unbuffered();
-    try self.output.draw.clearLinesBelow(self.viewport.start_row);
+pub fn dumpStdout(self: *Self) !void {
+    if (!self.fullscreen) {
+        self.output.writer.unbuffered();
+        try self.output.draw.clearLinesBelow(self.viewport.start_row);
+    }
 
     _ = try std.io.getStdOut().writer().write(self.stdout.items);
-    return true;
 }

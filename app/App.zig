@@ -48,6 +48,9 @@ pub const Config = struct {
     // Search config
     fuzzy_search: bool = true,
     ignore_case: bool = true,
+
+    // Viewport config
+    fullscreen: bool = false,
 };
 
 pub fn init(allocator: mem.Allocator, config: *Config) !Self {
@@ -67,6 +70,8 @@ pub fn deinit(self: *Self) void {
 
 pub fn run(self: *Self) !void {
     try self.state.preRun();
+    defer self.state.postRun() catch {};
+
     while (true) {
         try self.state.updateViewport();
         try self.state.fillBuffer();
@@ -74,12 +79,15 @@ pub fn run(self: *Self) !void {
         try self.state.printContents();
 
         const action = try self.state.getAppAction();
+
         switch (action) {
-            .quit => return,
+            .quit => break,
             .no_action => continue,
             else => try self.state.executeAction(action),
         }
 
-        if (try self.state.dumpStdout()) return;
+        if (self.state.stdout.items.len > 0) {
+            break;
+        }
     }
 }
