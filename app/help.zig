@@ -75,6 +75,10 @@ const help = [_]Section{
                 .key = "--time-type VALUE",
                 .description = "Set which time is displayed [(modified)|accessed|changed]",
             },
+            .{
+                .key = "--[no-]fullscreen",
+                .description = "Enable or disable fullscreen mode",
+            },
         },
     },
     .{
