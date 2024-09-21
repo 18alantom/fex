@@ -15,18 +15,20 @@ pub fn main() !void {
             break;
         }
 
-        const str = rbuf[0..rlen];
-
-        print("\n\x1b[1;34m", .{});
-        printChars(str);
-        printBytes(str);
-        print("\x1b[m\n", .{});
-
-        print("\x1b[1;36m", .{});
-        try printCodePoints(str, true);
-        try printCodePoints(str, false);
-        print("\x1b[m\n", .{});
+        inspect(rbuf[0..rlen]);
     }
+}
+
+pub fn inspect(str: []const u8) void {
+    print("\n\x1b[1;34m", .{});
+    printChars(str);
+    printBytes(str);
+    print("\x1b[m\n", .{});
+
+    print("\x1b[1;36m", .{});
+    printCodePoints(str, true) catch {};
+    printCodePoints(str, false) catch {};
+    print("\x1b[m\n", .{});
 }
 
 pub fn printChars(str: []const u8) void {

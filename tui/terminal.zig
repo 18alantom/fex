@@ -1,7 +1,11 @@
 const std = @import("std");
+const utils = @import("../utils.zig");
 
 const posix = std.posix;
 const fmt = std.fmt;
+
+const string = utils.string;
+
 const log = std.log.scoped(.terminal);
 
 pub const Size = struct {
@@ -12,6 +16,15 @@ pub const Size = struct {
 pub const Position = struct {
     col: u16,
     row: u16,
+};
+
+// Ref: https://vt100.net/docs/vt510-rm/DECRPM.html
+pub const ReportMode = enum {
+    not_recognized,
+    set,
+    reset,
+    permanently_set,
+    permanently_reset,
 };
 
 /// Gets number of rows and columns in the terminal
@@ -118,4 +131,33 @@ pub fn disableRawMode(bak: *posix.termios) !void {
         posix.TCSA.FLUSH,
         bak.*,
     );
+}
+
+// Ref
+pub fn canSynchornizeOutput() !bool {
+    // Needs Raw mode (no wait for \n) to work properly cause
+    // control sequence will not be written without it.
+    _ = try posix.write(posix.STDERR_FILENO, "\x1b[?2026$p");
+
+    var buf: [64]u8 = undefined;
+
+    // format: \x1b, "[", "?", "2", "0", "2", "6", ";", n, "$", "y"
+    const len = try posix.read(posix.STDIN_FILENO, &buf);
+    if (!string.startswith(buf[0..len], "\x1b[?2026;") or len < 9) {
+        return false;
+    }
+
+    // Check value of n
+    return getReportMode(buf[8]) == .reset;
+}
+
+fn getReportMode(ps: u8) ReportMode {
+    return switch (ps) {
+        '0' => ReportMode.not_recognized,
+        '1' => ReportMode.set,
+        '2' => ReportMode.reset,
+        '3' => ReportMode.permanently_set,
+        '4' => ReportMode.permanently_reset,
+        else => ReportMode.not_recognized,
+    };
 }

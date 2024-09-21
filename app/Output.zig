@@ -36,6 +36,11 @@ pub fn init(allocator: mem.Allocator, config: *Config) !Self {
     var draw = try allocator.create(tui.Draw);
 
     writer.* = tui.BufferedStdOut.init();
+
+    // writer.use_csi_sync = try tui.terminal.canSynchornizeOutput(); // breaks on macOS Terminal
+    // writer.use_dcs_sync = true; // garbage output on macOS Terminal
+    writer.use_csi_sync = true; // fails silently if does not work
+
     draw.* = tui.Draw{ .writer = writer };
     treeview.* = try TreeView.init(allocator, config);
 

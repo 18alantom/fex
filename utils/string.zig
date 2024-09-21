@@ -220,6 +220,12 @@ pub fn eql(a: []const u8, b: []const u8) bool {
     return mem.eql(u8, a, b);
 }
 
+pub fn startswith(str: []const u8, start: []const u8) bool {
+    if (str.len < start.len) return false;
+
+    return eql(str[0..start.len], start);
+}
+
 pub fn split(buffer: []const u8, delimiter: []const u8) std.mem.SplitIterator(u8, .sequence) {
     return mem.splitSequence(u8, buffer, delimiter);
 }

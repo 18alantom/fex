@@ -39,6 +39,10 @@ pub fn main() !void {
     defer terminal.disableRawMode(&bak) catch {};
 
     var writer = BW.init();
+
+    writer.use_csi_sync = true;
+    // writer.use_dcs_sync = true;
+
     var draw = Draw{ .writer = &writer };
     try draw.hideCursor();
     defer draw.showCursor() catch {};
@@ -155,7 +159,7 @@ pub fn fillScreenChar(char: u8, writer_: *BW) !FSStats {
     writer.buffered();
 
     const start_fill = time.nanoTimestamp();
-    for (0..size.rows) |r| {
+    for (0..(size.rows - 1)) |r| {
         for (0..size.cols) |_| {
             _ = try writer.print("\x1b[K\x1b[{d}m{c}\x1b[0m", .{ (c +| r) % 7 + 31, c });
         }
