@@ -148,7 +148,7 @@ the shell you use.
 
 ### Zsh Setup
 
-To setup the Zsh widget for fex, first copy the file `shell/.fex.zsh` to your
+To setup the Zsh widget for fex, first copy the file [`shell/.fex.zsh`](./shell/.fex.zsh) to your
 home directory. Then copy the following lines into your `.zshrc`:
 
 ```bash
@@ -158,6 +158,10 @@ home directory. Then copy the following lines into your `.zshrc`:
 # Bind CTRL-F to invoke fex (key binds can be custom)
 bindkey '^f' fex-widget
 ```
+
+### Fish Setup 
+
+To setup the keybind on Fish, copy the code from [`shell/.fex.fish`](./shell/.fex.fish) into to your `$HOME/.config/fish/config.fish`. And restart your shell to see it working!
 
 > [!TIP]
 >
