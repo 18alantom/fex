@@ -40,6 +40,10 @@ function install() {
   if [[ $(which_shell) == "zsh" && $(ask "Setup zsh configuration?") == "y" ]]; then
     setup_zsh
   fi
+
+  if [[ $(which_shell) == "fish" && $(ask "Setup fish configuration?") == "y" ]]; then
+    setup_fish
+  fi
   
   cleanup
   echo -e "Installation complete $check"
@@ -212,16 +216,50 @@ function setup_zsh() {
   fi
 }
 
+function setup_fish() {
+  if [[ ! -f ./.fex.fish ]]; then
+    error "Zsh file (.fex.fish) not found at $(pwd)"
+  fi
+  
+  local widget_path="$fex_target_dir/.fex.fish"
+  # Remove old fex-widget if present
+  if [[ -f $widget_path ]]; then
+    rm $widget_path
+  fi
+  
+  mv ./.fex.fish $widget_path
+  
+  local rc_path=$(which_rc)
+  local load_widget="[ -f $widget_path ] && source $widget_path"
+  
+  if ! grep -q "$load_widget" $rc_path; then
+    echo $load_widget >> $rc_path
+  fi
+  
+  # Key binding already exists
+  if grep -q "^bind.*fex-widget" $rc_path; then
+    return
+  fi
+
+  local bind_ctrlf="bind \cf fex-widget"
+  if [[ $(ask "Bind CTRL-F to invoke fex?") == "y" ]]; then
+    echo $bind_ctrlf >> $rc_path
+  else
+    echo "Check https://github.com/18alantom/fex?tab=readme-ov-file#fish-setup for info on custom keybinds"
+  fi
+}
+
 function which_rc() {
   case $(which_shell) in
     "zsh")  echo "$HOME/.zshrc"  ;;
     "bash") echo "$HOME/.bashrc" ;;
+    "fish") echo "$HOME/.config/fish/config.fish" ;;
     *)      echo "$HOME/.bashrc" ;;
   esac
 }
 
 function which_shell() {
-  local shells="zsh bash"
+  local shells="zsh bash fish"
   for s in $shells; do
     if echo "$SHELL" | grep -q "$s"; then
       echo "$s"

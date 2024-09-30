@@ -1,6 +1,6 @@
 # Sets up a fish widget
 
-function fex-launch-widget -d "Launch fex on ^f"
+function fex-widget -d "Invokes fex and executes commands from it"
   # setting variable for fex
   set -g FEX_COMMAND fex  
 
@@ -19,8 +19,6 @@ function fex-launch-widget -d "Launch fex on ^f"
   # cleaning after execution (jump to prompt on newline)
   commandline -f repaint
 end
-
-bind \cf fex-launch-widget
 
 # Ref's
 # What is eval ? - https://fishshell.com/docs/current/cmds/eval.html

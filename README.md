@@ -144,7 +144,7 @@ the shell you use.
 
 > [!NOTE]
 >
-> 🚧 bash and fish shell support will be added.
+> 🚧 bash shell support will be added.
 
 ### Zsh Setup
 
@@ -159,13 +159,9 @@ home directory. Then copy the following lines into your `.zshrc`:
 bindkey '^f' fex-widget
 ```
 
-### Fish Setup 
-
-To setup the keybind on Fish, copy the code from [`shell/.fex.fish`](./shell/.fex.fish) into to your `$HOME/.config/fish/config.fish`. And restart your shell to see it working!
-
 > [!TIP]
 >
-> You can change which key is used to invoke `fex` by using the Zsh `bindkey` command.
+> You can change which shortcut is used to invoke `fex` by using the Zsh `bindkey` command.
 > For example if you use Zsh vi mode, you can use `bindkey -a 'f' fex-widget` to
 > invoke `fex` using the `'f'` key when in command mode.
 >
@@ -173,6 +169,27 @@ To setup the keybind on Fish, copy the code from [`shell/.fex.fish`](./shell/.fe
 >
 > - ZLE manpage (`man zshzle`), the ZLE BUILTINS section.
 > - [Binding Keys and handling keymaps](https://zsh.sourceforge.io/Guide/zshguide04.html#l93)
+
+### Fish Setup
+
+To setup the fex key bind for Fish, copy [`shell/.fex.fish`](./shell/.fex.fish) into to home directory.
+Then copy the following lines below into your `$HOME/.config/fish/config.fish`.
+
+```bash
+# Source .fex.fish if it's present
+[ -f ~/.fex.fish ] && source ~/.fex.fish
+
+# Bind CTRL-F to invoke fex (key binds can be custom)
+bind \cf fex-widget
+```
+
+Once you're done, restart your shell to see it working!
+
+> [!TIP]
+>
+> You can change which shortcut is used to invoke `fex` by using the Fish `bind` command.
+>
+> Reference: [bind - handle fish key bindings](https://fishshell.com/docs/current/cmds/bind.html)
 
 ### `fex` Default Command
 
