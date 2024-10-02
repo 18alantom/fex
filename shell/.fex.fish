@@ -1,4 +1,4 @@
-# Sets up a fish widget
+# Sets up a fish widget to invoke on Ctrl-F 
 
 function fex-widget -d "Invokes fex and executes commands from it"
   # setting variable for fex
@@ -10,15 +10,18 @@ function fex-widget -d "Invokes fex and executes commands from it"
   if test -z "$exec_cmd"
     commandline -f repaint
     return
-  else 
-    # print the command which will be executed
-    echo $exec_cmd
-    eval $exec_cmd
+  else
+    commandline -f repaint
+    # if the $exec_Cmd printed, it prints both the parts (command) and (argument/flag) on new line. So. So, it needs to be joint. `
+    set joint_cmd (string join " " $exec_cmd)
+    commandline $joint_cmd
+    commandline -f execute
   end
-  
-  # cleaning after execution (jump to prompt on newline)
+
+  # cleaning after execution
   commandline -f repaint
 end
+
 
 # Ref's
 # What is eval ? - https://fishshell.com/docs/current/cmds/eval.html
