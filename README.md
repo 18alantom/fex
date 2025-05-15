@@ -15,7 +15,7 @@ quick exploration and navigation in mind.
 By using Vim-like keybindings, `fex` ends up being a near-effortless
 tool to zip around a file system:
 
-- `j`, `k` to move to the pervious and next item
+- `j`, `k` to move to the previous and next item
 - `h`, `l` to move up or drop down a directory
 - `/` to search for items
 - `:` to run commands on the selected item
@@ -49,7 +49,7 @@ tool to zip around a file system:
   - [Command Mode Controls](#command-mode-controls)
   - [Display Toggle Controls](#display-toggle-controls)
   - [Sort Controls](#sort-controls)
-- [Platorm Support](#platform-support)
+- [Platform Support](#platform-support)
 
 ## Installation
 

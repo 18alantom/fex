@@ -1,4 +1,4 @@
-/// View is responsible for maintaing View.buffer which is an
+/// View is responsible for maintaining View.buffer which is an
 /// ArrayList of fs items to be displayed.
 ///
 /// It maintains the cursor, and first and last incices to keep
