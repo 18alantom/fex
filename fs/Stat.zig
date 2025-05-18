@@ -77,7 +77,7 @@ pub fn stat(abspath: []const u8) !Self {
         };
     }
 
-    // if not linux, defaul to libc impl of lstat
+    // if not linux, default to libc impl of lstat
     else {
         var statbuf: libc.struct_stat = undefined;
         if (libc.lstat(abspath_w, &statbuf) != 0) {

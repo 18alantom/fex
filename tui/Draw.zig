@@ -68,7 +68,7 @@ const BoxConfig = struct {
     height: usize = 4, // number of vertical border chars, if 0 then only vertices
     chars: BoxChars = .{},
     styles: BoxStyles = .{},
-    style: []const u8 = "", // common style, overriden if `styles.value` is set.
+    style: []const u8 = "", // common style, overridden if `styles.value` is set.
 };
 
 // writer: fs.File.Writer,

@@ -124,7 +124,7 @@ fn updateMaxRows(self: *Self) void {
 }
 
 fn scrollAndSetCursor(lines: u16, row: u16, col: u16) !void {
-    // Scroll up and set cursor postion
+    // Scroll up and set cursor position
     var obuf: [64]u8 = undefined;
     const slc = try std.fmt.bufPrint(
         &obuf,
@@ -135,7 +135,7 @@ fn scrollAndSetCursor(lines: u16, row: u16, col: u16) !void {
 }
 
 fn setCursor(row: u16, col: u16) !void {
-    // Scroll up and set cursor postion
+    // Scroll up and set cursor position
     var obuf: [64]u8 = undefined;
     const slc = try std.fmt.bufPrint(
         &obuf,
